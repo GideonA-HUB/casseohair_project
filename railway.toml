@@ -3,9 +3,8 @@ builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
 
 [deploy]
-healthcheckPath = "/api/v1/health/"
-healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 3
 
-# Gunicorn + migrations handled by Dockerfile ENTRYPOINT (/entrypoint.sh)
+# No healthcheckPath — Railway healthchecks were failing on HTTP→HTTPS 301 redirects.
+# App start is handled by Dockerfile ENTRYPOINT (/entrypoint.sh).

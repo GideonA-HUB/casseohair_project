@@ -24,14 +24,13 @@ RUN pip install --no-cache-dir -r requirements.txt gunicorn
 COPY backend/ ./
 COPY --from=frontend-build /app/frontend/dist ./static/frontend/
 
-# Build-time collectstatic (uses dummy secret; real env at runtime)
-ENV SECRET_KEY=build-time-placeholder-change-in-production
+# Build-time collectstatic only (runtime uses entrypoint)
 RUN mkdir -p templates staticfiles && \
     cp static/frontend/index.html templates/index.html && \
-    python manage.py collectstatic --noinput
+    SECRET_KEY=build-only-not-for-production python manage.py collectstatic --noinput
 
 COPY scripts/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-EXPOSE 8000
+EXPOSE 8080
 ENTRYPOINT ["/entrypoint.sh"]

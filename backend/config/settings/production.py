@@ -5,13 +5,21 @@ DEBUG = config('DEBUG', default=False, cast=bool)
 
 # Railway auto-injects RAILWAY_PUBLIC_DOMAIN
 RAILWAY_PUBLIC_DOMAIN = os.environ.get('RAILWAY_PUBLIC_DOMAIN', '')
-if RAILWAY_PUBLIC_DOMAIN and RAILWAY_PUBLIC_DOMAIN not in ALLOWED_HOSTS:
-    ALLOWED_HOSTS = list(ALLOWED_HOSTS) + [RAILWAY_PUBLIC_DOMAIN]
+if RAILWAY_PUBLIC_DOMAIN:
+    if RAILWAY_PUBLIC_DOMAIN not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS = list(ALLOWED_HOSTS) + [RAILWAY_PUBLIC_DOMAIN]
+    # Ensure wildcard for all Railway subdomains
+    if '.railway.app' not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS = list(ALLOWED_HOSTS) + ['.railway.app']
 
 # Trust Railway's reverse proxy for HTTPS
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 USE_X_FORWARDED_HOST = True
 USE_X_FORWARDED_PORT = True
+
+# Railway terminates SSL at the edge. Internal health checks use HTTP.
+# SECURE_SSL_REDIRECT=True causes 301 responses and breaks Railway healthchecks.
+SECURE_SSL_REDIRECT = False
 
 # CSRF for admin and forms on production domain
 _csrf_origins = [o for o in config('CSRF_TRUSTED_ORIGINS', default='', cast=Csv()) if o]

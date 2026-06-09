@@ -55,7 +55,7 @@ In **Web Service → Variables**, add every variable from `.env.example`.
 | `SECRET_KEY` | Random 50+ char string | Generate: `python -c "import secrets; print(secrets.token_urlsafe(50))"` |
 | `DEBUG` | `False` | Never `True` in production |
 | `DJANGO_SETTINGS_MODULE` | `config.settings.production` | |
-| `ALLOWED_HOSTS` | `.railway.app` | Railway domain auto-added |
+| `ALLOWED_HOSTS` | `.railway.app,casseohairproject-production.up.railway.app` | `.railway.app` matches all Railway subdomains |
 | `SITE_URL` | `https://YOUR-APP.up.railway.app` | Update after first deploy |
 | `FRONTEND_URL` | Same as `SITE_URL` | Used for payment callbacks |
 | `CORS_ALLOWED_ORIGINS` | Same as `SITE_URL` | |
@@ -102,7 +102,14 @@ In **Web Service → Variables**, add every variable from `.env.example`.
    - Runs database migrations
    - Collects static files
    - Starts Gunicorn on Railway's `$PORT`
-3. Health check: `/api/v1/health/`
+3. Gunicorn starts on Railway's `$PORT` (usually **8080**, not 8000 — this is automatic)
+
+### Variables you do NOT need (delete if present)
+
+| Variable | Why remove |
+|----------|------------|
+| `JWT_SECRET_KEY` | Not used — JWT auth uses Django `SECRET_KEY` |
+| `RATELIMIT_ENABLE` | Not used in this project |
 
 ---
 
@@ -167,6 +174,25 @@ https://YOUR-APP.up.railway.app/checkout/verify
 ---
 
 ## Troubleshooting
+
+### "The train has not arrived at the station"
+This means Railway has **no healthy deployment**. Fix the deploy, push again, and wait for **Active** status.
+
+### Healthcheck failed with 301 redirects
+Fixed in code: `SECURE_SSL_REDIRECT` is disabled on Railway. Railway terminates HTTPS at the edge; internal checks use HTTP.
+
+### Port 8000 vs 8080
+**Do not manually set port 8000** in Railway Settings → Networking. Railway injects `PORT` (often 8080). The app listens on `$PORT` automatically. The "Port 8000" label in the UI is misleading — leave networking on automatic.
+
+### ALLOWED_HOSTS
+Your current value is fine:
+```
+localhost,127.0.0.1,.railway.app
+```
+You can optionally add your full domain:
+```
+casseohairproject-production.up.railway.app
+```
 
 ### Build fails at `npm ci`
 Ensure `frontend/package-lock.json` is committed to GitHub.
