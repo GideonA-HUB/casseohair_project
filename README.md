@@ -80,12 +80,16 @@ docker-compose up --build
 
 ## Railway Deployment
 
-Single project deployment with PostgreSQL addon:
+See **[DEPLOYMENT.md](DEPLOYMENT.md)** for the complete step-by-step guide and full list of environment variables.
 
-1. Connect repo to Railway
-2. Add PostgreSQL service
+Quick summary:
+1. Create Railway project from GitHub repo
+2. Add **PostgreSQL** plugin and link `DATABASE_URL`
 3. Set environment variables from `.env.example`
-4. Deploy — `railway.toml` configures build and health check
+4. Set `RUN_SEED=true` on first deploy only
+5. After deploy, update `SITE_URL`, `FRONTEND_URL`, `CORS_ALLOWED_ORIGINS`, `CSRF_TRUSTED_ORIGINS` with your live URL
+
+Single service serves both API and React frontend on one domain.
 
 ## Project Structure
 

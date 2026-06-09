@@ -1,14 +1,34 @@
 #!/bin/sh
 set -e
 
+export DJANGO_SETTINGS_MODULE="${DJANGO_SETTINGS_MODULE:-config.settings.production}"
+
+echo "=== CasseoHair Deploy ==="
 echo "Running migrations..."
 python manage.py migrate --noinput
 
-echo "Copying frontend build to templates..."
-mkdir -p templates static/frontend
+echo "Collecting static files..."
+python manage.py collectstatic --noinput --clear
+
+echo "Preparing frontend template..."
+mkdir -p templates
 if [ -f static/frontend/index.html ]; then
   cp static/frontend/index.html templates/index.html
+  echo "Frontend index.html copied to templates/"
+else
+  echo "WARNING: static/frontend/index.html not found"
 fi
 
-echo "Starting server..."
-exec "$@"
+if [ "${RUN_SEED:-false}" = "true" ]; then
+  echo "Running seed data..."
+  python manage.py seed_data
+fi
+
+PORT="${PORT:-8000}"
+echo "Starting gunicorn on port ${PORT}..."
+exec gunicorn config.wsgi:application \
+  --bind "0.0.0.0:${PORT}" \
+  --workers "${WEB_CONCURRENCY:-3}" \
+  --timeout 120 \
+  --access-logfile - \
+  --error-logfile -

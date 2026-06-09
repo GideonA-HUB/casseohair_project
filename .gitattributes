@@ -1,0 +1,4 @@
+# Normalize line endings for deployment scripts
+*.sh text eol=lf
+Dockerfile text eol=lf
+*.py text eol=lf
