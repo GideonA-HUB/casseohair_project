@@ -1,0 +1,157 @@
+export interface Product {
+  id: number;
+  name: string;
+  slug: string;
+  category: number | null;
+  category_name: string;
+  short_description: string;
+  price: string;
+  sale_price: string | null;
+  current_price: string;
+  is_on_sale: boolean;
+  discount_percentage: number;
+  length: string;
+  density: string;
+  lace_type: string;
+  color: string;
+  stock: number;
+  in_stock: boolean;
+  is_featured: boolean;
+  is_bestseller: boolean;
+  is_new_arrival: boolean;
+  primary_image: string | null;
+  description?: string;
+  sku?: string;
+  images?: ProductImage[];
+  videos?: ProductVideo[];
+  meta_title?: string;
+  meta_description?: string;
+  views_count?: number;
+  created_at?: string;
+}
+
+export interface ProductImage {
+  id: number;
+  image: string;
+  alt_text: string;
+  is_primary: boolean;
+  order: number;
+}
+
+export interface ProductVideo {
+  id: number;
+  video: string;
+  title: string;
+  order: number;
+}
+
+export interface Category {
+  id: number;
+  name: string;
+  slug: string;
+  description: string;
+  image: string;
+  product_count: number;
+  is_featured: boolean;
+  order: number;
+}
+
+export interface CartItem {
+  product: Product;
+  quantity: number;
+}
+
+export interface SiteSettings {
+  site_name: string;
+  tagline: string;
+  meta_description: string;
+  contact_email: string;
+  contact_phone: string;
+  whatsapp_number: string;
+  address: string;
+  instagram_url: string;
+  facebook_url: string;
+  twitter_url: string;
+  delivery_fee: string;
+  currency: string;
+  currency_symbol: string;
+  about_title: string;
+  about_content: string;
+  mission: string;
+  vision: string;
+  brand_story: string;
+  privacy_policy: string;
+  terms_of_service: string;
+  refund_policy: string;
+}
+
+export interface Testimonial {
+  id: number;
+  name: string;
+  role: string;
+  content: string;
+  rating: number;
+  image: string | null;
+}
+
+export interface Order {
+  id: number;
+  order_number: string;
+  full_name: string;
+  email: string;
+  phone: string;
+  address: string;
+  city: string;
+  state: string;
+  country: string;
+  subtotal: string;
+  delivery_fee: string;
+  total: string;
+  status: string;
+  payment_method: string;
+  is_paid: boolean;
+  items: OrderItem[];
+  created_at: string;
+}
+
+export interface OrderItem {
+  id: number;
+  product_name: string;
+  product_slug: string;
+  product_image: string;
+  price: string;
+  quantity: number;
+  subtotal: string;
+}
+
+export interface PaginatedResponse<T> {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: T[];
+}
+
+export interface CheckoutFormData {
+  full_name: string;
+  email: string;
+  phone: string;
+  address: string;
+  city: string;
+  state: string;
+  country: string;
+  order_notes?: string;
+  payment_method: 'paystack' | 'flutterwave';
+  items: { product_id: number; quantity: number }[];
+}
+
+export interface DashboardMetrics {
+  total_sales: string;
+  daily_sales: string;
+  weekly_sales: string;
+  monthly_sales: string;
+  yearly_sales: string;
+  total_orders: number;
+  pending_orders: number;
+  delivered_orders: number;
+  total_revenue: string;
+}
