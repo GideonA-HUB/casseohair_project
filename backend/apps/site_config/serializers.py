@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from apps.core.media import absolute_media_url
 
-from .models import ContactSubmission, NewsletterSubscriber, SiteAsset, SiteSettings, Testimonial
+from .models import ContactSubmission, HeroImage, NewsletterSubscriber, SiteAsset, SiteSettings, Testimonial
 
 
 class SiteAssetSerializer(serializers.ModelSerializer):
@@ -36,6 +36,17 @@ class TestimonialSerializer(serializers.ModelSerializer):
     class Meta:
         model = Testimonial
         fields = ['id', 'name', 'role', 'content', 'rating', 'image']
+
+    def get_image(self, obj):
+        return absolute_media_url(self.context.get('request'), obj.image)
+
+
+class HeroImageSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+
+    class Meta:
+        model = HeroImage
+        fields = ['id', 'image', 'alt_text', 'order', 'is_active']
 
     def get_image(self, obj):
         return absolute_media_url(self.context.get('request'), obj.image)

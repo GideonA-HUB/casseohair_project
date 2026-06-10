@@ -120,6 +120,23 @@ class NewsletterSubscriber(models.Model):
         return self.email
 
 
+class HeroImage(models.Model):
+    image = models.ImageField(upload_to='hero_images/')
+    alt_text = models.CharField(max_length=255, blank=True)
+    order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['order', '-created_at']
+        verbose_name = 'Hero Image'
+        verbose_name_plural = 'Hero Images'
+
+    def __str__(self):
+        return f'Hero Image {self.order}'
+
+
 class AdminActivityLog(models.Model):
     ACTION_CHOICES = [
         ('create', 'Create'),

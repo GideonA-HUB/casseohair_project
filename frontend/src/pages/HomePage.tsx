@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import SEO from '@/components/SEO';
 import ProductCard from '@/components/ProductCard';
 import CategoryCard from '@/components/CategoryCard';
+import { ShuffleHero } from '@/components/ui/shuffle-grid';
 import { productsApi, siteApi } from '@/api';
 import type { Category, Product, Testimonial } from '@/types';
 
@@ -49,38 +50,7 @@ export default function HomePage() {
       <SEO />
 
       {/* Hero */}
-      <section className="relative overflow-hidden">
-        <div className="relative bg-gradient-to-br from-brand-pink/10 via-white to-brand-gray-50 section-padding">
-          <div className="max-w-7xl mx-auto text-center">
-            <motion.h1
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7 }}
-              className="text-3xl md:text-5xl lg:text-6xl font-display font-bold text-brand-accent leading-tight mb-4"
-            >
-              Luxury Hair,<br />
-              <span className="text-brand-pink">Redefined</span>
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.2 }}
-              className="text-brand-accent/60 max-w-lg mx-auto mb-8 text-sm md:text-base"
-            >
-              Premium wigs & extensions — Bone Straight, Pixel Curls, Deep Wave, HD Lace & more
-            </motion.p>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.3 }}
-              className="flex flex-wrap gap-3 justify-center"
-            >
-              <Link to="/shop" className="btn-primary">Shop Now</Link>
-              <Link to="/shop?filter=new-arrivals" className="btn-outline">New Arrivals</Link>
-            </motion.div>
-          </div>
-        </div>
-      </section>
+      <ShuffleHero />
 
       {/* Categories */}
       {categories.length > 0 && (
