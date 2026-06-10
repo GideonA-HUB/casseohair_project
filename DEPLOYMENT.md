@@ -211,8 +211,21 @@ Ensure `CSRF_TRUSTED_ORIGINS` matches your exact Railway URL (with `https://`).
 ### Payment redirect fails
 Ensure `FRONTEND_URL` matches your live Railway URL exactly.
 
-### Images not uploading
-Set all three `CLOUDINARY_*` variables. Without Cloudinary, uploads use ephemeral container storage (lost on redeploy).
+### Images not uploading or not displaying
+**CRITICAL**: Set all three `CLOUDINARY_*` variables in Railway:
+- `CLOUDINARY_CLOUD_NAME`
+- `CLOUDINARY_API_KEY`
+- `CLOUDINARY_API_SECRET`
+
+Without Cloudinary, uploads use ephemeral container storage (lost on redeploy). Images uploaded via Django Admin will not persist between deployments and will not display on the website.
+
+To get Cloudinary credentials:
+1. Sign up at [cloudinary.com](https://cloudinary.com)
+2. Go to Dashboard → API Keys
+3. Copy the Cloud Name, API Key, and API Secret
+4. Add them to Railway environment variables
+
+After setting Cloudinary variables, redeploy your Railway service.
 
 ---
 
