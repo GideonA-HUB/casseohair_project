@@ -1,4 +1,5 @@
 import { apiClient } from './client';
+import { unwrapList } from '@/utils/api';
 import type {
   Category,
   CheckoutFormData,
@@ -14,18 +15,34 @@ export const productsApi = {
   list: (params?: Record<string, string | number>) =>
     apiClient.get<PaginatedResponse<Product>>('/products/', { params }),
   get: (slug: string) => apiClient.get<Product>(`/products/${slug}/`),
-  featured: () => apiClient.get<Product[]>('/products/featured/'),
-  bestsellers: () => apiClient.get<Product[]>('/products/bestsellers/'),
-  newArrivals: () => apiClient.get<Product[]>('/products/new-arrivals/'),
-  search: (q: string) => apiClient.get<{ results: Product[]; count: number }>('/products/search/', { params: { q } }),
-  categories: () => apiClient.get<Category[]>('/products/categories/'),
+  featured: (): Promise<Product[]> =>
+    apiClient
+      .get<Product[] | PaginatedResponse<Product>>('/products/featured/')
+      .then((r) => unwrapList<Product>(r.data)),
+  bestsellers: (): Promise<Product[]> =>
+    apiClient
+      .get<Product[] | PaginatedResponse<Product>>('/products/bestsellers/')
+      .then((r) => unwrapList<Product>(r.data)),
+  newArrivals: (): Promise<Product[]> =>
+    apiClient
+      .get<Product[] | PaginatedResponse<Product>>('/products/new-arrivals/')
+      .then((r) => unwrapList<Product>(r.data)),
+  search: (q: string) =>
+    apiClient.get<{ results: Product[]; count: number }>('/products/search/', { params: { q } }),
+  categories: (): Promise<Category[]> =>
+    apiClient
+      .get<Category[] | PaginatedResponse<Category>>('/products/categories/')
+      .then((r) => unwrapList<Category>(r.data)),
   category: (slug: string) => apiClient.get<Category>(`/products/categories/${slug}/`),
 };
 
 export const siteApi = {
   settings: () => apiClient.get<SiteSettings>('/site/settings/'),
   assets: () => apiClient.get<Record<string, { image: string }>>('/site/assets/'),
-  testimonials: () => apiClient.get<Testimonial[]>('/site/testimonials/'),
+  testimonials: (): Promise<Testimonial[]> =>
+    apiClient
+      .get<Testimonial[] | PaginatedResponse<Testimonial>>('/site/testimonials/')
+      .then((r) => unwrapList<Testimonial>(r.data)),
   contact: (data: { name: string; email: string; phone?: string; message: string }) =>
     apiClient.post('/site/contact/', data),
   newsletter: (email: string) => apiClient.post('/site/newsletter/', { email }),

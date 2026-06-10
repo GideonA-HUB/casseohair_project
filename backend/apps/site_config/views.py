@@ -44,6 +44,7 @@ class TestimonialListView(generics.ListAPIView):
     authentication_classes = []
     permission_classes = []
     serializer_class = TestimonialSerializer
+    pagination_class = None
 
     def get_queryset(self):
         return Testimonial.objects.filter(is_active=True, is_featured=True)

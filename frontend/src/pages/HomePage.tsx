@@ -5,6 +5,7 @@ import SEO from '@/components/SEO';
 import ProductCard from '@/components/ProductCard';
 import CategoryCard from '@/components/CategoryCard';
 import { productsApi, siteApi } from '@/api';
+import type { Category, Product, Testimonial } from '@/types';
 
 const whyChoose = [
   { icon: '✦', title: 'Authentic Luxury Hair', desc: 'Genuine premium hair sourced from trusted global suppliers' },
@@ -15,29 +16,29 @@ const whyChoose = [
 ];
 
 export default function HomePage() {
-  const { data: categories = [] } = useQuery({
+  const { data: categories = [] } = useQuery<Category[]>({
     queryKey: ['categories'],
-    queryFn: () => productsApi.categories().then((r) => r.data),
+    queryFn: () => productsApi.categories(),
   });
 
-  const { data: featured = [] } = useQuery({
+  const { data: featured = [] } = useQuery<Product[]>({
     queryKey: ['featured-products'],
-    queryFn: () => productsApi.featured().then((r) => r.data),
+    queryFn: () => productsApi.featured(),
   });
 
-  const { data: newArrivals = [] } = useQuery({
+  const { data: newArrivals = [] } = useQuery<Product[]>({
     queryKey: ['new-arrivals'],
-    queryFn: () => productsApi.newArrivals().then((r) => r.data),
+    queryFn: () => productsApi.newArrivals(),
   });
 
-  const { data: bestsellers = [] } = useQuery({
+  const { data: bestsellers = [] } = useQuery<Product[]>({
     queryKey: ['bestsellers'],
-    queryFn: () => productsApi.bestsellers().then((r) => r.data),
+    queryFn: () => productsApi.bestsellers(),
   });
 
-  const { data: testimonials = [] } = useQuery({
+  const { data: testimonials = [] } = useQuery<Testimonial[]>({
     queryKey: ['testimonials'],
-    queryFn: () => siteApi.testimonials().then((r) => r.data),
+    queryFn: () => siteApi.testimonials(),
   });
 
   const heroCategory = categories.find((c) => c.is_featured) || categories[0];

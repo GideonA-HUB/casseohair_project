@@ -19,6 +19,7 @@ from .serializers import (
 class CategoryListView(generics.ListAPIView):
     queryset = Category.objects.filter(is_active=True)
     serializer_class = CategoryListSerializer
+    pagination_class = None
 
 
 class CategoryDetailView(generics.RetrieveAPIView):
@@ -57,6 +58,7 @@ class ProductDetailView(generics.RetrieveAPIView):
 
 class FeaturedProductsView(generics.ListAPIView):
     serializer_class = ProductListSerializer
+    pagination_class = None
 
     def get_queryset(self):
         return Product.objects.filter(
@@ -66,6 +68,7 @@ class FeaturedProductsView(generics.ListAPIView):
 
 class BestsellerProductsView(generics.ListAPIView):
     serializer_class = ProductListSerializer
+    pagination_class = None
 
     def get_queryset(self):
         return Product.objects.filter(
@@ -75,6 +78,7 @@ class BestsellerProductsView(generics.ListAPIView):
 
 class NewArrivalProductsView(generics.ListAPIView):
     serializer_class = ProductListSerializer
+    pagination_class = None
 
     def get_queryset(self):
         return Product.objects.filter(

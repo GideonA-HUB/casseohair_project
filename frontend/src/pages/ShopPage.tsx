@@ -4,6 +4,7 @@ import SEO from '@/components/SEO';
 import ProductCard from '@/components/ProductCard';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { productsApi } from '@/api';
+import type { Product } from '@/types';
 
 export default function ShopPage() {
   const [searchParams] = useSearchParams();
@@ -12,7 +13,7 @@ export default function ShopPage() {
   const filter = searchParams.get('filter') || '';
   const category = categorySlug || searchParams.get('category') || '';
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading } = useQuery<{ results: Product[]; count: number }>({
     queryKey: ['products', search, filter, category],
     queryFn: async () => {
       if (search) {
@@ -20,16 +21,16 @@ export default function ShopPage() {
         return { results: res.data.results, count: res.data.count };
       }
       if (filter === 'featured') {
-        const res = await productsApi.featured();
-        return { results: res.data, count: res.data.length };
+        const results = await productsApi.featured();
+        return { results, count: results.length };
       }
       if (filter === 'new-arrivals') {
-        const res = await productsApi.newArrivals();
-        return { results: res.data, count: res.data.length };
+        const results = await productsApi.newArrivals();
+        return { results, count: results.length };
       }
       if (filter === 'bestsellers') {
-        const res = await productsApi.bestsellers();
-        return { results: res.data, count: res.data.length };
+        const results = await productsApi.bestsellers();
+        return { results, count: results.length };
       }
       const params: Record<string, string> = {};
       if (category) params.category = category;
