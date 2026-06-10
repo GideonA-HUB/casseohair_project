@@ -10,6 +10,9 @@ python manage.py migrate --noinput
 echo "Collecting static files..."
 python manage.py collectstatic --noinput --verbosity 0
 
+echo "Ensuring media upload directory exists..."
+mkdir -p media/products media/categories media/site_assets media/testimonials
+
 echo "Preparing frontend template..."
 mkdir -p templates
 if [ -f static/frontend/index.html ]; then

@@ -1,12 +1,19 @@
 from rest_framework import serializers
 
+from apps.core.media import absolute_media_url
+
 from .models import Category, Product, ProductImage, ProductVideo
 
 
 class ProductImageSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+
     class Meta:
         model = ProductImage
         fields = ['id', 'image', 'alt_text', 'is_primary', 'order']
+
+    def get_image(self, obj):
+        return absolute_media_url(self.context.get('request'), obj.image)
 
 
 class ProductVideoSerializer(serializers.ModelSerializer):
@@ -17,6 +24,7 @@ class ProductVideoSerializer(serializers.ModelSerializer):
 
 class CategoryListSerializer(serializers.ModelSerializer):
     product_count = serializers.IntegerField(read_only=True)
+    image = serializers.SerializerMethodField()
 
     class Meta:
         model = Category
@@ -24,6 +32,9 @@ class CategoryListSerializer(serializers.ModelSerializer):
             'id', 'name', 'slug', 'description', 'image',
             'product_count', 'is_featured', 'order',
         ]
+
+    def get_image(self, obj):
+        return absolute_media_url(self.context.get('request'), obj.image)
 
 
 class CategoryDetailSerializer(CategoryListSerializer):
@@ -54,9 +65,7 @@ class ProductListSerializer(serializers.ModelSerializer):
     def get_primary_image(self, obj):
         img = obj.primary_image
         if img:
-            request = self.context.get('request')
-            url = img.image.url
-            return request.build_absolute_uri(url) if request else url
+            return absolute_media_url(self.context.get('request'), img.image)
         return None
 
 

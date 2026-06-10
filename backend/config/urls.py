@@ -29,8 +29,9 @@ urlpatterns = [
     path('robots.txt', RobotsTxtView.as_view(), name='robots'),
 ]
 
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Serve uploaded media in all environments (filesystem storage when Cloudinary is not set).
+# Must be registered before the SPA catch-all so /media/* is not swallowed.
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if not settings.DEBUG:
     # Exclude api, admin (with or without trailing slash), static, media, sitemap, robots

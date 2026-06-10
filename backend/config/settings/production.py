@@ -47,3 +47,12 @@ WHITENOISE_MAX_AGE = 31536000
 # Ensure CORS includes production URL
 if SITE_URL and SITE_URL not in CORS_ALLOWED_ORIGINS:
     CORS_ALLOWED_ORIGINS = list(CORS_ALLOWED_ORIGINS) + [SITE_URL]
+
+# Warn when media is stored on the ephemeral container filesystem.
+# Set CLOUDINARY_* env vars so uploads persist across Railway redeploys.
+if not CLOUDINARY_CLOUD_NAME:
+    import logging
+    logging.getLogger(__name__).warning(
+        'CLOUDINARY_CLOUD_NAME is not set — uploaded images are stored on the '
+        'container filesystem and will be lost on redeploy. Add Cloudinary keys in Railway.'
+    )
