@@ -65,7 +65,7 @@ export default function Header({ whatsappNumber }: HeaderProps) {
           </button>
 
           <Link to="/" className="absolute left-1/2 -translate-x-1/2">
-            <img src="/logo.png" alt="CasseoHair" className="h-8 w-auto" />
+            <img src={`${import.meta.env.BASE_URL}logo.png`} alt="CasseoHair" className="h-8 w-auto" />
           </Link>
 
           <div className="flex items-center gap-1">

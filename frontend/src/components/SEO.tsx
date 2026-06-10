@@ -17,7 +17,7 @@ export default function SEO({
   title,
   description = DEFAULT_DESCRIPTION,
   canonical,
-  image = '/logo.png',
+  image = `${import.meta.env.BASE_URL}logo.png`,
   type = 'website',
   schema,
 }: SEOProps) {

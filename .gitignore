@@ -26,10 +26,13 @@ frontend/.vite/
 *.log
 npm-debug.log*
 
-# Environment
+# Environment — never commit real secrets
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.example
+!frontend/.env.example
+backend/.env
+frontend/.env
 
 # IDE
 .idea/

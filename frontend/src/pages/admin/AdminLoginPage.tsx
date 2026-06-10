@@ -27,7 +27,7 @@ export default function AdminLoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-brand-gray-50 px-4">
       <div className="w-full max-w-sm bg-white rounded-card shadow-luxury p-8">
         <div className="text-center mb-8">
-          <img src="/logo.png" alt="CasseoHair" className="h-8 mx-auto mb-4" />
+          <img src={`${import.meta.env.BASE_URL}logo.png`} alt="CasseoHair" className="h-8 mx-auto mb-4" />
           <h1 className="text-lg font-display font-semibold">Admin Dashboard</h1>
         </div>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

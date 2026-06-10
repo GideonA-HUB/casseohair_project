@@ -1,3 +1,4 @@
+import os
 from decimal import Decimal
 
 from django.contrib.auth.models import User
@@ -12,12 +13,15 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         if not User.objects.filter(username='admin').exists():
+            admin_password = os.environ.get('ADMIN_INITIAL_PASSWORD', 'admin123!')
             User.objects.create_superuser(
                 username='admin',
                 email='admin@casseohair.com',
-                password='admin123!',
+                password=admin_password,
             )
-            self.stdout.write(self.style.SUCCESS('Admin user created (admin / admin123!)'))
+            self.stdout.write(self.style.SUCCESS('Admin user created (username: admin)'))
+            if admin_password == 'admin123!':
+                self.stdout.write(self.style.WARNING('Change the default admin password after first login.'))
 
         settings, _ = SiteSettings.objects.get_or_create(pk=1)
         settings.site_name = 'CasseoHair'

@@ -35,7 +35,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
             className="fixed left-0 top-0 h-full w-72 bg-white z-50 shadow-luxury-lg flex flex-col"
           >
             <div className="flex items-center justify-between p-4 border-b border-brand-gray-100">
-              <img src="/logo.png" alt="CasseoHair" className="h-7" />
+              <img src={`${import.meta.env.BASE_URL}logo.png`} alt="CasseoHair" className="h-7" />
               <button onClick={onClose} className="p-2 hover:bg-brand-gray-50 rounded-full">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

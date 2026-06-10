@@ -46,7 +46,7 @@ export default function AdminDashboardPage() {
       <div className="min-h-screen bg-brand-gray-50">
         <header className="bg-white border-b border-brand-gray-100 px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="CasseoHair" className="h-7" />
+            <img src={`${import.meta.env.BASE_URL}logo.png`} alt="CasseoHair" className="h-7" />
             <span className="font-display font-semibold text-sm">Admin</span>
           </div>
           <div className="flex items-center gap-3">

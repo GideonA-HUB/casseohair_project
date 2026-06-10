@@ -8,13 +8,13 @@ echo "Running migrations..."
 python manage.py migrate --noinput
 
 echo "Collecting static files..."
-python manage.py collectstatic --noinput --clear
+python manage.py collectstatic --noinput --verbosity 0
 
 echo "Preparing frontend template..."
 mkdir -p templates
 if [ -f static/frontend/index.html ]; then
   cp static/frontend/index.html templates/index.html
-  echo "Frontend index.html copied to templates/"
+  echo "Frontend ready."
 else
   echo "WARNING: static/frontend/index.html not found"
 fi
@@ -25,7 +25,7 @@ if [ "${RUN_SEED:-false}" = "true" ]; then
 fi
 
 PORT="${PORT:-8000}"
-echo "Starting gunicorn on port ${PORT}..."
+echo "Starting server on port ${PORT}..."
 exec gunicorn config.wsgi:application \
   --bind "0.0.0.0:${PORT}" \
   --workers "${WEB_CONCURRENCY:-3}" \

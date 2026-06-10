@@ -2,15 +2,15 @@ import { Suspense, lazy } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import MainLayout from '@/layouts/MainLayout';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import HomePage from '@/pages/HomePage';
+import ShopPage from '@/pages/ShopPage';
+import ProductPage from '@/pages/ProductPage';
+import CheckoutPage from '@/pages/CheckoutPage';
+import CheckoutVerifyPage from '@/pages/CheckoutVerifyPage';
+import AboutPage from '@/pages/AboutPage';
+import ContactPage from '@/pages/ContactPage';
+import PolicyPage from '@/pages/PolicyPage';
 
-const HomePage = lazy(() => import('@/pages/HomePage'));
-const ShopPage = lazy(() => import('@/pages/ShopPage'));
-const ProductPage = lazy(() => import('@/pages/ProductPage'));
-const CheckoutPage = lazy(() => import('@/pages/CheckoutPage'));
-const CheckoutVerifyPage = lazy(() => import('@/pages/CheckoutVerifyPage'));
-const AboutPage = lazy(() => import('@/pages/AboutPage'));
-const ContactPage = lazy(() => import('@/pages/ContactPage'));
-const PolicyPage = lazy(() => import('@/pages/PolicyPage'));
 const AdminLoginPage = lazy(() => import('@/pages/admin/AdminLoginPage'));
 const AdminDashboardPage = lazy(() => import('@/pages/admin/AdminDashboardPage'));
 const AdminOrdersPage = lazy(() => import('@/pages/admin/AdminOrdersPage'));
@@ -18,7 +18,7 @@ const AdminReportsPage = lazy(() => import('@/pages/admin/AdminReportsPage'));
 
 export default function App() {
   return (
-    <Suspense fallback={<LoadingSpinner />}>
+    <Suspense fallback={<LoadingSpinner fullScreen={false} />}>
       <Routes>
         <Route element={<MainLayout />}>
           <Route index element={<HomePage />} />

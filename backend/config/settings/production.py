@@ -40,6 +40,10 @@ if not FRONTEND_URL or FRONTEND_URL == 'http://localhost:5173':
 # Use simpler static storage in production (avoids manifest issues with SPA assets)
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
+# WhiteNoise — serve collected static files reliably in production
+WHITENOISE_USE_FINDERS = False
+WHITENOISE_MAX_AGE = 31536000
+
 # Ensure CORS includes production URL
 if SITE_URL and SITE_URL not in CORS_ALLOWED_ORIGINS:
     CORS_ALLOWED_ORIGINS = list(CORS_ALLOWED_ORIGINS) + [SITE_URL]

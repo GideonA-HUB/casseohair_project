@@ -1,5 +1,7 @@
 import { motion } from 'framer-motion';
 
+const LOGO_SRC = `${import.meta.env.BASE_URL}logo.png`;
+
 interface LoadingSpinnerProps {
   fullScreen?: boolean;
 }
@@ -13,7 +15,7 @@ export default function LoadingSpinner({ fullScreen = true }: LoadingSpinnerProp
         transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
       >
         <img
-          src="/logo.png"
+          src={LOGO_SRC}
           alt="CasseoHair"
           className="w-full h-full object-contain"
         />
