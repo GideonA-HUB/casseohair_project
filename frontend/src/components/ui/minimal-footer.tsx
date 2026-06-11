@@ -116,7 +116,7 @@ export default function MinimalFooter({
           {subscribed ? (
             <p className="font-medium text-brand-pink">Thank you for subscribing!</p>
           ) : (
-            <form onSubmit={handleSubscribe} className="mx-auto flex max-w-md gap-2">
+            <form onSubmit={handleSubscribe} className="mx-auto flex max-w-md flex-col gap-2 sm:flex-row">
               <input
                 type="email"
                 value={email}
@@ -128,7 +128,7 @@ export default function MinimalFooter({
               <button
                 type="submit"
                 disabled={loading}
-                className="rounded-full bg-brand-pink px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-brand-pink/90 disabled:opacity-50"
+                className="rounded-full bg-brand-pink px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-brand-pink/90 disabled:opacity-50 whitespace-nowrap"
               >
                 Subscribe
               </button>

@@ -6,13 +6,15 @@ from rest_framework.views import APIView
 from apps.accounts.permissions import IsAdminUser
 
 from .filters import ProductFilter
-from .models import Category, Product
+from .models import Category, Product, ProductReview
 from .serializers import (
     CategoryDetailSerializer,
     CategoryListSerializer,
     ProductAdminSerializer,
     ProductDetailSerializer,
     ProductListSerializer,
+    ProductReviewSerializer,
+    ProductReviewListSerializer,
 )
 
 
@@ -120,3 +122,24 @@ class AdminProductDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAdminUser]
     serializer_class = ProductAdminSerializer
     queryset = Product.objects.all()
+
+
+class ProductReviewsView(generics.ListCreateAPIView):
+    serializer_class = ProductReviewSerializer
+
+    def get_queryset(self):
+        product_slug = self.kwargs.get('slug')
+        return ProductReview.objects.filter(
+            product__slug=product_slug,
+            is_approved=True
+        ).select_related('product')
+
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return ProductReviewSerializer
+        return ProductReviewListSerializer
+
+    def perform_create(self, serializer):
+        product_slug = self.kwargs.get('slug')
+        product = Product.objects.get(slug=product_slug)
+        serializer.save(product=product, is_approved=False)

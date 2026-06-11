@@ -154,3 +154,22 @@ class ProductVideo(models.Model):
 
     def __str__(self):
         return f'{self.product.name} - Video'
+
+
+class ProductReview(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='reviews')
+    name = models.CharField(max_length=100)
+    email = models.EmailField()
+    rating = models.PositiveSmallIntegerField(default=5)
+    comment = models.TextField()
+    is_approved = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Product Review'
+        verbose_name_plural = 'Product Reviews'
+
+    def __str__(self):
+        return f'{self.name} - {self.product.name} ({self.rating}/5)'

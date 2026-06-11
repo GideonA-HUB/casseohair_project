@@ -20,6 +20,8 @@ export interface Product {
   is_bestseller: boolean;
   is_new_arrival: boolean;
   primary_image: string | null;
+  average_rating?: number;
+  review_count?: number;
   description?: string;
   sku?: string;
   images?: ProductImage[];

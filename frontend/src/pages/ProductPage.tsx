@@ -9,6 +9,7 @@ import 'swiper/css/pagination';
 import 'swiper/css/navigation';
 import SEO from '@/components/SEO';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import ProductReviews from '@/components/ui/product-reviews';
 import { productsApi } from '@/api';
 import { useCartStore } from '@/store/cartStore';
 import { formatPrice, getLaceTypeLabel, getLengthLabel } from '@/utils/format';
@@ -183,6 +184,9 @@ export default function ProductPage() {
           </motion.div>
         </div>
       </div>
+
+      {/* Product Reviews */}
+      <ProductReviews productSlug={slug!} />
     </>
   );
 }

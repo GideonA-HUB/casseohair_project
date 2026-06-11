@@ -49,7 +49,21 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
             {truncateText(product.name, 50)}
           </h3>
         </Link>
-        <div className="flex items-center gap-2">
+        {product.average_rating && (
+          <div className="flex items-center gap-1">
+            <span className="text-brand-pink text-sm">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <span key={i}>
+                  {i < Math.round(product.average_rating || 0) ? '★' : '☆'}
+                </span>
+              ))}
+            </span>
+            <span className="text-xs text-brand-accent/40">
+              ({product.review_count})
+            </span>
+          </div>
+        )}
+        <div className="flex items-center gap-2 flex-wrap">
           <span className="text-sm font-semibold text-brand-accent">
             {formatPrice(product.current_price)}
           </span>

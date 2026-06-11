@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from apps.core.media import absolute_media_url
 
-from .models import Category, Product, ProductImage, ProductVideo
+from .models import Category, Product, ProductImage, ProductVideo, ProductReview
 
 
 class ProductImageSerializer(serializers.ModelSerializer):
@@ -51,6 +51,8 @@ class ProductListSerializer(serializers.ModelSerializer):
     discount_percentage = serializers.IntegerField(read_only=True)
     category_name = serializers.CharField(source='category.name', read_only=True)
     in_stock = serializers.BooleanField(read_only=True)
+    average_rating = serializers.SerializerMethodField()
+    review_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
@@ -60,6 +62,7 @@ class ProductListSerializer(serializers.ModelSerializer):
             'is_on_sale', 'discount_percentage', 'length', 'density',
             'lace_type', 'color', 'stock', 'in_stock', 'is_featured',
             'is_bestseller', 'is_new_arrival', 'primary_image',
+            'average_rating', 'review_count',
         ]
 
     def get_primary_image(self, obj):
@@ -67,6 +70,15 @@ class ProductListSerializer(serializers.ModelSerializer):
         if img:
             return absolute_media_url(self.context.get('request'), img.image)
         return None
+
+    def get_average_rating(self, obj):
+        reviews = obj.reviews.filter(is_approved=True)
+        if reviews.exists():
+            return round(sum(review.rating for review in reviews) / reviews.count(), 1)
+        return None
+
+    def get_review_count(self, obj):
+        return obj.reviews.filter(is_approved=True).count()
 
 
 class ProductDetailSerializer(ProductListSerializer):
@@ -84,3 +96,21 @@ class ProductAdminSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = '__all__'
+
+
+class ProductReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductReview
+        fields = ['id', 'product', 'name', 'rating', 'comment', 'is_approved', 'created_at']
+        read_only_fields = ['is_approved', 'created_at']
+
+    def validate_rating(self, value):
+        if value < 1 or value > 5:
+            raise serializers.ValidationError('Rating must be between 1 and 5.')
+        return value
+
+
+class ProductReviewListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductReview
+        fields = ['id', 'name', 'rating', 'comment', 'created_at']

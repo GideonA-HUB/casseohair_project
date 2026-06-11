@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.html import format_html
 
-from .models import Category, Product, ProductImage, ProductVideo
+from .models import Category, Product, ProductImage, ProductVideo, ProductReview
 
 
 class ProductImageInline(admin.TabularInline):
@@ -76,3 +76,21 @@ class ProductAdmin(admin.ModelAdmin):
     @admin.action(description='Archive selected products')
     def archive_products(self, request, queryset):
         queryset.update(is_archived=True, is_active=False)
+
+
+@admin.register(ProductReview)
+class ProductReviewAdmin(admin.ModelAdmin):
+    list_display = ['name', 'product', 'rating', 'is_approved', 'created_at']
+    list_filter = ['rating', 'is_approved', 'created_at']
+    search_fields = ['name', 'email', 'comment', 'product__name']
+    list_editable = ['is_approved']
+    readonly_fields = ['created_at', 'updated_at']
+    actions = ['approve_reviews', 'reject_reviews']
+
+    @admin.action(description='Approve selected reviews')
+    def approve_reviews(self, request, queryset):
+        queryset.update(is_approved=True)
+
+    @admin.action(description='Reject selected reviews')
+    def reject_reviews(self, request, queryset):
+        queryset.update(is_approved=False)
