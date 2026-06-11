@@ -66,3 +66,16 @@
     display: none;
   }
 }
+
+@keyframes x-slider {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(calc(-50% - 1.25rem));
+  }
+}
+
+.animate-x-slider {
+  animation: x-slider 30s linear infinite;
+}

@@ -1,7 +1,7 @@
 import { Outlet } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import Header from '@/components/Header';
-import Footer from '@/components/Footer';
+import MinimalFooter from '@/components/ui/minimal-footer';
 import CartDrawer from '@/components/CartDrawer';
 import { siteApi } from '@/api';
 
@@ -18,11 +18,13 @@ export default function MainLayout() {
       <main className="flex-1">
         <Outlet />
       </main>
-      <Footer
+      <MinimalFooter
         siteName={settings?.site_name}
         instagramUrl={settings?.instagram_url}
         facebookUrl={settings?.facebook_url}
         twitterUrl={settings?.twitter_url}
+        tiktokUrl={settings?.tiktok_url}
+        youtubeUrl={settings?.youtube_url}
       />
       <CartDrawer />
     </div>

@@ -32,13 +32,17 @@ class SiteSettingsSerializer(serializers.ModelSerializer):
 
 class TestimonialSerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField()
+    company_logo = serializers.SerializerMethodField()
 
     class Meta:
         model = Testimonial
-        fields = ['id', 'name', 'role', 'content', 'rating', 'image']
+        fields = ['id', 'name', 'role', 'content', 'rating', 'image', 'company_logo']
 
     def get_image(self, obj):
         return absolute_media_url(self.context.get('request'), obj.image)
+
+    def get_company_logo(self, obj):
+        return absolute_media_url(self.context.get('request'), obj.company_logo)
 
 
 class HeroImageSerializer(serializers.ModelSerializer):

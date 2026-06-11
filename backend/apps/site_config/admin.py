@@ -45,8 +45,9 @@ class SiteSettingsAdmin(admin.ModelAdmin):
 
 @admin.register(Testimonial)
 class TestimonialAdmin(admin.ModelAdmin):
-    list_display = ['name', 'rating', 'is_featured', 'is_active', 'order']
+    list_display = ['name', 'role', 'rating', 'is_featured', 'is_active', 'order']
     list_filter = ['is_featured', 'is_active']
+    list_editable = ['order', 'is_active', 'is_featured']
 
 
 @admin.register(HeroImage)

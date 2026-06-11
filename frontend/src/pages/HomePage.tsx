@@ -5,6 +5,7 @@ import SEO from '@/components/SEO';
 import ProductCard from '@/components/ProductCard';
 import CategoryCard from '@/components/CategoryCard';
 import { ShuffleHero } from '@/components/ui/shuffle-grid';
+import SlidingTestimonial from '@/components/ui/sliding-testimonial';
 import { productsApi, siteApi } from '@/api';
 import type { Category, Product, Testimonial } from '@/types';
 
@@ -139,25 +140,7 @@ export default function HomePage() {
       </section>
 
       {/* Testimonials */}
-      {testimonials.length > 0 && (
-        <section className="section-padding max-w-7xl mx-auto bg-brand-gray-50">
-          <h2 className="text-xl font-display font-semibold text-center mb-8">What Our Clients Say</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {testimonials.map((t) => (
-              <div key={t.id} className="bg-white p-6 rounded-card shadow-card">
-                <div className="flex gap-1 mb-3">
-                  {Array.from({ length: t.rating }).map((_, i) => (
-                    <span key={i} className="text-brand-pink text-sm">★</span>
-                  ))}
-                </div>
-                <p className="text-sm text-brand-accent/70 mb-4 leading-relaxed">"{t.content}"</p>
-                <p className="font-semibold text-sm">{t.name}</p>
-                {t.role && <p className="text-xs text-brand-accent/40">{t.role}</p>}
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
+      <SlidingTestimonial />
     </>
   );
 }

@@ -80,6 +80,7 @@ class Testimonial(models.Model):
     content = models.TextField()
     rating = models.PositiveSmallIntegerField(default=5)
     image = models.ImageField(upload_to='testimonials/', blank=True, null=True)
+    company_logo = models.ImageField(upload_to='testimonials/logos/', blank=True, null=True)
     is_featured = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     order = models.PositiveIntegerField(default=0)

@@ -72,6 +72,8 @@ export interface SiteSettings {
   instagram_url: string;
   facebook_url: string;
   twitter_url: string;
+  tiktok_url: string;
+  youtube_url: string;
   delivery_fee: string;
   currency: string;
   currency_symbol: string;
