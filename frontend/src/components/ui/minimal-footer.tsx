@@ -3,14 +3,6 @@
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { siteApi } from '@/api';
-import {
-  FacebookIcon,
-  InstagramIcon,
-  LinkedinIcon,
-  TwitterIcon,
-  YoutubeIcon,
-  TiktokIcon,
-} from 'lucide-react';
 
 interface FooterProps {
   siteName?: string;
@@ -93,27 +85,18 @@ export default function MinimalFooter({
 
   const socialLinks = [
     {
-      icon: <InstagramIcon className="size-4" />,
       link: instagramUrl || '#',
       name: 'Instagram',
     },
     {
-      icon: <FacebookIcon className="size-4" />,
       link: facebookUrl || '#',
       name: 'Facebook',
     },
     {
-      icon: <TwitterIcon className="size-4" />,
       link: twitterUrl || '#',
       name: 'Twitter',
     },
     {
-      icon: <TiktokIcon className="size-4" />,
-      link: tiktokUrl || '#',
-      name: 'TikTok',
-    },
-    {
-      icon: <YoutubeIcon className="size-4" />,
       link: youtubeUrl || '#',
       name: 'YouTube',
     },
@@ -226,17 +209,17 @@ export default function MinimalFooter({
 
         {/* Social Links */}
         {socialLinks.length > 0 && (
-          <div className="mt-8 flex justify-center gap-3">
+          <div className="mt-8 flex justify-center gap-4">
             {socialLinks.map((item, i) => (
               <a
                 key={i}
                 href={item.link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="rounded-md border border-white/20 p-1.5 text-white/50 transition-colors hover:bg-white/10 hover:text-brand-pink"
+                className="text-sm text-white/50 transition-colors hover:text-brand-pink"
                 aria-label={item.name}
               >
-                {item.icon}
+                {item.name}
               </a>
             ))}
           </div>
