@@ -4,18 +4,6 @@ set -e
 export DJANGO_SETTINGS_MODULE="${DJANGO_SETTINGS_MODULE:-config.settings.production}"
 
 echo "=== CasseoHair Deploy ==="
-python -c "
-import os
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings.production')
-import django
-django.setup()
-from django.conf import settings
-if getattr(settings, 'USE_CLOUDINARY', False):
-    print('Media storage: Cloudinary (%s)' % settings.CLOUDINARY_CLOUD_NAME)
-else:
-    print('WARNING: Cloudinary not configured — using local media storage')
-"
-
 echo "Running migrations..."
 python manage.py migrate --noinput
 

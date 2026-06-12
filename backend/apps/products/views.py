@@ -38,7 +38,7 @@ class ProductListView(generics.ListAPIView):
     ordering = ['-created_at']
 
     def get_queryset(self):
-        return Product.objects.filter(is_active=True, is_archived=False).select_related('category').prefetch_related('images')
+        return Product.objects.filter(is_active=True, is_archived=False).select_related('category').prefetch_related('images', 'reviews')
 
 
 class ProductDetailView(generics.RetrieveAPIView):
@@ -46,7 +46,7 @@ class ProductDetailView(generics.RetrieveAPIView):
     lookup_field = 'slug'
 
     def get_queryset(self):
-        return Product.objects.filter(is_active=True, is_archived=False).select_related('category').prefetch_related('images', 'videos')
+        return Product.objects.filter(is_active=True, is_archived=False).select_related('category').prefetch_related('images', 'videos', 'reviews')
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -65,7 +65,7 @@ class FeaturedProductsView(generics.ListAPIView):
     def get_queryset(self):
         return Product.objects.filter(
             is_active=True, is_archived=False, is_featured=True
-        ).select_related('category').prefetch_related('images')[:12]
+        ).select_related('category').prefetch_related('images', 'reviews')[:12]
 
 
 class BestsellerProductsView(generics.ListAPIView):
@@ -75,7 +75,7 @@ class BestsellerProductsView(generics.ListAPIView):
     def get_queryset(self):
         return Product.objects.filter(
             is_active=True, is_archived=False, is_bestseller=True
-        ).select_related('category').prefetch_related('images')[:12]
+        ).select_related('category').prefetch_related('images', 'reviews')[:12]
 
 
 class NewArrivalProductsView(generics.ListAPIView):
@@ -85,7 +85,7 @@ class NewArrivalProductsView(generics.ListAPIView):
     def get_queryset(self):
         return Product.objects.filter(
             is_active=True, is_archived=False, is_new_arrival=True
-        ).select_related('category').prefetch_related('images')[:12]
+        ).select_related('category').prefetch_related('images', 'reviews')[:12]
 
 
 class ProductSearchView(APIView):
@@ -102,7 +102,7 @@ class ProductSearchView(APIView):
             Q(lace_type__icontains=query),
             is_active=True,
             is_archived=False,
-        ).select_related('category').prefetch_related('images')[:20]
+        ).select_related('category').prefetch_related('images', 'reviews')[:20]
 
         serializer = ProductListSerializer(products, many=True, context={'request': request})
         return Response({'results': serializer.data, 'count': len(serializer.data)})
