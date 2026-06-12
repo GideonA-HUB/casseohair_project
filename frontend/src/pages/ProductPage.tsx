@@ -20,13 +20,21 @@ export default function ProductPage() {
   const [added, setAdded] = useState(false);
   const { addItem } = useCartStore();
 
-  const { data: product, isLoading } = useQuery({
+  const { data: product, isLoading, error } = useQuery({
     queryKey: ['product', slug],
     queryFn: () => productsApi.get(slug!).then((r) => r.data),
     enabled: !!slug,
+    retry: 1,
   });
 
   if (isLoading) return <LoadingSpinner fullScreen={false} />;
+  if (error) {
+    return (
+      <div className="section-padding text-center py-20">
+        <p className="text-brand-accent/50">Something went wrong. Please try again.</p>
+      </div>
+    );
+  }
   if (!product) {
     return (
       <div className="section-padding text-center py-20">

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 
 interface Review {
   id: number;
@@ -27,10 +27,6 @@ export default function ProductReviews({ productSlug }: ProductReviewsProps) {
   });
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-
-  const { scrollYProgress } = useScroll();
-  const opacity = useTransform(scrollYProgress, [0, 0.3], [0, 1]);
-  const y = useTransform(scrollYProgress, [0, 0.3], [50, 0]);
 
   useEffect(() => {
     fetchReviews();
@@ -92,10 +88,7 @@ export default function ProductReviews({ productSlug }: ProductReviewsProps) {
   }));
 
   return (
-    <motion.section
-      style={{ opacity, y }}
-      className="w-full section-padding bg-brand-gray-50"
-    >
+    <section className="w-full section-padding bg-brand-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-12">
@@ -316,6 +309,6 @@ export default function ProductReviews({ productSlug }: ProductReviewsProps) {
           </motion.div>
         )}
       </div>
-    </motion.section>
+    </section>
   );
 }
