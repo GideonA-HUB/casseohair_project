@@ -40,6 +40,14 @@ export interface ProductImage {
   order: number;
 }
 
+export interface ProductReview {
+  id: number;
+  name: string;
+  rating: number;
+  comment: string;
+  created_at: string;
+}
+
 export interface ProductVideo {
   id: number;
   video: string;

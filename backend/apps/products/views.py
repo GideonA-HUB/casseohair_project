@@ -13,8 +13,9 @@ from .serializers import (
     ProductAdminSerializer,
     ProductDetailSerializer,
     ProductListSerializer,
-    ProductReviewSerializer,
+    ProductReviewCreateSerializer,
     ProductReviewListSerializer,
+    ProductReviewSerializer,
 )
 
 
@@ -126,6 +127,7 @@ class AdminProductDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 class ProductReviewsView(generics.ListCreateAPIView):
     serializer_class = ProductReviewSerializer
+    pagination_class = None
 
     def get_queryset(self):
         product_slug = self.kwargs.get('slug')
@@ -136,7 +138,7 @@ class ProductReviewsView(generics.ListCreateAPIView):
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
-            return ProductReviewSerializer
+            return ProductReviewCreateSerializer
         return ProductReviewListSerializer
 
     def perform_create(self, serializer):

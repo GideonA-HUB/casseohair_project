@@ -7,6 +7,7 @@ import type {
   Order,
   PaginatedResponse,
   Product,
+  ProductReview,
   SiteSettings,
   Testimonial,
 } from '@/types';
@@ -34,6 +35,14 @@ export const productsApi = {
       .get<Category[] | PaginatedResponse<Category>>('/products/categories/')
       .then((r) => unwrapList<Category>(r.data)),
   category: (slug: string) => apiClient.get<Category>(`/products/categories/${slug}/`),
+  reviews: (slug: string): Promise<ProductReview[]> =>
+    apiClient
+      .get<ProductReview[] | PaginatedResponse<ProductReview>>(`/products/${slug}/reviews/`)
+      .then((r) => unwrapList<ProductReview>(r.data)),
+  createReview: (
+    slug: string,
+    data: { name: string; email: string; rating: number; comment: string }
+  ) => apiClient.post(`/products/${slug}/reviews/`, data),
 };
 
 export const siteApi = {

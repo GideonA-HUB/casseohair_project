@@ -10,6 +10,7 @@ import 'swiper/css/navigation';
 import SEO from '@/components/SEO';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import ProductReviews from '@/components/ui/product-reviews';
+import StarRating from '@/components/StarRating';
 import { productsApi } from '@/api';
 import { useCartStore } from '@/store/cartStore';
 import { formatPrice, getLaceTypeLabel, getLengthLabel } from '@/utils/format';
@@ -119,6 +120,15 @@ export default function ProductPage() {
             )}
             <h1 className="text-2xl md:text-3xl font-display font-semibold">{product.name}</h1>
 
+            {(product.review_count ?? 0) > 0 && product.average_rating != null && (
+              <div className="flex items-center gap-2">
+                <StarRating value={product.average_rating} size="md" />
+                <span className="text-sm text-brand-accent/60">
+                  {product.average_rating} · {product.review_count} review{product.review_count !== 1 ? 's' : ''}
+                </span>
+              </div>
+            )}
+
             <div className="flex items-center gap-3">
               <span className="text-2xl font-semibold">{formatPrice(product.current_price)}</span>
               {product.is_on_sale && (
@@ -194,7 +204,11 @@ export default function ProductPage() {
       </div>
 
       {/* Product Reviews */}
-      <ProductReviews productSlug={slug!} />
+      <ProductReviews
+        productSlug={slug!}
+        averageRating={product.average_rating}
+        reviewCount={product.review_count}
+      />
     </>
   );
 }

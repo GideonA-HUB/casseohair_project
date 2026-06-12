@@ -98,16 +98,22 @@ class ProductAdminSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class ProductReviewSerializer(serializers.ModelSerializer):
+class ProductReviewCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductReview
-        fields = ['id', 'product', 'name', 'rating', 'comment', 'is_approved', 'created_at']
-        read_only_fields = ['is_approved', 'created_at']
+        fields = ['name', 'email', 'rating', 'comment']
 
     def validate_rating(self, value):
         if value < 1 or value > 5:
             raise serializers.ValidationError('Rating must be between 1 and 5.')
         return value
+
+
+class ProductReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductReview
+        fields = ['id', 'product', 'name', 'email', 'rating', 'comment', 'is_approved', 'created_at']
+        read_only_fields = ['is_approved', 'created_at']
 
 
 class ProductReviewListSerializer(serializers.ModelSerializer):

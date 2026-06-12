@@ -1,292 +1,315 @@
-"use client"
-
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-
-interface Review {
-  id: number;
-  name: string;
-  rating: number;
-  comment: string;
-  created_at: string;
-}
+import { useState, useEffect } from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
+import { useRef } from 'react';
+import StarRating from '@/components/StarRating';
+import { productsApi } from '@/api';
+import type { ProductReview } from '@/types';
 
 interface ProductReviewsProps {
   productSlug: string;
+  averageRating?: number | null;
+  reviewCount?: number;
 }
 
-export default function ProductReviews({ productSlug }: ProductReviewsProps) {
-  const [reviews, setReviews] = useState<Review[]>([]);
+export default function ProductReviews({
+  productSlug,
+  averageRating,
+  reviewCount = 0,
+}: ProductReviewsProps) {
+  const sectionRef = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ['start end', 'end start'],
+  });
+  const parallaxY = useTransform(scrollYProgress, [0, 1], ['-8%', '8%']);
+  const parallaxOpacity = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0.4, 1, 1, 0.4]);
+
+  const [reviews, setReviews] = useState<ProductReview[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    rating: 5,
-    comment: "",
-  });
+  const [formData, setFormData] = useState({ name: '', email: '', rating: 5, comment: '' });
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    fetchReviews();
+    let cancelled = false;
+    setLoading(true);
+    productsApi
+      .reviews(productSlug)
+      .then((data) => {
+        if (!cancelled) setReviews(data);
+      })
+      .catch(() => {
+        if (!cancelled) setReviews([]);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [productSlug]);
 
-  const fetchReviews = async () => {
-    try {
-      const response = await fetch(`/api/v1/products/${productSlug}/reviews/`);
-      if (response.ok) {
-        const data = await response.json();
-        setReviews(data);
-      }
-    } catch (error) {
-      console.error("Failed to fetch reviews:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const displayAverage =
+    reviews.length > 0
+      ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
+      : averageRating?.toFixed(1) ?? '0.0';
+
+  const displayCount = reviews.length > 0 ? reviews.length : reviewCount;
+
+  const ratingDistribution = [5, 4, 3, 2, 1].map((rating) => {
+    const count = reviews.filter((r) => r.rating === rating).length;
+    return {
+      rating,
+      count,
+      percentage: reviews.length > 0 ? (count / reviews.length) * 100 : 0,
+    };
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || !formData.email || !formData.comment) return;
+    if (!formData.name.trim() || !formData.email.trim() || !formData.comment.trim()) return;
 
     setSubmitting(true);
+    setError('');
     try {
-      const response = await fetch(`/api/v1/products/${productSlug}/reviews/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (response.ok) {
-        setSubmitted(true);
-        setFormData({ name: "", email: "", rating: 5, comment: "" });
-        setTimeout(() => {
-          setSubmitted(false);
-          setShowForm(false);
-        }, 3000);
-      }
-    } catch (error) {
-      console.error("Failed to submit review:", error);
+      await productsApi.createReview(productSlug, formData);
+      setSubmitted(true);
+      setFormData({ name: '', email: '', rating: 5, comment: '' });
+      setTimeout(() => {
+        setSubmitted(false);
+        setShowForm(false);
+      }, 4000);
+    } catch {
+      setError('Could not submit your review. Please try again.');
     } finally {
       setSubmitting(false);
     }
   };
 
-  const averageRating = reviews.length > 0
-    ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
-    : "0";
-
-  const ratingDistribution = [5, 4, 3, 2, 1].map((rating) => ({
-    rating,
-    count: reviews.filter((r) => r.rating === rating).length,
-    percentage: reviews.length > 0
-      ? (reviews.filter((r) => r.rating === rating).length / reviews.length) * 100
-      : 0,
-  }));
-
   return (
-    <section className="w-full section-padding bg-brand-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-display font-semibold text-brand-black mb-4">
+    <section ref={sectionRef} className="relative overflow-hidden bg-brand-gray-50">
+      {/* Parallax background */}
+      <motion.div
+        style={{ y: parallaxY, opacity: parallaxOpacity }}
+        className="pointer-events-none absolute inset-0"
+        aria-hidden
+      >
+        <div className="absolute -top-24 -right-24 h-96 w-96 rounded-full bg-brand-pink/10 blur-3xl" />
+        <div className="absolute -bottom-32 -left-32 h-[28rem] w-[28rem] rounded-full bg-brand-pink/5 blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full border border-brand-pink/10" />
+      </motion.div>
+
+      <div className="relative section-padding max-w-7xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-10 md:mb-14"
+        >
+          <p className="text-xs font-medium uppercase tracking-[0.2em] text-brand-pink mb-3">
+            Voices of Luxury
+          </p>
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-display font-semibold text-brand-black mb-4">
             Customer Reviews
           </h2>
-          <p className="text-brand-accent/60">
-            See what our customers are saying about this product
+          <p className="text-brand-accent/60 max-w-xl mx-auto">
+            Real experiences from our community — share yours and help others discover their perfect look.
           </p>
-        </div>
+        </motion.div>
 
-        {/* Rating Summary */}
-        <div className="bg-white rounded-luxury shadow-card p-6 md:p-8 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Average Rating */}
-            <div className="flex flex-col items-center justify-center text-center">
-              <div className="text-5xl md:text-6xl font-display font-semibold text-brand-pink mb-2">
-                {averageRating}
-              </div>
-              <div className="flex gap-1 mb-2">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <span
-                    key={i}
-                    className={`text-2xl ${
-                      i < Math.round(Number(averageRating))
-                        ? "text-brand-pink"
-                        : "text-brand-gray-300"
-                    }`}
-                  >
-                    ★
-                  </span>
-                ))}
-              </div>
-              <p className="text-sm text-brand-accent/60">
-                Based on {reviews.length} review{reviews.length !== 1 ? "s" : ""}
+        {/* Summary card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="bg-white/90 backdrop-blur-sm rounded-luxury shadow-luxury border border-white p-6 md:p-10 mb-10"
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+            <div className="flex flex-col items-center text-center lg:items-start lg:text-left">
+              <span className="text-6xl md:text-7xl font-display font-semibold text-brand-pink leading-none">
+                {displayAverage}
+              </span>
+              <StarRating value={Number(displayAverage)} size="lg" />
+              <p className="mt-3 text-sm text-brand-accent/60">
+                Based on {displayCount} review{displayCount !== 1 ? 's' : ''}
               </p>
             </div>
 
-            {/* Rating Distribution */}
             <div className="space-y-3">
-              {ratingDistribution.map((item) => (
-                <div key={item.rating} className="flex items-center gap-3">
-                  <span className="text-sm text-brand-accent w-8">{item.rating} ★</span>
-                  <div className="flex-1 h-2 bg-brand-gray-200 rounded-full overflow-hidden">
+              {ratingDistribution.map((item, index) => (
+                <motion.div
+                  key={item.rating}
+                  initial={{ opacity: 0, x: 20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.05 }}
+                  className="flex items-center gap-3"
+                >
+                  <span className="text-sm text-brand-accent w-10 shrink-0">{item.rating} ★</span>
+                  <div className="flex-1 h-2.5 bg-brand-gray-100 rounded-full overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
                       whileInView={{ width: `${item.percentage}%` }}
-                      transition={{ duration: 0.8, ease: "easeOut" }}
-                      className="h-full bg-brand-pink rounded-full"
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.8, ease: 'easeOut', delay: index * 0.05 }}
+                      className="h-full bg-gradient-to-r from-brand-pink to-brand-pink/70 rounded-full"
                     />
                   </div>
-                  <span className="text-sm text-brand-accent/60 w-8 text-right">
-                    {item.count}
-                  </span>
-                </div>
+                  <span className="text-sm text-brand-accent/50 w-6 text-right">{item.count}</span>
+                </motion.div>
               ))}
             </div>
           </div>
-        </div>
+        </motion.div>
 
-        {/* Reviews List */}
+        {/* Reviews grid */}
         {loading ? (
-          <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-2 border-brand-pink border-t-transparent" />
+          <div className="flex justify-center py-16">
+            <div className="h-10 w-10 animate-spin rounded-full border-2 border-brand-pink border-t-transparent" />
           </div>
         ) : reviews.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6 mb-10">
             {reviews.map((review, index) => (
-              <motion.div
+              <motion.article
                 key={review.id}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: index * 0.1 }}
                 viewport={{ once: true }}
-                className="bg-white rounded-luxury shadow-card p-6"
+                transition={{ duration: 0.45, delay: index * 0.08 }}
+                whileHover={{ y: -4 }}
+                className="group bg-white rounded-luxury shadow-card border border-brand-gray-100 p-6 md:p-7 transition-shadow hover:shadow-luxury"
               >
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <h4 className="font-semibold text-brand-black">{review.name}</h4>
-                    <p className="text-xs text-brand-accent/40">
-                      {new Date(review.created_at).toLocaleDateString()}
-                    </p>
+                <div className="flex items-start justify-between gap-4 mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="h-11 w-11 rounded-full bg-gradient-to-br from-brand-pink to-brand-pink/60 flex items-center justify-center text-white font-semibold text-sm shrink-0">
+                      {review.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-brand-black">{review.name}</h4>
+                      <time className="text-xs text-brand-accent/40">
+                        {new Date(review.created_at).toLocaleDateString('en-NG', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                        })}
+                      </time>
+                    </div>
                   </div>
-                  <div className="flex gap-0.5">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <span
-                        key={i}
-                        className={`text-sm ${
-                          i < review.rating ? "text-brand-pink" : "text-brand-gray-300"
-                        }`}
-                      >
-                        ★
-                      </span>
-                    ))}
-                  </div>
+                  <StarRating value={review.rating} size="sm" />
                 </div>
-                <p className="text-brand-accent leading-relaxed">{review.comment}</p>
-              </motion.div>
+                <p className="text-brand-accent/80 leading-relaxed text-sm md:text-base">
+                  &ldquo;{review.comment}&rdquo;
+                </p>
+              </motion.article>
             ))}
           </div>
         ) : (
-          <div className="text-center py-12 bg-white rounded-luxury shadow-card mb-8">
-            <p className="text-brand-accent/60">No reviews yet. Be the first to review!</p>
-          </div>
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="text-center py-14 bg-white rounded-luxury shadow-card border border-brand-gray-100 mb-10"
+          >
+            <p className="text-4xl mb-3">✦</p>
+            <p className="text-brand-accent/60">No reviews yet. Be the first to share your experience.</p>
+          </motion.div>
         )}
 
-        {/* Write Review Button */}
+        {/* CTA / Form */}
         {!showForm && !submitted && (
-          <div className="text-center">
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="text-center"
+          >
             <button
               onClick={() => setShowForm(true)}
-              className="btn-primary px-8 py-3 rounded-full"
+              className="btn-primary px-10 py-3.5 rounded-full text-sm tracking-wide"
             >
               Write a Review
             </button>
-          </div>
+          </motion.div>
         )}
 
-        {/* Review Form */}
         {showForm && !submitted && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-luxury shadow-card p-6 md:p-8 mt-8"
+            className="bg-white rounded-luxury shadow-luxury border border-brand-gray-100 p-6 md:p-10 mt-6"
           >
-            <h3 className="text-xl font-display font-semibold text-brand-black mb-6">
-              Write Your Review
+            <h3 className="text-xl md:text-2xl font-display font-semibold text-brand-black mb-2">
+              Share Your Experience
             </h3>
+            <p className="text-sm text-brand-accent/60 mb-8">
+              Your name will be shown publicly. Email is required for verification only.
+            </p>
+
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
-                  <label className="block text-sm font-medium text-brand-accent mb-2">
-                    Your Name *
-                  </label>
+                  <label className="block text-sm font-medium text-brand-accent mb-2">Your Name *</label>
                   <input
                     type="text"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-4 py-3 rounded-luxury border border-brand-gray-200 focus:border-brand-pink outline-none transition-colors"
+                    className="input-luxury"
                     required
+                    maxLength={100}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-brand-accent mb-2">
-                    Your Email *
-                  </label>
+                  <label className="block text-sm font-medium text-brand-accent mb-2">Your Email *</label>
                   <input
                     type="email"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full px-4 py-3 rounded-luxury border border-brand-gray-200 focus:border-brand-pink outline-none transition-colors"
+                    className="input-luxury"
                     required
                   />
                 </div>
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-brand-accent mb-2">
-                  Rating *
-                </label>
-                <div className="flex gap-2">
-                  {[1, 2, 3, 4, 5].map((rating) => (
-                    <button
-                      key={rating}
-                      type="button"
-                      onClick={() => setFormData({ ...formData, rating })}
-                      className={`text-3xl transition-colors ${
-                        rating <= formData.rating ? "text-brand-pink" : "text-brand-gray-300"
-                      } hover:text-brand-pink`}
-                    >
-                      ★
-                    </button>
-                  ))}
-                </div>
+                <label className="block text-sm font-medium text-brand-accent mb-2">Your Rating *</label>
+                <StarRating
+                  value={formData.rating}
+                  size="lg"
+                  interactive
+                  onChange={(rating) => setFormData({ ...formData, rating })}
+                />
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-brand-accent mb-2">
-                  Your Review *
-                </label>
+                <label className="block text-sm font-medium text-brand-accent mb-2">Your Review *</label>
                 <textarea
                   value={formData.comment}
                   onChange={(e) => setFormData({ ...formData, comment: e.target.value })}
                   rows={5}
-                  className="w-full px-4 py-3 rounded-luxury border border-brand-gray-200 focus:border-brand-pink outline-none transition-colors resize-none"
+                  className="input-luxury resize-none"
                   required
+                  placeholder="Tell us about the quality, fit, and how you feel wearing it..."
                 />
               </div>
-              <div className="flex gap-4">
+
+              {error && <p className="text-sm text-red-500">{error}</p>}
+
+              <div className="flex flex-wrap gap-3">
                 <button
                   type="submit"
                   disabled={submitting}
                   className="btn-primary px-8 py-3 rounded-full disabled:opacity-50"
                 >
-                  {submitting ? "Submitting..." : "Submit Review"}
+                  {submitting ? 'Submitting...' : 'Submit Review'}
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowForm(false)}
-                  className="btn-ghost px-8 py-3 rounded-full"
+                  className="btn-outline px-8 py-3 rounded-full"
                 >
                   Cancel
                 </button>
@@ -295,16 +318,16 @@ export default function ProductReviews({ productSlug }: ProductReviewsProps) {
           </motion.div>
         )}
 
-        {/* Success Message */}
         {submitted && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
+            initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-brand-pink text-white text-center py-8 px-6 rounded-luxury shadow-card mt-8"
+            className="bg-gradient-to-r from-brand-pink to-brand-pink/90 text-white text-center py-10 px-6 rounded-luxury shadow-luxury mt-6"
           >
-            <h3 className="text-xl font-semibold mb-2">Thank You!</h3>
-            <p className="text-white/90">
-              Your review has been submitted and will be visible after approval.
+            <p className="text-3xl mb-2">✦</p>
+            <h3 className="text-xl font-display font-semibold mb-2">Thank You!</h3>
+            <p className="text-white/90 text-sm md:text-base">
+              Your review has been submitted and will appear after our team approves it.
             </p>
           </motion.div>
         )}

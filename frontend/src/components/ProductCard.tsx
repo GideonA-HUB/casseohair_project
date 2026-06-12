@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import StarRating from '@/components/StarRating';
 import type { Product } from '@/types';
 import { formatPrice, truncateText } from '@/utils/format';
 
@@ -49,18 +50,10 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
             {truncateText(product.name, 50)}
           </h3>
         </Link>
-        {product.average_rating && (
-          <div className="flex items-center gap-1">
-            <span className="text-brand-pink text-sm">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <span key={i}>
-                  {i < Math.round(product.average_rating || 0) ? '★' : '☆'}
-                </span>
-              ))}
-            </span>
-            <span className="text-xs text-brand-accent/40">
-              ({product.review_count})
-            </span>
+        {(product.review_count ?? 0) > 0 && product.average_rating != null && (
+          <div className="flex items-center gap-1.5">
+            <StarRating value={product.average_rating} size="sm" />
+            <span className="text-xs text-brand-accent/40">({product.review_count})</span>
           </div>
         )}
         <div className="flex items-center gap-2 flex-wrap">

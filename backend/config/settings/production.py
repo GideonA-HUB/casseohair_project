@@ -37,22 +37,29 @@ CSRF_TRUSTED_ORIGINS = _csrf_origins
 if not FRONTEND_URL or FRONTEND_URL == 'http://localhost:5173':
     FRONTEND_URL = SITE_URL
 
-# Use simpler static storage in production (avoids manifest issues with SPA assets)
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+# Plain static storage — WhiteNoise middleware compresses at serve time.
+# CompressedStaticFilesStorage races on parallel collect (Windows/OneDrive + Docker).
+STORAGES['staticfiles'] = {
+    'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
+}
+STATICFILES_STORAGE = STORAGES['staticfiles']['BACKEND']
 
 # WhiteNoise — serve collected static files reliably in production
 WHITENOISE_USE_FINDERS = False
 WHITENOISE_MAX_AGE = 31536000
+WHITENOISE_MANIFEST_STRICT = False
 
 # Ensure CORS includes production URL
 if SITE_URL and SITE_URL not in CORS_ALLOWED_ORIGINS:
     CORS_ALLOWED_ORIGINS = list(CORS_ALLOWED_ORIGINS) + [SITE_URL]
 
-# Warn when media is stored on the ephemeral container filesystem.
-# Set CLOUDINARY_* env vars so uploads persist across Railway redeploys.
-if not CLOUDINARY_CLOUD_NAME:
-    import logging
-    logging.getLogger(__name__).warning(
-        'CLOUDINARY_CLOUD_NAME is not set — uploaded images are stored on the '
-        'container filesystem and will be lost on redeploy. Add Cloudinary keys in Railway.'
+import logging
+
+_logger = logging.getLogger(__name__)
+if USE_CLOUDINARY:
+    _logger.info('Media storage: Cloudinary (cloud_name=%s)', CLOUDINARY_CLOUD_NAME)
+else:
+    _logger.warning(
+        'Media storage: local filesystem — set CLOUDINARY_CLOUD_NAME, '
+        'CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET in Railway.'
     )
