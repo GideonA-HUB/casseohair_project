@@ -25,7 +25,7 @@ rm -rf staticfiles/*
 python manage.py collectstatic --noinput --verbosity 0 --upload-unhashed-files
 
 echo "Ensuring media upload directory exists..."
-mkdir -p media/products media/categories media/site_assets media/testimonials
+mkdir -p media/products media/categories media/site_assets media/testimonials media/why_choose
 
 echo "Preparing frontend template..."
 mkdir -p templates

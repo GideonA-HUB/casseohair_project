@@ -10,6 +10,7 @@ import type {
   ProductReview,
   SiteSettings,
   Testimonial,
+  WhyChooseItem,
 } from '@/types';
 
 export const productsApi = {
@@ -52,6 +53,10 @@ export const siteApi = {
     apiClient
       .get<Testimonial[] | PaginatedResponse<Testimonial>>('/site/testimonials/')
       .then((r) => unwrapList<Testimonial>(r.data)),
+  whyChoose: (): Promise<WhyChooseItem[]> =>
+    apiClient
+      .get<WhyChooseItem[] | PaginatedResponse<WhyChooseItem>>('/site/why-choose/')
+      .then((r) => unwrapList<WhyChooseItem>(r.data)),
   contact: (data: { name: string; email: string; phone?: string; message: string }) =>
     apiClient.post('/site/contact/', data),
   newsletter: (email: string) => apiClient.post('/site/newsletter/', { email }),

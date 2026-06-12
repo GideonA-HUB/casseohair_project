@@ -7,7 +7,15 @@ from rest_framework.views import APIView
 from apps.accounts.permissions import IsAdminUser
 from apps.notifications.services import EmailService, NotificationService
 
-from .models import ContactSubmission, HeroImage, NewsletterSubscriber, SiteAsset, SiteSettings, Testimonial
+from .models import (
+    ContactSubmission,
+    HeroImage,
+    NewsletterSubscriber,
+    SiteAsset,
+    SiteSettings,
+    Testimonial,
+    WhyChooseItem,
+)
 from .serializers import (
     ContactSubmissionSerializer,
     HeroImageSerializer,
@@ -15,6 +23,7 @@ from .serializers import (
     SiteAssetSerializer,
     SiteSettingsSerializer,
     TestimonialSerializer,
+    WhyChooseItemSerializer,
 )
 
 
@@ -49,6 +58,16 @@ class TestimonialListView(generics.ListAPIView):
 
     def get_queryset(self):
         return Testimonial.objects.filter(is_active=True, is_featured=True)
+
+
+class WhyChooseListView(generics.ListAPIView):
+    authentication_classes = []
+    permission_classes = []
+    serializer_class = WhyChooseItemSerializer
+    pagination_class = None
+
+    def get_queryset(self):
+        return WhyChooseItem.objects.filter(is_active=True)[:7]
 
 
 class HeroImagesView(generics.ListAPIView):

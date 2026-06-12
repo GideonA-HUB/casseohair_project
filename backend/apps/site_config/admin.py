@@ -9,6 +9,7 @@ from .models import (
     SiteAsset,
     SiteSettings,
     Testimonial,
+    WhyChooseItem,
 )
 
 
@@ -48,6 +49,24 @@ class TestimonialAdmin(admin.ModelAdmin):
     list_display = ['name', 'role', 'rating', 'is_featured', 'is_active', 'order']
     list_filter = ['is_featured', 'is_active']
     list_editable = ['order', 'is_active', 'is_featured']
+
+
+@admin.register(WhyChooseItem)
+class WhyChooseItemAdmin(admin.ModelAdmin):
+    list_display = ['title', 'preview', 'order', 'is_active', 'updated_at']
+    list_filter = ['is_active']
+    list_editable = ['order', 'is_active']
+    search_fields = ['title', 'description']
+    fieldsets = (
+        (None, {'fields': ('title', 'description', 'image', 'alt_text')}),
+        ('Display', {'fields': ('order', 'is_active')}),
+    )
+
+    def preview(self, obj):
+        if obj.image:
+            return format_html('<img src="{}" style="max-height:48px;border-radius:6px;" />', obj.image.url)
+        return '-'
+    preview.short_description = 'Preview'
 
 
 @admin.register(HeroImage)

@@ -55,6 +55,12 @@ class SiteSettings(models.Model):
     vat_rate = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     instagram_feed_enabled = models.BooleanField(default=False)
     instagram_access_token = models.CharField(max_length=500, blank=True)
+    why_choose_title = models.CharField(max_length=255, default='Why Choose CasseoHair')
+    why_choose_subtitle = models.CharField(
+        max_length=500,
+        blank=True,
+        default='Authentic luxury hair, crafted for elegance',
+    )
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -119,6 +125,29 @@ class NewsletterSubscriber(models.Model):
 
     def __str__(self):
         return self.email
+
+
+class WhyChooseItem(models.Model):
+    """Homepage parallax feature card — up to 7 items, managed in Django admin."""
+    title = models.CharField(max_length=120)
+    description = models.TextField()
+    image = models.ImageField(upload_to='why_choose/', blank=True, null=True)
+    alt_text = models.CharField(max_length=255, blank=True)
+    order = models.PositiveIntegerField(
+        default=0,
+        help_text='Display order in parallax (0 = first layer, max 6)',
+    )
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['order', 'created_at']
+        verbose_name = 'Why Choose Item'
+        verbose_name_plural = 'Why Choose Items'
+
+    def __str__(self):
+        return self.title
 
 
 class HeroImage(models.Model):

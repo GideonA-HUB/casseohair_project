@@ -2,7 +2,15 @@ from rest_framework import serializers
 
 from apps.core.media import absolute_media_url
 
-from .models import ContactSubmission, HeroImage, NewsletterSubscriber, SiteAsset, SiteSettings, Testimonial
+from .models import (
+    ContactSubmission,
+    HeroImage,
+    NewsletterSubscriber,
+    SiteAsset,
+    SiteSettings,
+    Testimonial,
+    WhyChooseItem,
+)
 
 
 class SiteAssetSerializer(serializers.ModelSerializer):
@@ -27,7 +35,19 @@ class SiteSettingsSerializer(serializers.ModelSerializer):
             'privacy_policy', 'terms_of_service', 'refund_policy',
             'delivery_fee', 'currency', 'currency_symbol',
             'is_vat_inclusive', 'vat_rate', 'instagram_feed_enabled',
+            'why_choose_title', 'why_choose_subtitle',
         ]
+
+
+class WhyChooseItemSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+
+    class Meta:
+        model = WhyChooseItem
+        fields = ['id', 'title', 'description', 'image', 'alt_text', 'order']
+
+    def get_image(self, obj):
+        return absolute_media_url(self.context.get('request'), obj.image) if obj.image else None
 
 
 class TestimonialSerializer(serializers.ModelSerializer):

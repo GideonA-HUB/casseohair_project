@@ -1,21 +1,13 @@
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { motion } from 'framer-motion';
 import SEO from '@/components/SEO';
 import ProductCard from '@/components/ProductCard';
 import CategoryCard from '@/components/CategoryCard';
 import { ShuffleHero } from '@/components/ui/shuffle-grid';
 import SlidingTestimonial from '@/components/ui/sliding-testimonial';
+import WhyChooseSection from '@/components/WhyChooseSection';
 import { productsApi, siteApi } from '@/api';
 import type { Category, Product, Testimonial } from '@/types';
-
-const whyChoose = [
-  { icon: '✦', title: 'Authentic Luxury Hair', desc: 'Genuine premium hair sourced from trusted global suppliers' },
-  { icon: '◈', title: 'Global Sourcing', desc: 'Vietnamese, Cambodian, Indian & Burmese premium collections' },
-  { icon: '◇', title: 'Premium Lace', desc: 'HD Lace, Transparent Lace & Swiss Lace craftsmanship' },
-  { icon: '◎', title: 'Long Lifespan', desc: 'Built to last with proper care and premium construction' },
-  { icon: '▸', title: 'Fast Delivery', desc: 'Swift nationwide delivery across Nigeria' },
-];
 
 export default function HomePage() {
   const { data: categories = [] } = useQuery<Category[]>({
@@ -118,26 +110,8 @@ export default function HomePage() {
         </section>
       )}
 
-      {/* Why Choose */}
-      <section className="section-padding max-w-7xl mx-auto">
-        <h2 className="text-xl font-display font-semibold text-center mb-8">Why Choose CasseoHair</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {whyChoose.map((item, i) => (
-            <motion.div
-              key={item.title}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              className="text-center p-6 rounded-card bg-brand-gray-50"
-            >
-              <span className="text-2xl text-brand-pink mb-3 block">{item.icon}</span>
-              <h3 className="font-semibold mb-2">{item.title}</h3>
-              <p className="text-sm text-brand-accent/60">{item.desc}</p>
-            </motion.div>
-          ))}
-        </div>
-      </section>
+      {/* Why Choose — zoom parallax */}
+      <WhyChooseSection />
 
       {/* Testimonials */}
       <SlidingTestimonial />

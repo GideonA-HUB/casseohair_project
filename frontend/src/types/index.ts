@@ -95,6 +95,17 @@ export interface SiteSettings {
   privacy_policy: string;
   terms_of_service: string;
   refund_policy: string;
+  why_choose_title?: string;
+  why_choose_subtitle?: string;
+}
+
+export interface WhyChooseItem {
+  id: number;
+  title: string;
+  description: string;
+  image: string | null;
+  alt_text: string;
+  order: number;
 }
 
 export interface Testimonial {

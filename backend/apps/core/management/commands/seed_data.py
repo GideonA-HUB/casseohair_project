@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand
 
 from apps.products.models import Category, Product
-from apps.site_config.models import SiteSettings, Testimonial
+from apps.site_config.models import SiteSettings, Testimonial, WhyChooseItem
 
 
 class Command(BaseCommand):
@@ -39,6 +39,8 @@ class Command(BaseCommand):
         )
         settings.mission = 'To deliver authentic luxury hair that empowers every woman to feel confident, elegant, and beautiful.'
         settings.vision = 'To become Africa\'s most trusted luxury hair brand, rivaling international premium beauty houses.'
+        settings.why_choose_title = 'Why Choose CasseoHair'
+        settings.why_choose_subtitle = 'Authentic luxury hair, crafted for elegance'
         settings.save()
         self.stdout.write(self.style.SUCCESS('Site settings configured'))
 
@@ -110,6 +112,25 @@ class Command(BaseCommand):
                     **p,
                 )
             self.stdout.write(self.style.SUCCESS(f'{len(products)} sample products created'))
+
+        if not WhyChooseItem.objects.exists():
+            why_choose_data = [
+                ('Authentic Luxury Hair', 'Genuine premium hair sourced from trusted global suppliers', 0),
+                ('Global Sourcing', 'Vietnamese, Cambodian, Indian & Burmese premium collections', 1),
+                ('Premium Lace', 'HD Lace, Transparent Lace & Swiss Lace craftsmanship', 2),
+                ('Long Lifespan', 'Built to last with proper care and premium construction', 3),
+                ('Effortless Elegance', 'Silky textures that move naturally with every step', 4),
+                ('Fast Delivery', 'Swift nationwide delivery across Nigeria', 5),
+                ('Natural Look', 'Undetectable lace and flawless hairlines every time', 6),
+            ]
+            for title, description, order in why_choose_data:
+                WhyChooseItem.objects.create(
+                    title=title,
+                    description=description,
+                    order=order,
+                    is_active=True,
+                )
+            self.stdout.write(self.style.SUCCESS('Why Choose items created (upload images in Django admin)'))
 
         if not Testimonial.objects.exists():
             Testimonial.objects.create(
