@@ -6,6 +6,8 @@ export default {
       colors: {
         brand: {
           pink: '#E62E72',
+          'pink-dark': '#801337',
+          'pink-light': '#F24785',
           black: '#000000',
           accent: '#1A1A1A',
           white: '#FFFFFF',
