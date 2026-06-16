@@ -41,6 +41,10 @@ class Command(BaseCommand):
         settings.vision = 'To become Africa\'s most trusted luxury hair brand, rivaling international premium beauty houses.'
         settings.why_choose_title = 'Why Choose CasseoHair'
         settings.why_choose_subtitle = 'Authentic luxury hair, crafted for elegance'
+        settings.contact_email = 'casseohair@gmail.com'
+        settings.whatsapp_number = '+2348135380528'
+        settings.instagram_url = 'https://www.instagram.com/casseohair?igsh=dHgxaG5maWVucXZl'
+        settings.tiktok_url = 'https://www.tiktok.com/@casseo_hair?_r=1&_t=ZN-977lyQmMdao'
         settings.save()
         self.stdout.write(self.style.SUCCESS('Site settings configured'))
 

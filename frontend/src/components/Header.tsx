@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCartStore } from '@/store/cartStore';
 import MobileMenu from './MobileMenu';
+import { BRAND_WHATSAPP } from '@/constants/brand';
 
 interface HeaderProps {
   whatsappNumber?: string;
@@ -24,9 +25,7 @@ export default function Header({ whatsappNumber }: HeaderProps) {
     }
   };
 
-  const whatsappUrl = whatsappNumber
-    ? `https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}`
-    : '#';
+  const whatsappUrl = `https://wa.me/${(whatsappNumber || BRAND_WHATSAPP).replace(/[^0-9]/g, '')}`;
 
   const iconBtn =
     'p-2 rounded-lg text-white hover:bg-white/10 active:bg-white/15 transition-colors';

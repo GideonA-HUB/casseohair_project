@@ -20,6 +20,7 @@ export default function MainLayout() {
       </main>
       <MinimalFooter
         siteName={settings?.site_name}
+        contactEmail={settings?.contact_email}
         instagramUrl={settings?.instagram_url}
         facebookUrl={settings?.facebook_url}
         twitterUrl={settings?.twitter_url}
