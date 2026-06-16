@@ -9,6 +9,7 @@ interface MobileMenuProps {
 const menuLinks = [
   { to: '/', label: 'Home' },
   { to: '/shop', label: 'Shop All' },
+  { to: '/shop?filter=flash-sales', label: 'Flash Sales' },
   { to: '/shop?filter=new-arrivals', label: 'New Arrivals' },
   { to: '/shop?filter=bestsellers', label: 'Best Sellers' },
   { to: '/about', label: 'About' },

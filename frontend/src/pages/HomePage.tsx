@@ -45,6 +45,7 @@ export default function HomePage() {
 
   const heroCategory = categories.find((c) => c.is_featured) || categories[0];
   const gridCategories = categories.filter((c) => c.id !== heroCategory?.id).slice(0, 2);
+  const desktopCategories = heroCategory ? [heroCategory, ...gridCategories] : gridCategories.slice(0, 3);
 
   const flashSaleEnd = useMemo(() => {
     if (!flashSales.length) return null;
@@ -82,15 +83,27 @@ export default function HomePage() {
 
       {/* Categories */}
       {categories.length > 0 && (
-        <section className="section-padding max-w-7xl lg:max-w-4xl mx-auto">
-          {heroCategory && (
-            <div className="mb-4">
-              <CategoryCard category={heroCategory} variant="hero" />
-            </div>
-          )}
-          {gridCategories.length > 0 && (
-            <div className="grid grid-cols-2 gap-4">
-              {gridCategories.map((cat, i) => (
+        <section className="section-padding max-w-7xl mx-auto">
+          {/* Mobile/tablet layout (keep current behavior) */}
+          <div className="lg:hidden">
+            {heroCategory && (
+              <div className="mb-4">
+                <CategoryCard category={heroCategory} variant="hero" />
+              </div>
+            )}
+            {gridCategories.length > 0 && (
+              <div className="grid grid-cols-2 gap-4">
+                {gridCategories.map((cat, i) => (
+                  <CategoryCard key={cat.id} category={cat} index={i} />
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Desktop layout: 3 cards side-by-side */}
+          {desktopCategories.length >= 3 && (
+            <div className="hidden lg:grid grid-cols-3 gap-6">
+              {desktopCategories.slice(0, 3).map((cat, i) => (
                 <CategoryCard key={cat.id} category={cat} index={i} />
               ))}
             </div>

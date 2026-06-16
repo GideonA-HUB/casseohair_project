@@ -48,7 +48,7 @@ export default function CategoryCard({ category, variant = 'grid', index = 0 }: 
     >
       <Link
         to={`/shop/category/${category.slug}`}
-        className="block relative rounded-card overflow-hidden aspect-square lg:aspect-[4/3] lg:max-h-[140px] xl:max-h-[155px] shadow-card group bg-brand-gray-100"
+        className="block relative rounded-card overflow-hidden aspect-square lg:aspect-[5/4] lg:max-h-[320px] xl:max-h-[340px] shadow-card group bg-brand-gray-100"
       >
         {category.image ? (
           <img src={category.image} alt={category.name} className={categoryImageClass} loading="lazy" />

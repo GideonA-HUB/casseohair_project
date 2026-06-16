@@ -89,37 +89,36 @@ export default function ProductReviews({
   };
 
   return (
-    <section
-      ref={sectionRef}
-      className="relative overflow-hidden bg-gradient-to-br from-brand-pink-dark via-brand-pink to-brand-pink-dark"
-    >
-      {/* Subtle depth on pink */}
-      <motion.div
-        style={{ y: parallaxY, opacity: parallaxOpacity }}
-        className="pointer-events-none absolute inset-0"
-        aria-hidden
-      >
-        <div className="absolute -top-24 -right-24 h-96 w-96 rounded-full bg-white/10 blur-3xl" />
-        <div className="absolute -bottom-32 -left-32 h-[28rem] w-[28rem] rounded-full bg-black/10 blur-3xl" />
-      </motion.div>
-
+    <section ref={sectionRef} className="relative overflow-hidden bg-brand-gray-50">
       <div className="relative section-padding max-w-7xl mx-auto">
+        {/* Heading block (pink only here) */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-10 md:mb-14"
+          className="relative overflow-hidden rounded-luxury bg-gradient-to-br from-brand-pink-dark via-brand-pink to-brand-pink-dark px-6 py-10 md:px-10 md:py-12 mb-10 md:mb-14"
         >
-          <p className="text-xs font-medium uppercase tracking-[0.2em] text-white/90 mb-3">
-            Voices of Luxury
-          </p>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-display font-semibold text-white mb-4">
-            Customer Reviews
-          </h2>
-          <p className="text-white/85 max-w-xl mx-auto text-sm md:text-base leading-relaxed">
-            Real experiences from our community — share yours and help others discover their perfect look.
-          </p>
+          <motion.div
+            style={{ y: parallaxY, opacity: parallaxOpacity }}
+            className="pointer-events-none absolute inset-0"
+            aria-hidden
+          >
+            <div className="absolute -top-20 -right-20 h-72 w-72 rounded-full bg-white/15 blur-3xl" />
+            <div className="absolute -bottom-28 -left-28 h-[24rem] w-[24rem] rounded-full bg-black/10 blur-3xl" />
+          </motion.div>
+
+          <div className="relative text-center">
+            <p className="text-xs font-medium uppercase tracking-[0.2em] text-white/90 mb-3">
+              Voices of Luxury
+            </p>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-display font-semibold text-white mb-4">
+              Customer Reviews
+            </h2>
+            <p className="text-white/85 max-w-xl mx-auto text-sm md:text-base leading-relaxed">
+              Real experiences from our community — share yours and help others discover their perfect look.
+            </p>
+          </div>
         </motion.div>
 
         {/* Summary card */}
@@ -171,7 +170,7 @@ export default function ProductReviews({
         {/* Reviews grid */}
         {loading ? (
           <div className="flex justify-center py-16">
-            <div className="h-10 w-10 animate-spin rounded-full border-2 border-white border-t-transparent" />
+            <div className="h-10 w-10 animate-spin rounded-full border-2 border-brand-pink border-t-transparent" />
           </div>
         ) : reviews.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6 mb-10">
