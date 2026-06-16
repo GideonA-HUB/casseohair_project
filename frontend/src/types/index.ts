@@ -19,6 +19,8 @@ export interface Product {
   is_featured: boolean;
   is_bestseller: boolean;
   is_new_arrival: boolean;
+  is_flash_sale?: boolean;
+  flash_sale_end_at?: string | null;
   primary_image: string | null;
   average_rating?: number;
   review_count?: number;

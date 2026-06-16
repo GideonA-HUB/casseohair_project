@@ -89,6 +89,18 @@ class NewArrivalProductsView(generics.ListAPIView):
         ).select_related('category').prefetch_related('images', 'reviews')[:12]
 
 
+class FlashSaleProductsView(generics.ListAPIView):
+    serializer_class = ProductListSerializer
+    pagination_class = None
+
+    def get_queryset(self):
+        return Product.objects.filter(
+            is_active=True,
+            is_archived=False,
+            is_flash_sale=True,
+        ).select_related('category').prefetch_related('images', 'reviews')[:20]
+
+
 class ProductSearchView(APIView):
     def get(self, request):
         query = request.query_params.get('q', '').strip()

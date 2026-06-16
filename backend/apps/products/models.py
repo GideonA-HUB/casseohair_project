@@ -1,4 +1,7 @@
+from datetime import timedelta
+
 from django.db import models
+from django.utils import timezone
 from django.utils.text import slugify
 
 
@@ -69,6 +72,8 @@ class Product(models.Model):
     is_featured = models.BooleanField(default=False)
     is_bestseller = models.BooleanField(default=False)
     is_new_arrival = models.BooleanField(default=False)
+    is_flash_sale = models.BooleanField(default=False)
+    flash_sale_end_at = models.DateTimeField(blank=True, null=True)
     is_active = models.BooleanField(default=True)
     is_archived = models.BooleanField(default=False)
     meta_title = models.CharField(max_length=70, blank=True)
@@ -92,6 +97,11 @@ class Product(models.Model):
                 slug = f'{base_slug}-{counter}'
                 counter += 1
             self.slug = slug
+
+        if self.is_flash_sale and not self.flash_sale_end_at:
+            self.flash_sale_end_at = timezone.now() + timedelta(days=3)
+        if not self.is_flash_sale:
+            self.flash_sale_end_at = None
         super().save(*args, **kwargs)
 
     @property

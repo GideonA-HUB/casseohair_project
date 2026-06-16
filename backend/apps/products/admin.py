@@ -1,4 +1,7 @@
+from datetime import timedelta
+
 from django.contrib import admin
+from django.utils import timezone
 from django.utils.html import format_html
 
 from .models import Category, Product, ProductImage, ProductVideo, ProductReview
@@ -36,11 +39,11 @@ class CategoryAdmin(admin.ModelAdmin):
 class ProductAdmin(admin.ModelAdmin):
     list_display = [
         'name', 'category', 'price', 'sale_price', 'stock',
-        'is_featured', 'is_bestseller', 'is_new_arrival', 'is_active',
+        'is_featured', 'is_bestseller', 'is_new_arrival', 'is_flash_sale', 'is_active',
     ]
     list_filter = [
         'category', 'is_featured', 'is_bestseller', 'is_new_arrival',
-        'is_active', 'is_archived', 'lace_type', 'length',
+        'is_flash_sale', 'is_active', 'is_archived', 'lace_type', 'length',
     ]
     search_fields = ['name', 'sku', 'description']
     prepopulated_fields = {'slug': ('name',)}
@@ -56,14 +59,17 @@ class ProductAdmin(admin.ModelAdmin):
             'fields': ('length', 'density', 'lace_type', 'color'),
         }),
         ('Flags', {
-            'fields': ('is_featured', 'is_bestseller', 'is_new_arrival', 'is_active', 'is_archived'),
+            'fields': (
+                'is_featured', 'is_bestseller', 'is_new_arrival',
+                'is_flash_sale', 'flash_sale_end_at', 'is_active', 'is_archived'
+            ),
         }),
         ('SEO', {
             'fields': ('meta_title', 'meta_description'),
             'classes': ('collapse',),
         }),
     )
-    actions = ['mark_featured', 'mark_bestseller', 'archive_products']
+    actions = ['mark_featured', 'mark_bestseller', 'start_flash_sale', 'stop_flash_sale', 'archive_products']
 
     @admin.action(description='Mark as featured')
     def mark_featured(self, request, queryset):
@@ -72,6 +78,14 @@ class ProductAdmin(admin.ModelAdmin):
     @admin.action(description='Mark as bestseller')
     def mark_bestseller(self, request, queryset):
         queryset.update(is_bestseller=True)
+
+    @admin.action(description='Start 3-day flash sale for selected')
+    def start_flash_sale(self, request, queryset):
+        queryset.update(is_flash_sale=True, flash_sale_end_at=timezone.now() + timedelta(days=3))
+
+    @admin.action(description='Stop flash sale for selected')
+    def stop_flash_sale(self, request, queryset):
+        queryset.update(is_flash_sale=False, flash_sale_end_at=None)
 
     @admin.action(description='Archive selected products')
     def archive_products(self, request, queryset):

@@ -20,7 +20,7 @@ export default function CategoryCard({ category, variant = 'grid', index = 0 }: 
       >
         <Link
           to={`/shop/category/${category.slug}`}
-          className="block relative rounded-luxury overflow-hidden aspect-[16/9] shadow-luxury group"
+          className="block relative rounded-luxury overflow-hidden aspect-[16/10] lg:aspect-[16/8] xl:aspect-[18/8] shadow-luxury group"
         >
           {category.image ? (
             <img
@@ -49,7 +49,7 @@ export default function CategoryCard({ category, variant = 'grid', index = 0 }: 
     >
       <Link
         to={`/shop/category/${category.slug}`}
-        className="block relative rounded-card overflow-hidden aspect-square shadow-card group"
+        className="block relative rounded-card overflow-hidden aspect-square lg:aspect-[5/4] shadow-card group"
       >
         {category.image ? (
           <img

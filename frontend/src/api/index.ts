@@ -29,6 +29,10 @@ export const productsApi = {
     apiClient
       .get<Product[] | PaginatedResponse<Product>>('/products/new-arrivals/')
       .then((r) => unwrapList<Product>(r.data)),
+  flashSales: (): Promise<Product[]> =>
+    apiClient
+      .get<Product[] | PaginatedResponse<Product>>('/products/flash-sales/')
+      .then((r) => unwrapList<Product>(r.data)),
   search: (q: string) =>
     apiClient.get<{ results: Product[]; count: number }>('/products/search/', { params: { q } }),
   categories: (): Promise<Category[]> =>

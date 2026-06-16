@@ -14,6 +14,7 @@ class ProductFilter(django_filters.FilterSet):
     is_featured = django_filters.BooleanFilter()
     is_bestseller = django_filters.BooleanFilter()
     is_new_arrival = django_filters.BooleanFilter()
+    is_flash_sale = django_filters.BooleanFilter()
 
     class Meta:
         model = Product

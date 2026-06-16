@@ -85,23 +85,23 @@ export default function ProductPage() {
       <div className="section-padding max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Gallery */}
-          <div>
+          <div className="lg:max-w-[560px]">
             {images.length > 1 ? (
               <Swiper modules={[Pagination, Navigation]} pagination navigation className="rounded-card overflow-hidden">
                 {images.map((img) => (
                   <SwiperSlide key={img.id}>
-                    <div className="aspect-[4/5] bg-brand-gray-50">
+                    <div className="aspect-[4/5] lg:aspect-[4/4] bg-brand-gray-50">
                       <img src={img.image} alt={img.alt_text || product.name} className="w-full h-full object-cover" />
                     </div>
                   </SwiperSlide>
                 ))}
               </Swiper>
             ) : images.length === 1 ? (
-              <div className="aspect-[4/5] rounded-card overflow-hidden bg-brand-gray-50">
+              <div className="aspect-[4/5] lg:aspect-[4/4] rounded-card overflow-hidden bg-brand-gray-50">
                 <img src={images[0].image} alt={product.name} className="w-full h-full object-cover" />
               </div>
             ) : (
-              <div className="aspect-[4/5] rounded-card bg-brand-gray-50 flex items-center justify-center text-brand-accent/20 text-6xl">
+              <div className="aspect-[4/5] lg:aspect-[4/4] rounded-card bg-brand-gray-50 flex items-center justify-center text-brand-accent/20 text-6xl">
                 ✦
               </div>
             )}

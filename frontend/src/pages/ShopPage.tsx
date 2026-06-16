@@ -32,6 +32,10 @@ export default function ShopPage() {
         const results = await productsApi.bestsellers();
         return { results, count: results.length };
       }
+      if (filter === 'flash-sales') {
+        const results = await productsApi.flashSales();
+        return { results, count: results.length };
+      }
       const params: Record<string, string> = {};
       if (category) params.category = category;
       const res = await productsApi.list(params);
@@ -47,6 +51,8 @@ export default function ShopPage() {
     ? 'Best Sellers'
     : filter === 'featured'
     ? 'Featured'
+    : filter === 'flash-sales'
+    ? 'Flash Sales'
     : 'Shop All';
 
   return (

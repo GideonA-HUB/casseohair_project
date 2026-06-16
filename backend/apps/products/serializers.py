@@ -61,7 +61,7 @@ class ProductListSerializer(serializers.ModelSerializer):
             'short_description', 'price', 'sale_price', 'current_price',
             'is_on_sale', 'discount_percentage', 'length', 'density',
             'lace_type', 'color', 'stock', 'in_stock', 'is_featured',
-            'is_bestseller', 'is_new_arrival', 'primary_image',
+            'is_bestseller', 'is_new_arrival', 'is_flash_sale', 'flash_sale_end_at', 'primary_image',
             'average_rating', 'review_count',
         ]
 
