@@ -82,7 +82,7 @@ export default function HomePage() {
 
       {/* Categories */}
       {categories.length > 0 && (
-        <section className="section-padding max-w-7xl lg:max-w-6xl mx-auto">
+        <section className="section-padding max-w-7xl lg:max-w-4xl mx-auto">
           {heroCategory && (
             <div className="mb-4">
               <CategoryCard category={heroCategory} variant="hero" />

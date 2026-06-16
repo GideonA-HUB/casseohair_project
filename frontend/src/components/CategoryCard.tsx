@@ -8,6 +8,9 @@ interface CategoryCardProps {
   index?: number;
 }
 
+const categoryImageClass =
+  'w-full h-full object-cover object-[center_top] transition-transform duration-500 group-hover:scale-105';
+
 export default function CategoryCard({ category, variant = 'grid', index = 0 }: CategoryCardProps) {
   const count = category.product_count;
 
@@ -20,21 +23,17 @@ export default function CategoryCard({ category, variant = 'grid', index = 0 }: 
       >
         <Link
           to={`/shop/category/${category.slug}`}
-          className="block relative rounded-luxury overflow-hidden aspect-[16/10] lg:aspect-[16/8] xl:aspect-[18/8] shadow-luxury group"
+          className="block relative rounded-luxury overflow-hidden aspect-[16/10] lg:aspect-[21/9] lg:max-h-[180px] xl:max-h-[200px] shadow-luxury group bg-brand-gray-100"
         >
           {category.image ? (
-            <img
-              src={category.image}
-              alt={category.name}
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-            />
+            <img src={category.image} alt={category.name} className={categoryImageClass} loading="lazy" />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-brand-pink/20 to-brand-black/10" />
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-          <div className="absolute bottom-0 left-0 p-5 text-white">
-            <h2 className="text-2xl font-display font-semibold">{category.name}</h2>
-            <p className="text-sm text-white/80 mt-1">{count} Items Available</p>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent" />
+          <div className="absolute bottom-0 left-0 p-4 lg:p-5 text-white">
+            <h2 className="text-xl lg:text-2xl font-display font-semibold">{category.name}</h2>
+            <p className="text-sm text-white/85 mt-1">{count} Items Available</p>
           </div>
         </Link>
       </motion.div>
@@ -49,19 +48,14 @@ export default function CategoryCard({ category, variant = 'grid', index = 0 }: 
     >
       <Link
         to={`/shop/category/${category.slug}`}
-        className="block relative rounded-card overflow-hidden aspect-square lg:aspect-[5/4] shadow-card group"
+        className="block relative rounded-card overflow-hidden aspect-square lg:aspect-[4/3] lg:max-h-[140px] xl:max-h-[155px] shadow-card group bg-brand-gray-100"
       >
         {category.image ? (
-          <img
-            src={category.image}
-            alt={category.name}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-            loading="lazy"
-          />
+          <img src={category.image} alt={category.name} className={categoryImageClass} loading="lazy" />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-brand-pink/15 to-brand-gray-100" />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-transparent" />
         <div className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 flex items-center justify-center">
           <svg className="w-4 h-4 text-brand-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -69,7 +63,7 @@ export default function CategoryCard({ category, variant = 'grid', index = 0 }: 
         </div>
         <div className="absolute bottom-0 left-0 p-3 text-white">
           <h3 className="text-sm font-semibold">{category.name}</h3>
-          <p className="text-xs text-white/70">{count} Items</p>
+          <p className="text-xs text-white/75">{count} Items</p>
         </div>
       </Link>
     </motion.div>

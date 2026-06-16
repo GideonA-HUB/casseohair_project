@@ -89,16 +89,18 @@ export default function ProductReviews({
   };
 
   return (
-    <section ref={sectionRef} className="relative overflow-hidden bg-brand-gray-50">
-      {/* Parallax background */}
+    <section
+      ref={sectionRef}
+      className="relative overflow-hidden bg-gradient-to-br from-brand-pink-dark via-brand-pink to-brand-pink-dark"
+    >
+      {/* Subtle depth on pink */}
       <motion.div
         style={{ y: parallaxY, opacity: parallaxOpacity }}
         className="pointer-events-none absolute inset-0"
         aria-hidden
       >
-        <div className="absolute -top-24 -right-24 h-96 w-96 rounded-full bg-brand-pink/10 blur-3xl" />
-        <div className="absolute -bottom-32 -left-32 h-[28rem] w-[28rem] rounded-full bg-brand-pink/5 blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full border border-brand-pink/10" />
+        <div className="absolute -top-24 -right-24 h-96 w-96 rounded-full bg-white/10 blur-3xl" />
+        <div className="absolute -bottom-32 -left-32 h-[28rem] w-[28rem] rounded-full bg-black/10 blur-3xl" />
       </motion.div>
 
       <div className="relative section-padding max-w-7xl mx-auto">
@@ -109,13 +111,13 @@ export default function ProductReviews({
           transition={{ duration: 0.6 }}
           className="text-center mb-10 md:mb-14"
         >
-          <p className="text-xs font-medium uppercase tracking-[0.2em] text-brand-pink mb-3">
+          <p className="text-xs font-medium uppercase tracking-[0.2em] text-white/90 mb-3">
             Voices of Luxury
           </p>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-display font-semibold text-brand-black mb-4">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-display font-semibold text-white mb-4">
             Customer Reviews
           </h2>
-          <p className="text-brand-accent/60 max-w-xl mx-auto">
+          <p className="text-white/85 max-w-xl mx-auto text-sm md:text-base leading-relaxed">
             Real experiences from our community — share yours and help others discover their perfect look.
           </p>
         </motion.div>
@@ -126,7 +128,7 @@ export default function ProductReviews({
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="bg-white/90 backdrop-blur-sm rounded-luxury shadow-luxury border border-white p-6 md:p-10 mb-10"
+          className="bg-white rounded-luxury shadow-luxury border border-white/80 p-6 md:p-10 mb-10"
         >
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             <div className="flex flex-col items-center text-center lg:items-start lg:text-left">
@@ -169,7 +171,7 @@ export default function ProductReviews({
         {/* Reviews grid */}
         {loading ? (
           <div className="flex justify-center py-16">
-            <div className="h-10 w-10 animate-spin rounded-full border-2 border-brand-pink border-t-transparent" />
+            <div className="h-10 w-10 animate-spin rounded-full border-2 border-white border-t-transparent" />
           </div>
         ) : reviews.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6 mb-10">
@@ -229,7 +231,7 @@ export default function ProductReviews({
           >
             <button
               onClick={() => setShowForm(true)}
-              className="btn-primary px-10 py-3.5 rounded-full text-sm tracking-wide"
+              className="inline-block bg-white text-brand-pink font-semibold py-3.5 px-10 rounded-full text-sm tracking-wide transition-all hover:bg-white/95 hover:shadow-luxury-lg active:scale-95"
             >
               Write a Review
             </button>

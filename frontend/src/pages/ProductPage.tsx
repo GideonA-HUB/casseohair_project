@@ -83,25 +83,33 @@ export default function ProductPage() {
       />
 
       <div className="section-padding max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,360px)_1fr] gap-6 lg:gap-10 items-start">
           {/* Gallery */}
-          <div className="lg:max-w-[560px]">
+          <div className="w-full max-w-md mx-auto lg:max-w-[360px] lg:mx-0">
             {images.length > 1 ? (
               <Swiper modules={[Pagination, Navigation]} pagination navigation className="rounded-card overflow-hidden">
                 {images.map((img) => (
                   <SwiperSlide key={img.id}>
-                    <div className="aspect-[4/5] lg:aspect-[4/4] bg-brand-gray-50">
-                      <img src={img.image} alt={img.alt_text || product.name} className="w-full h-full object-cover" />
+                    <div className="aspect-[4/5] lg:aspect-[3/4] lg:max-h-[380px] bg-brand-gray-50">
+                      <img
+                        src={img.image}
+                        alt={img.alt_text || product.name}
+                        className="w-full h-full object-cover object-[center_top]"
+                      />
                     </div>
                   </SwiperSlide>
                 ))}
               </Swiper>
             ) : images.length === 1 ? (
-              <div className="aspect-[4/5] lg:aspect-[4/4] rounded-card overflow-hidden bg-brand-gray-50">
-                <img src={images[0].image} alt={product.name} className="w-full h-full object-cover" />
+              <div className="aspect-[4/5] lg:aspect-[3/4] lg:max-h-[380px] rounded-card overflow-hidden bg-brand-gray-50">
+                <img
+                  src={images[0].image}
+                  alt={product.name}
+                  className="w-full h-full object-cover object-[center_top]"
+                />
               </div>
             ) : (
-              <div className="aspect-[4/5] lg:aspect-[4/4] rounded-card bg-brand-gray-50 flex items-center justify-center text-brand-accent/20 text-6xl">
+              <div className="aspect-[4/5] lg:aspect-[3/4] lg:max-h-[380px] rounded-card bg-brand-gray-50 flex items-center justify-center text-brand-accent/20 text-6xl">
                 ✦
               </div>
             )}
