@@ -90,10 +90,15 @@ export interface SiteSettings {
   currency: string;
   currency_symbol: string;
   about_title: string;
+  about_subtitle: string;
   about_content: string;
   mission: string;
   vision: string;
   brand_story: string;
+  ceo_name: string;
+  ceo_title: string;
+  ceo_bio: string;
+  ceo_photo: string | null;
   privacy_policy: string;
   terms_of_service: string;
   refund_policy: string;

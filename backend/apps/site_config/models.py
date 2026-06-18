@@ -41,10 +41,20 @@ class SiteSettings(models.Model):
     tiktok_url = models.URLField(blank=True)
     youtube_url = models.URLField(blank=True)
     about_title = models.CharField(max_length=255, blank=True)
+    about_subtitle = models.CharField(
+        max_length=255,
+        blank=True,
+        default='Luxury Hair, Delivered with Care',
+        help_text='Subtitle shown below the About page heading',
+    )
     about_content = models.TextField(blank=True)
     mission = models.TextField(blank=True)
     vision = models.TextField(blank=True)
     brand_story = models.TextField(blank=True)
+    ceo_name = models.CharField(max_length=120, blank=True, help_text='CEO / Founder display name')
+    ceo_title = models.CharField(max_length=120, blank=True, default='Founder & CEO')
+    ceo_bio = models.TextField(blank=True, help_text='Short biography shown on the About page')
+    ceo_photo = models.ImageField(upload_to='about/', blank=True, null=True)
     privacy_policy = models.TextField(blank=True)
     terms_of_service = models.TextField(blank=True)
     refund_policy = models.TextField(blank=True)

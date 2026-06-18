@@ -25,18 +25,24 @@ class SiteAssetSerializer(serializers.ModelSerializer):
 
 
 class SiteSettingsSerializer(serializers.ModelSerializer):
+    ceo_photo = serializers.SerializerMethodField()
+
     class Meta:
         model = SiteSettings
         fields = [
             'site_name', 'tagline', 'meta_description', 'meta_keywords',
             'contact_email', 'contact_phone', 'whatsapp_number', 'address',
             'instagram_url', 'facebook_url', 'twitter_url', 'tiktok_url', 'youtube_url',
-            'about_title', 'about_content', 'mission', 'vision', 'brand_story',
+            'about_title', 'about_subtitle', 'about_content', 'mission', 'vision', 'brand_story',
+            'ceo_name', 'ceo_title', 'ceo_bio', 'ceo_photo',
             'privacy_policy', 'terms_of_service', 'refund_policy',
             'delivery_fee', 'currency', 'currency_symbol',
             'is_vat_inclusive', 'vat_rate', 'instagram_feed_enabled',
             'why_choose_title', 'why_choose_subtitle',
         ]
+
+    def get_ceo_photo(self, obj):
+        return absolute_media_url(self.context.get('request'), obj.ceo_photo) if obj.ceo_photo else None
 
 
 class WhyChooseItemSerializer(serializers.ModelSerializer):

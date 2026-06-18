@@ -31,7 +31,14 @@ class SiteSettingsAdmin(admin.ModelAdmin):
         ('General', {'fields': ('site_name', 'tagline', 'meta_description', 'meta_keywords')}),
         ('Contact', {'fields': ('contact_email', 'contact_phone', 'whatsapp_number', 'address')}),
         ('Social Media', {'fields': ('instagram_url', 'facebook_url', 'twitter_url', 'tiktok_url', 'youtube_url')}),
-        ('About', {'fields': ('about_title', 'about_content', 'mission', 'vision', 'brand_story')}),
+        ('About Page', {
+            'fields': (
+                'about_title', 'about_subtitle', 'brand_story', 'about_content',
+                'mission', 'vision',
+                'ceo_name', 'ceo_title', 'ceo_bio', 'ceo_photo',
+            ),
+            'description': 'All content displayed on the public About page (/about).',
+        }),
         ('Policies', {'fields': ('privacy_policy', 'terms_of_service', 'refund_policy')}),
         ('Commerce', {'fields': ('delivery_fee', 'currency', 'currency_symbol', 'is_vat_inclusive', 'vat_rate')}),
         ('Instagram Feed', {'fields': ('instagram_feed_enabled', 'instagram_access_token')}),

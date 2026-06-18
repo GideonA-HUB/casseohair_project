@@ -28,7 +28,7 @@ DJANGO_SETTINGS_MODULE=config.settings.collectstatic \
   python manage.py collectstatic --noinput --verbosity 0
 
 echo "Ensuring media upload directory exists..."
-mkdir -p media/products media/categories media/site_assets media/testimonials media/why_choose
+mkdir -p media/products media/categories media/site_assets media/testimonials media/why_choose media/about
 
 echo "Preparing frontend template..."
 mkdir -p templates

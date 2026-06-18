@@ -6,6 +6,11 @@ from django.core.management import call_command
 from django.core.management.base import BaseCommand
 
 from apps.products.models import Product
+from apps.site_config.default_policies import (
+    DEFAULT_PRIVACY_POLICY,
+    DEFAULT_REFUND_POLICY,
+    DEFAULT_TERMS_OF_SERVICE,
+)
 from apps.site_config.models import SiteSettings, Testimonial, WhyChooseItem
 
 
@@ -49,6 +54,12 @@ class Command(BaseCommand):
         settings.whatsapp_number = '+2348135380528'
         settings.instagram_url = 'https://www.instagram.com/casseohair?igsh=dHgxaG5maWVucXZl'
         settings.tiktok_url = 'https://www.tiktok.com/@casseo_hair?_r=1&_t=ZN-977lyQmMdao'
+        if not settings.privacy_policy:
+            settings.privacy_policy = DEFAULT_PRIVACY_POLICY
+        if not settings.terms_of_service:
+            settings.terms_of_service = DEFAULT_TERMS_OF_SERVICE
+        if not settings.refund_policy:
+            settings.refund_policy = DEFAULT_REFUND_POLICY
         settings.save()
         self.stdout.write(self.style.SUCCESS('Site settings configured'))
 

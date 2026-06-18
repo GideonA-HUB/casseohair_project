@@ -33,7 +33,7 @@ class SiteSettingsView(APIView):
 
     def get(self, request):
         settings_obj = SiteSettings.get_settings()
-        return Response(SiteSettingsSerializer(settings_obj).data)
+        return Response(SiteSettingsSerializer(settings_obj, context={'request': request}).data)
 
 
 class SiteAssetsView(APIView):
