@@ -28,7 +28,9 @@ COPY --from=frontend-build /app/frontend/dist ./static/frontend/
 RUN mkdir -p templates && \
     rm -rf staticfiles && mkdir -p staticfiles && \
     cp static/frontend/index.html templates/index.html && \
-    SECRET_KEY=build-only-not-for-production python manage.py collectstatic --noinput --verbosity 0 --upload-unhashed-files
+    SECRET_KEY=build-only-not-for-production \
+    DJANGO_SETTINGS_MODULE=config.settings.collectstatic \
+    python manage.py collectstatic --noinput --verbosity 0
 
 COPY scripts/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh

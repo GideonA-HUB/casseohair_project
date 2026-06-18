@@ -24,8 +24,8 @@ python manage.py cleanup_legacy_categories
 
 echo "Collecting static files..."
 rm -rf staticfiles/*
-# cloudinary_storage overrides collectstatic and skips copy unless this flag is set
-python manage.py collectstatic --noinput --verbosity 0 --upload-unhashed-files
+DJANGO_SETTINGS_MODULE=config.settings.collectstatic \
+  python manage.py collectstatic --noinput --verbosity 0
 
 echo "Ensuring media upload directory exists..."
 mkdir -p media/products media/categories media/site_assets media/testimonials media/why_choose
