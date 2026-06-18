@@ -20,9 +20,14 @@ from .serializers import (
 
 
 class CategoryListView(generics.ListAPIView):
-    queryset = Category.objects.filter(is_active=True)
     serializer_class = CategoryListSerializer
     pagination_class = None
+
+    def get_queryset(self):
+        qs = Category.objects.filter(is_active=True)
+        if self.request.query_params.get('featured') == 'true':
+            qs = qs.filter(is_featured=True)
+        return qs
 
 
 class CategoryDetailView(generics.RetrieveAPIView):

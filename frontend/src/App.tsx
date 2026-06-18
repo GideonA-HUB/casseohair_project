@@ -9,6 +9,7 @@ import CheckoutPage from '@/pages/CheckoutPage';
 import CheckoutVerifyPage from '@/pages/CheckoutVerifyPage';
 import AboutPage from '@/pages/AboutPage';
 import ContactPage from '@/pages/ContactPage';
+import CategoriesPage from '@/pages/CategoriesPage';
 import PolicyPage from '@/pages/PolicyPage';
 
 const AdminLoginPage = lazy(() => import('@/pages/admin/AdminLoginPage'));
@@ -35,6 +36,7 @@ export default function App() {
           <Route index element={<HomePage />} />
           <Route path="shop" element={<ShopPage />} />
           <Route path="shop/category/:slug" element={<ShopPage />} />
+          <Route path="categories" element={<CategoriesPage />} />
           <Route path="product/:slug" element={<ProductPage />} />
           <Route path="checkout" element={<CheckoutPage />} />
           <Route path="checkout/verify" element={<CheckoutVerifyPage />} />

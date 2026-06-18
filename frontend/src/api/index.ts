@@ -35,9 +35,11 @@ export const productsApi = {
       .then((r) => unwrapList<Product>(r.data)),
   search: (q: string) =>
     apiClient.get<{ results: Product[]; count: number }>('/products/search/', { params: { q } }),
-  categories: (): Promise<Category[]> =>
+  categories: (params?: { featured?: boolean }): Promise<Category[]> =>
     apiClient
-      .get<Category[] | PaginatedResponse<Category>>('/products/categories/')
+      .get<Category[] | PaginatedResponse<Category>>('/products/categories/', {
+        params: params?.featured ? { featured: 'true' } : undefined,
+      })
       .then((r) => unwrapList<Category>(r.data)),
   category: (slug: string) => apiClient.get<Category>(`/products/categories/${slug}/`),
   reviews: (slug: string): Promise<ProductReview[]> =>

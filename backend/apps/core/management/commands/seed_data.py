@@ -2,9 +2,10 @@ import os
 from decimal import Decimal
 
 from django.contrib.auth.models import User
+from django.core.management import call_command
 from django.core.management.base import BaseCommand
 
-from apps.products.models import Category, Product
+from apps.products.models import Product
 from apps.site_config.models import SiteSettings, Testimonial, WhyChooseItem
 
 
@@ -12,6 +13,9 @@ class Command(BaseCommand):
     help = 'Seed initial data for CasseoHair'
 
     def handle(self, *args, **options):
+        # Always remove legacy hair-type categories that were auto-seeded in older deploys.
+        call_command('cleanup_legacy_categories')
+
         if not User.objects.filter(username='admin').exists():
             admin_password = os.environ.get('ADMIN_INITIAL_PASSWORD', 'admin123!')
             User.objects.create_superuser(
@@ -48,74 +52,19 @@ class Command(BaseCommand):
         settings.save()
         self.stdout.write(self.style.SUCCESS('Site settings configured'))
 
-        categories_data = [
-            'Bone Straight', 'Pixel Curls', 'Deep Wave', 'Water Wave',
-            'Body Wave', 'Kinky Curly', 'Jerry Curl', 'HD Lace Wigs',
-            'Raw Vietnamese Hair', 'Raw Indian Hair',
-        ]
-
-        for i, name in enumerate(categories_data):
-            Category.objects.get_or_create(
-                name=name,
-                defaults={'order': i, 'is_featured': i < 3},
+        self.stdout.write(
+            self.style.WARNING(
+                'Categories are managed in Django admin — no demo categories are seeded.'
             )
-        self.stdout.write(self.style.SUCCESS(f'{len(categories_data)} categories created'))
+        )
 
         if Product.objects.exists():
             self.stdout.write('Products already exist, skipping product seed')
         else:
-            bone_straight = Category.objects.get(name='Bone Straight')
-            products = [
-                {
-                    'name': 'Luxury Vietnamese Bone Straight 20"',
-                    'price': Decimal('185000'),
-                    'length': '20',
-                    'lace_type': 'hd_lace',
-                    'density': '200%',
-                    'is_featured': True,
-                    'is_bestseller': True,
-                    'category': bone_straight,
-                },
-                {
-                    'name': 'Premium Pixel Curls 18"',
-                    'price': Decimal('220000'),
-                    'sale_price': Decimal('195000'),
-                    'length': '18',
-                    'lace_type': 'transparent_lace',
-                    'density': '180%',
-                    'is_new_arrival': True,
-                    'is_featured': True,
-                    'category': Category.objects.get(name='Pixel Curls'),
-                },
-                {
-                    'name': 'Deep Wave HD Lace Frontal 22"',
-                    'price': Decimal('250000'),
-                    'length': '22',
-                    'lace_type': 'frontal',
-                    'density': '250%',
-                    'is_bestseller': True,
-                    'category': Category.objects.get(name='Deep Wave'),
-                },
-                {
-                    'name': 'Raw Indian Hair Body Wave 24"',
-                    'price': Decimal('175000'),
-                    'length': '24',
-                    'lace_type': 'closure',
-                    'density': '200%',
-                    'is_new_arrival': True,
-                    'category': Category.objects.get(name='Body Wave'),
-                },
-            ]
-
-            for p in products:
-                Product.objects.create(
-                    description=f'Premium luxury {p["name"]}. Sourced globally, crafted for elegance.',
-                    short_description=f'Authentic luxury hair - {p["name"]}',
-                    stock=15,
-                    color='Natural Black',
-                    **p,
-                )
-            self.stdout.write(self.style.SUCCESS(f'{len(products)} sample products created'))
+            self.stdout.write(
+                'No products found. Add products in Django admin under your categories '
+                '(Straight hairs, Curly Hairs, Wavy/Bouncy Hairs).'
+            )
 
         if not WhyChooseItem.objects.exists():
             why_choose_data = [

@@ -74,6 +74,7 @@ export default function MinimalFooter({
 
   const shopLinks = [
     { title: 'All Products', href: '/shop' },
+    { title: 'Categories', href: '/categories' },
     { title: 'New Arrivals', href: '/shop?filter=new-arrivals' },
     { title: 'Best Sellers', href: '/shop?filter=bestsellers' },
     { title: 'Flash Sales', href: '/shop?filter=flash-sales' },

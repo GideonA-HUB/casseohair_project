@@ -14,8 +14,8 @@ export default function HomePage() {
   const [now, setNow] = useState(() => Date.now());
 
   const { data: categories = [] } = useQuery<Category[]>({
-    queryKey: ['categories'],
-    queryFn: () => productsApi.categories(),
+    queryKey: ['categories', 'featured'],
+    queryFn: () => productsApi.categories({ featured: true }),
   });
 
   const { data: featured = [] } = useQuery<Product[]>({
@@ -43,9 +43,9 @@ export default function HomePage() {
     queryFn: () => siteApi.testimonials(),
   });
 
-  const heroCategory = categories.find((c) => c.is_featured) || categories[0];
-  const gridCategories = categories.filter((c) => c.id !== heroCategory?.id).slice(0, 2);
-  const desktopCategories = heroCategory ? [heroCategory, ...gridCategories] : gridCategories.slice(0, 3);
+  const heroCategory = categories[0];
+  const gridCategories = categories.slice(1, 3);
+  const desktopCategories = categories.slice(0, 3);
 
   const flashSaleEnd = useMemo(() => {
     if (!flashSales.length) return null;

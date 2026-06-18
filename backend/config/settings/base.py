@@ -126,10 +126,6 @@ if USE_CLOUDINARY:
         'BACKEND': 'cloudinary_storage.storage.MediaCloudinaryStorage',
     }
 
-# django-cloudinary-storage collectstatic still reads this deprecated setting.
-DEFAULT_FILE_STORAGE = STORAGES['default']['BACKEND']
-STATICFILES_STORAGE = STORAGES['staticfiles']['BACKEND']
-
 # REST Framework
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [

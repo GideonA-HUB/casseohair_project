@@ -19,6 +19,9 @@ else:
 echo "Running migrations..."
 python manage.py migrate --noinput
 
+echo "Removing legacy seed categories (if any)..."
+python manage.py cleanup_legacy_categories
+
 echo "Collecting static files..."
 rm -rf staticfiles/*
 # cloudinary_storage overrides collectstatic and skips copy unless this flag is set

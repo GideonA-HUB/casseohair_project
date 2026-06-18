@@ -42,7 +42,6 @@ if not FRONTEND_URL or FRONTEND_URL == 'http://localhost:5173':
 STORAGES['staticfiles'] = {
     'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
 }
-STATICFILES_STORAGE = STORAGES['staticfiles']['BACKEND']
 
 # WhiteNoise — serve collected static files reliably in production
 WHITENOISE_USE_FINDERS = False
