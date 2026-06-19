@@ -25,11 +25,12 @@ def create_admin_user(sender, **kwargs):
     if admin_username and admin_password and admin_email:
         # Check if admin user already exists
         if not User.objects.filter(username=admin_username).exists():
-            User.objects.create_superuser(
+            user = User.objects.create_superuser(
                 username=admin_username,
                 email=admin_email,
                 password=admin_password,
             )
-            print(f"Admin user '{admin_username}' created successfully from environment variables.")
+            print(f"Admin user '{admin_username}' created successfully from environment variables with is_staff={user.is_staff} and is_superuser={user.is_superuser}.")
         else:
-            print(f"Admin user '{admin_username}' already exists. Skipping creation.")
+            user = User.objects.get(username=admin_username)
+            print(f"Admin user '{admin_username}' already exists with is_staff={user.is_staff} and is_superuser={user.is_superuser}. Skipping creation.")

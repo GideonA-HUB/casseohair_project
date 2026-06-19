@@ -93,6 +93,9 @@ class ProductDetailSerializer(ProductListSerializer):
 
 
 class ProductAdminSerializer(serializers.ModelSerializer):
+    images = ProductImageSerializer(many=True, read_only=True)
+    videos = ProductVideoSerializer(many=True, read_only=True)
+
     class Meta:
         model = Product
         fields = '__all__'

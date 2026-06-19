@@ -81,23 +81,23 @@ class AdminMetricsView(APIView):
 
         # Total metrics
         total_orders = Order.objects.count()
-        total_revenue = Order.objects.aggregate(total=Sum('total_amount'))['total'] or 0
+        total_revenue = Order.objects.aggregate(total=Sum('total'))['total'] or 0
 
         # Today's metrics
         today_orders = Order.objects.filter(created_at__date=today).count()
-        today_revenue = Order.objects.filter(created_at__date=today).aggregate(total=Sum('total_amount'))['total'] or 0
+        today_revenue = Order.objects.filter(created_at__date=today).aggregate(total=Sum('total'))['total'] or 0
 
         # Week metrics
         week_orders = Order.objects.filter(created_at__gte=week_ago).count()
-        week_revenue = Order.objects.filter(created_at__gte=week_ago).aggregate(total=Sum('total_amount'))['total'] or 0
+        week_revenue = Order.objects.filter(created_at__gte=week_ago).aggregate(total=Sum('total'))['total'] or 0
 
         # Month metrics
         month_orders = Order.objects.filter(created_at__gte=month_ago).count()
-        month_revenue = Order.objects.filter(created_at__gte=month_ago).aggregate(total=Sum('total_amount'))['total'] or 0
+        month_revenue = Order.objects.filter(created_at__gte=month_ago).aggregate(total=Sum('total'))['total'] or 0
 
         # Year metrics
         year_orders = Order.objects.filter(created_at__gte=year_ago).count()
-        year_revenue = Order.objects.filter(created_at__gte=year_ago).aggregate(total=Sum('total_amount'))['total'] or 0
+        year_revenue = Order.objects.filter(created_at__gte=year_ago).aggregate(total=Sum('total'))['total'] or 0
 
         # Other metrics
         pending_reviews = ProductReview.objects.filter(is_approved=False).count()

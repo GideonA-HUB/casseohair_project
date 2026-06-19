@@ -15,7 +15,7 @@ export default function AdminNotifications() {
     queryKey: ['admin-notifications'],
     queryFn: async () => {
       const token = localStorage.getItem('access_token');
-      const response = await fetch('/api/v1/notifications/admin/', {
+      const response = await fetch('/api/v1/notifications/admin/list/', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
