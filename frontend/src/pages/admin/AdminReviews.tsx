@@ -20,7 +20,7 @@ export default function AdminReviews() {
     queryKey: ['admin-reviews', statusFilter],
     queryFn: async () => {
       const token = localStorage.getItem('access_token');
-      const response = await fetch(`/api/v1/products/reviews/admin/?status=${statusFilter}`, {
+      const response = await fetch(`/api/v1/products/admin/reviews/?status=${statusFilter}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -32,7 +32,7 @@ export default function AdminReviews() {
 
   const approveReview = async (reviewId: number) => {
     const token = localStorage.getItem('access_token');
-    await fetch(`/api/v1/products/reviews/${reviewId}/approve/`, {
+    await fetch(`/api/v1/products/admin/reviews/${reviewId}/approve/`, {
       method: 'PATCH',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -43,7 +43,7 @@ export default function AdminReviews() {
 
   const rejectReview = async (reviewId: number) => {
     const token = localStorage.getItem('access_token');
-    await fetch(`/api/v1/products/reviews/${reviewId}/reject/`, {
+    await fetch(`/api/v1/products/admin/reviews/${reviewId}/reject/`, {
       method: 'PATCH',
       headers: {
         Authorization: `Bearer ${token}`,

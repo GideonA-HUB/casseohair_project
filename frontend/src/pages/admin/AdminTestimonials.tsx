@@ -19,7 +19,7 @@ export default function AdminTestimonials() {
     queryKey: ['admin-testimonials'],
     queryFn: async () => {
       const token = localStorage.getItem('access_token');
-      const response = await fetch('/api/v1/site/testimonials/admin/', {
+      const response = await fetch('/api/v1/site/admin/testimonials/', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -31,7 +31,7 @@ export default function AdminTestimonials() {
 
   const toggleActive = async (testimonialId: number, isActive: boolean) => {
     const token = localStorage.getItem('access_token');
-    await fetch(`/api/v1/site/testimonials/${testimonialId}/`, {
+    await fetch(`/api/v1/site/admin/testimonials/${testimonialId}/`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -44,7 +44,7 @@ export default function AdminTestimonials() {
 
   const toggleFeatured = async (testimonialId: number, isFeatured: boolean) => {
     const token = localStorage.getItem('access_token');
-    await fetch(`/api/v1/site/testimonials/${testimonialId}/`, {
+    await fetch(`/api/v1/site/admin/testimonials/${testimonialId}/`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -57,7 +57,7 @@ export default function AdminTestimonials() {
 
   const deleteTestimonial = async (testimonialId: number) => {
     const token = localStorage.getItem('access_token');
-    await fetch(`/api/v1/site/testimonials/${testimonialId}/`, {
+    await fetch(`/api/v1/site/admin/testimonials/${testimonialId}/`, {
       method: 'DELETE',
       headers: {
         Authorization: `Bearer ${token}`,

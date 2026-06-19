@@ -21,7 +21,7 @@ export default function AdminCategories() {
     queryKey: ['admin-categories'],
     queryFn: async () => {
       const token = localStorage.getItem('access_token');
-      const response = await fetch('/api/v1/categories/', {
+      const response = await fetch('/api/v1/products/admin/categories/', {
         headers: {
           Authorization: `Bearer ${token}`,
         },

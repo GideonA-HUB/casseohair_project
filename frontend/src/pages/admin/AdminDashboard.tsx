@@ -22,7 +22,7 @@ export default function AdminDashboard() {
     queryKey: ['admin-metrics'],
     queryFn: async () => {
       const token = localStorage.getItem('access_token');
-      const response = await fetch('/api/v1/admin/metrics/', {
+      const response = await fetch('/api/v1/accounts/metrics/', {
         headers: {
           Authorization: `Bearer ${token}`,
         },

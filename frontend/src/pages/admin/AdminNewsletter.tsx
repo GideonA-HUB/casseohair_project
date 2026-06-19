@@ -14,7 +14,7 @@ export default function AdminNewsletter() {
     queryKey: ['admin-newsletter'],
     queryFn: async () => {
       const token = localStorage.getItem('access_token');
-      const response = await fetch('/api/v1/site/newsletter/admin/', {
+      const response = await fetch('/api/v1/site/admin/newsletter/', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -26,7 +26,7 @@ export default function AdminNewsletter() {
 
   const toggleActive = async (subscriberId: number, isActive: boolean) => {
     const token = localStorage.getItem('access_token');
-    await fetch(`/api/v1/site/newsletter/${subscriberId}/`, {
+    await fetch(`/api/v1/site/admin/newsletter/${subscriberId}/`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -39,7 +39,7 @@ export default function AdminNewsletter() {
 
   const deleteSubscriber = async (subscriberId: number) => {
     const token = localStorage.getItem('access_token');
-    await fetch(`/api/v1/site/newsletter/${subscriberId}/`, {
+    await fetch(`/api/v1/site/admin/newsletter/${subscriberId}/`, {
       method: 'DELETE',
       headers: {
         Authorization: `Bearer ${token}`,

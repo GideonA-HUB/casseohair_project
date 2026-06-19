@@ -18,7 +18,7 @@ export default function AdminContacts() {
     queryKey: ['admin-contacts'],
     queryFn: async () => {
       const token = localStorage.getItem('access_token');
-      const response = await fetch('/api/v1/site/contacts/admin/', {
+      const response = await fetch('/api/v1/site/admin/contacts/', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -30,7 +30,7 @@ export default function AdminContacts() {
 
   const markAsRead = async (contactId: number) => {
     const token = localStorage.getItem('access_token');
-    await fetch(`/api/v1/site/contacts/${contactId}/read/`, {
+    await fetch(`/api/v1/site/admin/contacts/${contactId}/read/`, {
       method: 'PATCH',
       headers: {
         Authorization: `Bearer ${token}`,

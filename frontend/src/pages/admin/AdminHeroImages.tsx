@@ -17,7 +17,7 @@ export default function AdminHeroImages() {
     queryKey: ['admin-hero-images'],
     queryFn: async () => {
       const token = localStorage.getItem('access_token');
-      const response = await fetch('/api/v1/site/hero-images/', {
+      const response = await fetch('/api/v1/site/admin/hero-images/', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -35,7 +35,7 @@ export default function AdminHeroImages() {
     formData.append('image', selectedFile);
     formData.append('alt_text', 'Hero image');
 
-    await fetch('/api/v1/site/hero-images/', {
+    await fetch('/api/v1/site/admin/hero-images/', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -49,7 +49,7 @@ export default function AdminHeroImages() {
 
   const toggleActive = async (imageId: number, isActive: boolean) => {
     const token = localStorage.getItem('access_token');
-    await fetch(`/api/v1/site/hero-images/${imageId}/`, {
+    await fetch(`/api/v1/site/admin/hero-images/${imageId}/`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -62,7 +62,7 @@ export default function AdminHeroImages() {
 
   const deleteImage = async (imageId: number) => {
     const token = localStorage.getItem('access_token');
-    await fetch(`/api/v1/site/hero-images/${imageId}/`, {
+    await fetch(`/api/v1/site/admin/hero-images/${imageId}/`, {
       method: 'DELETE',
       headers: {
         Authorization: `Bearer ${token}`,

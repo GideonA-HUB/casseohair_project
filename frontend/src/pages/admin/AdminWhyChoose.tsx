@@ -24,7 +24,7 @@ export default function AdminWhyChoose() {
     queryKey: ['admin-why-choose'],
     queryFn: async () => {
       const token = localStorage.getItem('access_token');
-      const response = await fetch('/api/v1/site/why-choose/', {
+      const response = await fetch('/api/v1/site/admin/why-choose/', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -44,7 +44,7 @@ export default function AdminWhyChoose() {
       formDataObj.append('image', selectedFile);
     }
 
-    await fetch('/api/v1/site/why-choose/', {
+    await fetch('/api/v1/site/admin/why-choose/', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -59,7 +59,7 @@ export default function AdminWhyChoose() {
 
   const toggleActive = async (itemId: number, isActive: boolean) => {
     const token = localStorage.getItem('access_token');
-    await fetch(`/api/v1/site/why-choose/${itemId}/`, {
+    await fetch(`/api/v1/site/admin/why-choose/${itemId}/`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -72,7 +72,7 @@ export default function AdminWhyChoose() {
 
   const deleteItem = async (itemId: number) => {
     const token = localStorage.getItem('access_token');
-    await fetch(`/api/v1/site/why-choose/${itemId}/`, {
+    await fetch(`/api/v1/site/admin/why-choose/${itemId}/`, {
       method: 'DELETE',
       headers: {
         Authorization: `Bearer ${token}`,

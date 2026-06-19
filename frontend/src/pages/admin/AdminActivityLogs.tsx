@@ -15,7 +15,7 @@ export default function AdminActivityLogs() {
     queryKey: ['admin-activity-logs'],
     queryFn: async () => {
       const token = localStorage.getItem('access_token');
-      const response = await fetch('/api/v1/site/activity-logs/admin/', {
+      const response = await fetch('/api/v1/site/admin/activity-logs/', {
         headers: {
           Authorization: `Bearer ${token}`,
         },

@@ -40,7 +40,7 @@ export default function AdminOrders() {
     queryKey: ['admin-orders', statusFilter],
     queryFn: async () => {
       const token = localStorage.getItem('access_token');
-      const response = await fetch(`/api/v1/admin/orders/?status=${statusFilter}`, {
+      const response = await fetch(`/api/v1/orders/admin/?status=${statusFilter}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -52,7 +52,7 @@ export default function AdminOrders() {
 
   const updateOrderStatus = async (orderId: number, status: string) => {
     const token = localStorage.getItem('access_token');
-    await fetch(`/api/v1/admin/orders/${orderId}/status/`, {
+    await fetch(`/api/v1/orders/admin/${orderId}/status/`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
