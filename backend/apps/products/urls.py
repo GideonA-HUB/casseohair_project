@@ -22,6 +22,14 @@ from .views import (
 )
 
 urlpatterns = [
+    path('admin/', AdminProductListCreateView.as_view(), name='admin-product-list'),
+    path('admin/<int:pk>/', AdminProductDetailView.as_view(), name='admin-product-detail'),
+    path('admin/categories/', AdminCategoryListView.as_view(), name='admin-category-list'),
+    path('admin/categories/<int:pk>/', AdminCategoryDetailView.as_view(), name='admin-category-detail'),
+    path('admin/reviews/', AdminReviewListView.as_view(), name='admin-review-list'),
+    path('admin/reviews/<int:pk>/', AdminReviewDetailView.as_view(), name='admin-review-detail'),
+    path('admin/reviews/<int:pk>/approve/', AdminReviewApproveView.as_view(), name='admin-review-approve'),
+    path('admin/reviews/<int:pk>/reject/', AdminReviewRejectView.as_view(), name='admin-review-reject'),
     path('categories/', CategoryListView.as_view(), name='category-list'),
     path('categories/<slug:slug>/', CategoryDetailView.as_view(), name='category-detail'),
     path('', ProductListView.as_view(), name='product-list'),
@@ -32,12 +40,4 @@ urlpatterns = [
     path('search/', ProductSearchView.as_view(), name='product-search'),
     path('<slug:slug>/', ProductDetailView.as_view(), name='product-detail'),
     path('<slug:slug>/reviews/', ProductReviewsView.as_view(), name='product-reviews'),
-    path('admin/', AdminProductListCreateView.as_view(), name='admin-product-list'),
-    path('admin/<int:pk>/', AdminProductDetailView.as_view(), name='admin-product-detail'),
-    path('admin/categories/', AdminCategoryListView.as_view(), name='admin-category-list'),
-    path('admin/categories/<int:pk>/', AdminCategoryDetailView.as_view(), name='admin-category-detail'),
-    path('admin/reviews/', AdminReviewListView.as_view(), name='admin-review-list'),
-    path('admin/reviews/<int:pk>/', AdminReviewDetailView.as_view(), name='admin-review-detail'),
-    path('admin/reviews/<int:pk>/approve/', AdminReviewApproveView.as_view(), name='admin-review-approve'),
-    path('admin/reviews/<int:pk>/reject/', AdminReviewRejectView.as_view(), name='admin-review-reject'),
 ]

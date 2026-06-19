@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 interface Product {
   id: number;
@@ -19,20 +19,62 @@ interface Product {
   created_at: string;
 }
 
+interface Category {
+  id: number;
+  name: string;
+  slug: string;
+}
+
 export default function AdminProducts() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [newProduct, setNewProduct] = useState({
+    name: '',
+    slug: '',
+    category: '',
+    price: '',
+    sale_price: '',
+    stock: '',
+    description: '',
+    short_description: '',
+    length: '',
+    density: '',
+    lace_type: '',
+    color: '',
+    is_featured: false,
+    is_bestseller: false,
+    is_new_arrival: false,
+    images: [] as File[],
+    videos: [] as File[],
+  });
+  const queryClient = useQueryClient();
 
-  const { data: products, isLoading } = useQuery<Product[]>({
+  const { data: products, isLoading, error } = useQuery<Product[]>({
     queryKey: ['admin-products', statusFilter],
     queryFn: async () => {
       const token = localStorage.getItem('access_token');
-      const response = await fetch(`/api/v1/products/admin/?status=${statusFilter}`, {
+      const response = await fetch(`/api/v1/products/admin/`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
       if (!response.ok) throw new Error('Failed to fetch products');
+      const data = await response.json();
+      return Array.isArray(data) ? data : data.results || [];
+    },
+  });
+
+  const { data: categories } = useQuery<Category[]>({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const token = localStorage.getItem('access_token');
+      const response = await fetch('/api/v1/products/categories/', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) throw new Error('Failed to fetch categories');
       return response.json();
     },
   });
@@ -42,18 +84,104 @@ export default function AdminProducts() {
     product.slug.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
 
-  const toggleProductStatus = async (productId: number, isActive: boolean) => {
-    const token = localStorage.getItem('access_token');
-    await fetch(`/api/v1/products/admin/${productId}/`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ is_active: !isActive }),
+  const toggleProductStatus = useMutation({
+    mutationFn: async ({ productId, isActive }: { productId: number; isActive: boolean }) => {
+      const token = localStorage.getItem('access_token');
+      const response = await fetch(`/api/v1/products/admin/${productId}/`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ is_active: !isActive }),
+      });
+      if (!response.ok) throw new Error('Failed to update product status');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+    },
+  });
+
+  const createProductMutation = useMutation({
+    mutationFn: async (formData: FormData) => {
+      const token = localStorage.getItem('access_token');
+      const response = await fetch('/api/v1/products/admin/', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+      if (!response.ok) throw new Error('Failed to create product');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+      setIsAddModalOpen(false);
+      setNewProduct({
+        name: '',
+        slug: '',
+        category: '',
+        price: '',
+        sale_price: '',
+        stock: '',
+        description: '',
+        short_description: '',
+        length: '',
+        density: '',
+        lace_type: '',
+        color: '',
+        is_featured: false,
+        is_bestseller: false,
+        is_new_arrival: false,
+        images: [],
+        videos: [],
+      });
+    },
+  });
+
+  const handleAddProduct = () => {
+    const formData = new FormData();
+    formData.append('name', newProduct.name);
+    formData.append('slug', newProduct.slug);
+    formData.append('category', newProduct.category);
+    formData.append('price', newProduct.price);
+    formData.append('sale_price', newProduct.sale_price || '0');
+    formData.append('stock', newProduct.stock);
+    formData.append('description', newProduct.description);
+    formData.append('short_description', newProduct.short_description);
+    formData.append('length', newProduct.length);
+    formData.append('density', newProduct.density);
+    formData.append('lace_type', newProduct.lace_type);
+    formData.append('color', newProduct.color);
+    formData.append('is_featured', newProduct.is_featured.toString());
+    formData.append('is_bestseller', newProduct.is_bestseller.toString());
+    formData.append('is_new_arrival', newProduct.is_new_arrival.toString());
+    newProduct.images.forEach((image) => {
+      formData.append('images', image);
     });
-    // Refetch products
+    newProduct.videos.forEach((video) => {
+      formData.append('videos', video);
+    });
+    createProductMutation.mutate(formData);
   };
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <p className="text-red-500 mb-4">Failed to load products</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-brand-pink text-white px-6 py-2 rounded-xl"
+          >
+            Refresh Page
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -67,6 +195,7 @@ export default function AdminProducts() {
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
+          onClick={() => setIsAddModalOpen(true)}
           className="bg-brand-pink text-white font-semibold py-2.5 px-6 rounded-xl hover:bg-brand-pink/90 transition-all shadow-lg shadow-brand-pink/30"
         >
           Add New Product
@@ -172,7 +301,8 @@ export default function AdminProducts() {
                     </td>
                     <td className="px-6 py-4">
                       <button
-                        onClick={() => toggleProductStatus(product.id, product.is_active)}
+                        onClick={() => toggleProductStatus.mutate({ productId: product.id, isActive: product.is_active })}
+                        disabled={toggleProductStatus.isPending}
                         className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
                           product.is_active
                             ? 'bg-green-100 text-green-800 hover:bg-green-200'
@@ -218,6 +348,226 @@ export default function AdminProducts() {
           </div>
         )}
       </motion.div>
+
+      {/* Add Product Modal */}
+      {isAddModalOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 overflow-y-auto"
+          onClick={() => setIsAddModalOpen(false)}
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            className="bg-white rounded-2xl p-8 max-w-4xl w-full mx-4 my-8"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="text-2xl font-bold text-brand-black mb-6">Add New Product</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[70vh] overflow-y-auto">
+              <div>
+                <label className="block text-sm font-medium text-brand-accent mb-2">Name *</label>
+                <input
+                  type="text"
+                  value={newProduct.name}
+                  onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl border border-brand-gray-200 focus:border-brand-pink focus:ring-2 focus:ring-brand-pink/20 outline-none transition-all"
+                  placeholder="Product name"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-brand-accent mb-2">Slug *</label>
+                <input
+                  type="text"
+                  value={newProduct.slug}
+                  onChange={(e) => setNewProduct({ ...newProduct, slug: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl border border-brand-gray-200 focus:border-brand-pink focus:ring-2 focus:ring-brand-pink/20 outline-none transition-all"
+                  placeholder="product-slug"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-brand-accent mb-2">Category *</label>
+                <select
+                  value={newProduct.category}
+                  onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl border border-brand-gray-200 focus:border-brand-pink focus:ring-2 focus:ring-brand-pink/20 outline-none transition-all"
+                >
+                  <option value="">Select category</option>
+                  {categories?.map((cat) => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-brand-accent mb-2">Price *</label>
+                <input
+                  type="number"
+                  value={newProduct.price}
+                  onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl border border-brand-gray-200 focus:border-brand-pink focus:ring-2 focus:ring-brand-pink/20 outline-none transition-all"
+                  placeholder="0.00"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-brand-accent mb-2">Sale Price</label>
+                <input
+                  type="number"
+                  value={newProduct.sale_price}
+                  onChange={(e) => setNewProduct({ ...newProduct, sale_price: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl border border-brand-gray-200 focus:border-brand-pink focus:ring-2 focus:ring-brand-pink/20 outline-none transition-all"
+                  placeholder="0.00"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-brand-accent mb-2">Stock *</label>
+                <input
+                  type="number"
+                  value={newProduct.stock}
+                  onChange={(e) => setNewProduct({ ...newProduct, stock: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl border border-brand-gray-200 focus:border-brand-pink focus:ring-2 focus:ring-brand-pink/20 outline-none transition-all"
+                  placeholder="0"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-brand-accent mb-2">Short Description</label>
+                <textarea
+                  value={newProduct.short_description}
+                  onChange={(e) => setNewProduct({ ...newProduct, short_description: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl border border-brand-gray-200 focus:border-brand-pink focus:ring-2 focus:ring-brand-pink/20 outline-none transition-all resize-none"
+                  rows={2}
+                  placeholder="Short description"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-brand-accent mb-2">Description</label>
+                <textarea
+                  value={newProduct.description}
+                  onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl border border-brand-gray-200 focus:border-brand-pink focus:ring-2 focus:ring-brand-pink/20 outline-none transition-all resize-none"
+                  rows={4}
+                  placeholder="Full product description"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-brand-accent mb-2">Length</label>
+                <input
+                  type="text"
+                  value={newProduct.length}
+                  onChange={(e) => setNewProduct({ ...newProduct, length: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl border border-brand-gray-200 focus:border-brand-pink focus:ring-2 focus:ring-brand-pink/20 outline-none transition-all"
+                  placeholder="e.g., 12 inches"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-brand-accent mb-2">Density</label>
+                <input
+                  type="text"
+                  value={newProduct.density}
+                  onChange={(e) => setNewProduct({ ...newProduct, density: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl border border-brand-gray-200 focus:border-brand-pink focus:ring-2 focus:ring-brand-pink/20 outline-none transition-all"
+                  placeholder="e.g., 180%"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-brand-accent mb-2">Lace Type</label>
+                <input
+                  type="text"
+                  value={newProduct.lace_type}
+                  onChange={(e) => setNewProduct({ ...newProduct, lace_type: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl border border-brand-gray-200 focus:border-brand-pink focus:ring-2 focus:ring-brand-pink/20 outline-none transition-all"
+                  placeholder="e.g., 13x4"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-brand-accent mb-2">Color</label>
+                <input
+                  type="text"
+                  value={newProduct.color}
+                  onChange={(e) => setNewProduct({ ...newProduct, color: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl border border-brand-gray-200 focus:border-brand-pink focus:ring-2 focus:ring-brand-pink/20 outline-none transition-all"
+                  placeholder="e.g., Natural Black"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-brand-accent mb-2">Images</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={(e) => setNewProduct({ ...newProduct, images: Array.from(e.target.files || []) })}
+                  className="w-full px-4 py-3 rounded-xl border border-brand-gray-200 focus:border-brand-pink focus:ring-2 focus:ring-brand-pink/20 outline-none transition-all"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-brand-accent mb-2">Videos</label>
+                <input
+                  type="file"
+                  accept="video/*"
+                  multiple
+                  onChange={(e) => setNewProduct({ ...newProduct, videos: Array.from(e.target.files || []) })}
+                  className="w-full px-4 py-3 rounded-xl border border-brand-gray-200 focus:border-brand-pink focus:ring-2 focus:ring-brand-pink/20 outline-none transition-all"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={newProduct.is_featured}
+                    onChange={(e) => setNewProduct({ ...newProduct, is_featured: e.target.checked })}
+                    className="w-4 h-4 rounded border-brand-gray-300 text-brand-pink focus:ring-brand-pink"
+                  />
+                  <span className="text-sm font-medium text-brand-accent">Featured</span>
+                </label>
+              </div>
+              <div className="md:col-span-2">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={newProduct.is_bestseller}
+                    onChange={(e) => setNewProduct({ ...newProduct, is_bestseller: e.target.checked })}
+                    className="w-4 h-4 rounded border-brand-gray-300 text-brand-pink focus:ring-brand-pink"
+                  />
+                  <span className="text-sm font-medium text-brand-accent">Bestseller</span>
+                </label>
+              </div>
+              <div className="md:col-span-2">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={newProduct.is_new_arrival}
+                    onChange={(e) => setNewProduct({ ...newProduct, is_new_arrival: e.target.checked })}
+                    className="w-4 h-4 rounded border-brand-gray-300 text-brand-pink focus:ring-brand-pink"
+                  />
+                  <span className="text-sm font-medium text-brand-accent">New Arrival</span>
+                </label>
+              </div>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setIsAddModalOpen(false)}
+                className="flex-1 px-6 py-3 rounded-xl border border-brand-gray-200 text-brand-accent font-semibold hover:bg-brand-gray-50 transition-all"
+              >
+                Cancel
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleAddProduct}
+                disabled={createProductMutation.isPending}
+                className="flex-1 px-6 py-3 rounded-xl bg-brand-pink text-white font-semibold hover:bg-brand-pink/90 transition-all disabled:opacity-50"
+              >
+                {createProductMutation.isPending ? 'Adding...' : 'Add Product'}
+              </motion.button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
     </div>
   );
 }

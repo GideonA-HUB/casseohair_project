@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 interface Category {
   id: number;
@@ -16,8 +16,11 @@ interface Category {
 
 export default function AdminCategories() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [newCategory, setNewCategory] = useState({ name: '', description: '', image: null as File | null });
+  const queryClient = useQueryClient();
 
-  const { data: categories, isLoading } = useQuery<Category[]>({
+  const { data: categories, isLoading, error } = useQuery<Category[]>({
     queryKey: ['admin-categories'],
     queryFn: async () => {
       const token = localStorage.getItem('access_token');
@@ -31,10 +34,56 @@ export default function AdminCategories() {
     },
   });
 
+  const createCategoryMutation = useMutation({
+    mutationFn: async (formData: FormData) => {
+      const token = localStorage.getItem('access_token');
+      const response = await fetch('/api/v1/products/admin/categories/', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+      if (!response.ok) throw new Error('Failed to create category');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
+      setIsAddModalOpen(false);
+      setNewCategory({ name: '', description: '', image: null });
+    },
+  });
+
   const filteredCategories = categories?.filter(category =>
     category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     category.slug.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
+
+  const handleAddCategory = () => {
+    const formData = new FormData();
+    formData.append('name', newCategory.name);
+    formData.append('description', newCategory.description);
+    if (newCategory.image) {
+      formData.append('image', newCategory.image);
+    }
+    createCategoryMutation.mutate(formData);
+  };
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <p className="text-red-500 mb-4">Failed to load categories</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-brand-pink text-white px-6 py-2 rounded-xl"
+          >
+            Refresh Page
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -48,6 +97,7 @@ export default function AdminCategories() {
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
+          onClick={() => setIsAddModalOpen(true)}
           className="bg-brand-pink text-white font-semibold py-2.5 px-6 rounded-xl hover:bg-brand-pink/90 transition-all shadow-lg shadow-brand-pink/30"
         >
           Add New Category
@@ -135,6 +185,77 @@ export default function AdminCategories() {
           ))
         )}
       </motion.div>
+
+      {/* Add Category Modal */}
+      {isAddModalOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+          onClick={() => setIsAddModalOpen(false)}
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            className="bg-white rounded-2xl p-8 max-w-md w-full mx-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="text-2xl font-bold text-brand-black mb-6">Add New Category</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-brand-accent mb-2">Name</label>
+                <input
+                  type="text"
+                  value={newCategory.name}
+                  onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl border border-brand-gray-200 focus:border-brand-pink focus:ring-2 focus:ring-brand-pink/20 outline-none transition-all"
+                  placeholder="Category name"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-brand-accent mb-2">Description</label>
+                <textarea
+                  value={newCategory.description}
+                  onChange={(e) => setNewCategory({ ...newCategory, description: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl border border-brand-gray-200 focus:border-brand-pink focus:ring-2 focus:ring-brand-pink/20 outline-none transition-all resize-none"
+                  rows={3}
+                  placeholder="Category description"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-brand-accent mb-2">Image</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setNewCategory({ ...newCategory, image: e.target.files?.[0] || null })}
+                  className="w-full px-4 py-3 rounded-xl border border-brand-gray-200 focus:border-brand-pink focus:ring-2 focus:ring-brand-pink/20 outline-none transition-all"
+                />
+              </div>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setIsAddModalOpen(false)}
+                className="flex-1 px-6 py-3 rounded-xl border border-brand-gray-200 text-brand-accent font-semibold hover:bg-brand-gray-50 transition-all"
+              >
+                Cancel
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleAddCategory}
+                disabled={createCategoryMutation.isPending}
+                className="flex-1 px-6 py-3 rounded-xl bg-brand-pink text-white font-semibold hover:bg-brand-pink/90 transition-all disabled:opacity-50"
+              >
+                {createCategoryMutation.isPending ? 'Adding...' : 'Add Category'}
+              </motion.button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
     </div>
   );
 }
