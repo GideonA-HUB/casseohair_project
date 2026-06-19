@@ -122,3 +122,18 @@ class OrderStatusUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = ['status', 'refund_amount', 'refund_reason']
+
+
+class AdminOrderSerializer(serializers.ModelSerializer):
+    items = OrderItemSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Order
+        fields = [
+            'id', 'order_number', 'full_name', 'email', 'phone',
+            'address', 'city', 'state', 'country', 'order_notes',
+            'subtotal', 'delivery_fee', 'total', 'status', 'payment_method',
+            'payment_reference', 'is_paid', 'paid_at', 'shipped_at', 'delivered_at',
+            'cancelled_at', 'refund_amount', 'refund_reason', 'items', 'created_at', 'updated_at',
+        ]
+        read_only_fields = ['order_number', 'created_at', 'updated_at']

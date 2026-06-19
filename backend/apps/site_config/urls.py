@@ -2,14 +2,22 @@ from django.urls import path
 
 from .views import (
     AdminContactListView,
+    AdminHeroImagesView,
+    AdminHeroImageView,
     AdminNewsletterListView,
+    AdminSettingsView,
+    AdminTestimonialsView,
+    AdminTestimonialDetailView,
+    AdminWhyChooseItemsView,
+    AdminWhyChooseItemDetailView,
+    AdminActivityLogsView,
     ContactSubmitView,
     HeroImagesView,
-    WhyChooseListView,
     NewsletterSubscribeView,
     SiteAssetsView,
     SiteSettingsView,
     TestimonialListView,
+    WhyChooseListView,
 )
 
 urlpatterns = [
@@ -22,4 +30,12 @@ urlpatterns = [
     path('newsletter/', NewsletterSubscribeView.as_view(), name='newsletter-subscribe'),
     path('admin/contacts/', AdminContactListView.as_view(), name='admin-contacts'),
     path('admin/newsletter/', AdminNewsletterListView.as_view(), name='admin-newsletter'),
+    path('admin/settings/', AdminSettingsView.as_view(), name='admin-settings'),
+    path('admin/testimonials/', AdminTestimonialsView.as_view(), name='admin-testimonials'),
+    path('admin/testimonials/<int:pk>/', AdminTestimonialDetailView.as_view(), name='admin-testimonial-detail'),
+    path('admin/hero-images/', AdminHeroImagesView.as_view(), name='admin-hero-images'),
+    path('admin/hero-images/<int:pk>/', AdminHeroImageView.as_view(), name='admin-hero-image-detail'),
+    path('admin/why-choose/', AdminWhyChooseItemsView.as_view(), name='admin-why-choose'),
+    path('admin/why-choose/<int:pk>/', AdminWhyChooseItemDetailView.as_view(), name='admin-why-choose-detail'),
+    path('admin/activity-logs/', AdminActivityLogsView.as_view(), name='admin-activity-logs'),
 ]

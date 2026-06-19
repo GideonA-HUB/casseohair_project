@@ -7,7 +7,7 @@ from apps.accounts.permissions import IsAdminUser
 from apps.notifications.services import NotificationService
 
 from .models import Order
-from .serializers import CheckoutSerializer, OrderSerializer, OrderStatusUpdateSerializer
+from .serializers import CheckoutSerializer, OrderSerializer, OrderStatusUpdateSerializer, AdminOrderSerializer
 
 
 class CheckoutView(APIView):
@@ -35,14 +35,18 @@ class OrderDetailView(APIView):
 
 class AdminOrderListView(generics.ListAPIView):
     permission_classes = [IsAdminUser]
-    serializer_class = OrderSerializer
+    serializer_class = AdminOrderSerializer
     filterset_fields = ['status', 'is_paid', 'payment_method']
     search_fields = ['order_number', 'email', 'full_name', 'phone']
     ordering_fields = ['created_at', 'total']
     ordering = ['-created_at']
 
     def get_queryset(self):
-        return Order.objects.prefetch_related('items').all()
+        status_filter = self.request.query_params.get('status')
+        queryset = Order.objects.prefetch_related('items').all()
+        if status_filter and status_filter != 'all':
+            queryset = queryset.filter(status=status_filter)
+        return queryset
 
 
 class AdminOrderDetailView(generics.RetrieveUpdateAPIView):
@@ -53,7 +57,7 @@ class AdminOrderDetailView(generics.RetrieveUpdateAPIView):
     def get_serializer_class(self):
         if self.request.method in ['PUT', 'PATCH']:
             return OrderStatusUpdateSerializer
-        return OrderSerializer
+        return AdminOrderSerializer
 
     def perform_update(self, serializer):
         old_status = self.get_object().status
@@ -69,3 +73,33 @@ class AdminOrderDetailView(generics.RetrieveUpdateAPIView):
             elif order.status == 'cancelled':
                 order.cancelled_at = timezone.now()
                 order.save(update_fields=['cancelled_at'])
+
+
+class AdminOrderStatusUpdateView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def patch(self, request, pk):
+        try:
+            order = Order.objects.get(pk=pk)
+        except Order.DoesNotExist:
+            return Response({'detail': 'Order not found.'}, status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = OrderStatusUpdateSerializer(order, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        
+        old_status = order.status
+        order = serializer.save()
+        
+        if old_status != order.status:
+            NotificationService.notify_order_status_change(order)
+            if order.status == 'delivered':
+                order.delivered_at = timezone.now()
+                order.save(update_fields=['delivered_at'])
+            elif order.status == 'shipped':
+                order.shipped_at = timezone.now()
+                order.save(update_fields=['shipped_at'])
+            elif order.status == 'cancelled':
+                order.cancelled_at = timezone.now()
+                order.save(update_fields=['cancelled_at'])
+        
+        return Response(AdminOrderSerializer(order).data)

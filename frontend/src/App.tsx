@@ -1,6 +1,7 @@
 import { Suspense, lazy, useEffect } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import MainLayout from '@/layouts/MainLayout';
+import AdminLayout from '@/pages/admin/AdminLayout';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import HomePage from '@/pages/HomePage';
 import ShopPage from '@/pages/ShopPage';
@@ -12,10 +13,20 @@ import ContactPage from '@/pages/ContactPage';
 import CategoriesPage from '@/pages/CategoriesPage';
 import PolicyPage from '@/pages/PolicyPage';
 
-const AdminLoginPage = lazy(() => import('@/pages/admin/AdminLoginPage'));
-const AdminDashboardPage = lazy(() => import('@/pages/admin/AdminDashboardPage'));
-const AdminOrdersPage = lazy(() => import('@/pages/admin/AdminOrdersPage'));
-const AdminReportsPage = lazy(() => import('@/pages/admin/AdminReportsPage'));
+const AdminLogin = lazy(() => import('@/pages/admin/AdminLogin'));
+const AdminDashboard = lazy(() => import('@/pages/admin/AdminDashboard'));
+const AdminOrders = lazy(() => import('@/pages/admin/AdminOrders'));
+const AdminProducts = lazy(() => import('@/pages/admin/AdminProducts'));
+const AdminCategories = lazy(() => import('@/pages/admin/AdminCategories'));
+const AdminReviews = lazy(() => import('@/pages/admin/AdminReviews'));
+const AdminContacts = lazy(() => import('@/pages/admin/AdminContacts'));
+const AdminHeroImages = lazy(() => import('@/pages/admin/AdminHeroImages'));
+const AdminNewsletter = lazy(() => import('@/pages/admin/AdminNewsletter'));
+const AdminTestimonials = lazy(() => import('@/pages/admin/AdminTestimonials'));
+const AdminWhyChoose = lazy(() => import('@/pages/admin/AdminWhyChoose'));
+const AdminSettings = lazy(() => import('@/pages/admin/AdminSettings'));
+const AdminActivityLogs = lazy(() => import('@/pages/admin/AdminActivityLogs'));
+const AdminNotifications = lazy(() => import('@/pages/admin/AdminNotifications'));
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -47,10 +58,22 @@ export default function App() {
           <Route path="refund" element={<PolicyPage />} />
         </Route>
 
-        <Route path="admin-dashboard/login" element={<AdminLoginPage />} />
-        <Route path="admin-dashboard" element={<AdminDashboardPage />} />
-        <Route path="admin-dashboard/orders" element={<AdminOrdersPage />} />
-        <Route path="admin-dashboard/reports" element={<AdminReportsPage />} />
+        <Route path="/dashboard/login" element={<AdminLogin />} />
+        <Route element={<AdminLayout />}>
+          <Route path="/dashboard" element={<AdminDashboard />} />
+          <Route path="/dashboard/orders" element={<AdminOrders />} />
+          <Route path="/dashboard/products" element={<AdminProducts />} />
+          <Route path="/dashboard/categories" element={<AdminCategories />} />
+          <Route path="/dashboard/reviews" element={<AdminReviews />} />
+          <Route path="/dashboard/notifications" element={<AdminNotifications />} />
+          <Route path="/dashboard/contacts" element={<AdminContacts />} />
+          <Route path="/dashboard/hero-images" element={<AdminHeroImages />} />
+          <Route path="/dashboard/newsletter" element={<AdminNewsletter />} />
+          <Route path="/dashboard/testimonials" element={<AdminTestimonials />} />
+          <Route path="/dashboard/why-choose" element={<AdminWhyChoose />} />
+          <Route path="/dashboard/settings" element={<AdminSettings />} />
+          <Route path="/dashboard/activity-logs" element={<AdminActivityLogs />} />
+        </Route>
       </Routes>
     </Suspense>
   );

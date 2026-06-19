@@ -1,8 +1,14 @@
 from django.urls import path
 
 from .views import (
+    AdminCategoryDetailView,
+    AdminCategoryListView,
     AdminProductDetailView,
     AdminProductListCreateView,
+    AdminReviewApproveView,
+    AdminReviewDetailView,
+    AdminReviewListView,
+    AdminReviewRejectView,
     BestsellerProductsView,
     CategoryDetailView,
     CategoryListView,
@@ -26,6 +32,12 @@ urlpatterns = [
     path('search/', ProductSearchView.as_view(), name='product-search'),
     path('<slug:slug>/', ProductDetailView.as_view(), name='product-detail'),
     path('<slug:slug>/reviews/', ProductReviewsView.as_view(), name='product-reviews'),
-    path('admin/list/', AdminProductListCreateView.as_view(), name='admin-product-list'),
+    path('admin/', AdminProductListCreateView.as_view(), name='admin-product-list'),
     path('admin/<int:pk>/', AdminProductDetailView.as_view(), name='admin-product-detail'),
+    path('admin/categories/', AdminCategoryListView.as_view(), name='admin-category-list'),
+    path('admin/categories/<int:pk>/', AdminCategoryDetailView.as_view(), name='admin-category-detail'),
+    path('admin/reviews/', AdminReviewListView.as_view(), name='admin-review-list'),
+    path('admin/reviews/<int:pk>/', AdminReviewDetailView.as_view(), name='admin-review-detail'),
+    path('admin/reviews/<int:pk>/approve/', AdminReviewApproveView.as_view(), name='admin-review-approve'),
+    path('admin/reviews/<int:pk>/reject/', AdminReviewRejectView.as_view(), name='admin-review-reject'),
 ]

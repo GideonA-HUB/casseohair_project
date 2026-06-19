@@ -193,6 +193,11 @@ RESEND_API_KEY = config('RESEND_API_KEY', default='')
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='orders@casseohair.com')
 ADMIN_EMAIL = config('ADMIN_EMAIL', default='admin@casseohair.com')
 
+# Admin Dashboard Credentials
+ADMIN_USERNAME = config('ADMIN_USERNAME', default='admin')
+ADMIN_PASSWORD = config('ADMIN_PASSWORD', default='admin123')
+ADMIN_USER_EMAIL = config('ADMIN_USER_EMAIL', default='admin@casseohair.com')
+
 # Security
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True

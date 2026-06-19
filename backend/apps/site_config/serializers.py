@@ -3,6 +3,7 @@ from rest_framework import serializers
 from apps.core.media import absolute_media_url
 
 from .models import (
+    AdminActivityLog,
     ContactSubmission,
     HeroImage,
     NewsletterSubscriber,
@@ -54,6 +55,12 @@ class WhyChooseItemSerializer(serializers.ModelSerializer):
 
     def get_image(self, obj):
         return absolute_media_url(self.context.get('request'), obj.image) if obj.image else None
+
+
+class AdminActivityLogSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AdminActivityLog
+        fields = ['id', 'user', 'action', 'description', 'ip_address', 'created_at']
 
 
 class TestimonialSerializer(serializers.ModelSerializer):

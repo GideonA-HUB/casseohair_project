@@ -8,6 +8,7 @@ from apps.accounts.permissions import IsAdminUser
 from apps.notifications.services import EmailService, NotificationService
 
 from .models import (
+    AdminActivityLog,
     ContactSubmission,
     HeroImage,
     NewsletterSubscriber,
@@ -17,6 +18,7 @@ from .models import (
     WhyChooseItem,
 )
 from .serializers import (
+    AdminActivityLogSerializer,
     ContactSubmissionSerializer,
     HeroImageSerializer,
     NewsletterSubscribeSerializer,
@@ -114,7 +116,65 @@ class AdminContactListView(generics.ListAPIView):
 class AdminNewsletterListView(generics.ListAPIView):
     permission_classes = [IsAdminUser]
     serializer_class = NewsletterSubscribeSerializer
-    queryset = NewsletterSubscriber.objects.filter(is_active=True)
+    queryset = NewsletterSubscriber.objects.all()
+
+
+class AdminSettingsView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def get(self, request):
+        settings_obj = SiteSettings.get_settings()
+        return Response(SiteSettingsSerializer(settings_obj, context={'request': request}).data)
+
+    def patch(self, request):
+        settings_obj = SiteSettings.get_settings()
+        serializer = SiteSettingsSerializer(settings_obj, data=request.data, partial=True, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(SiteSettingsSerializer(settings_obj, context={'request': request}).data)
+
+
+class AdminTestimonialsView(generics.ListCreateAPIView):
+    permission_classes = [IsAdminUser]
+    serializer_class = TestimonialSerializer
+    queryset = Testimonial.objects.all()
+
+
+class AdminTestimonialDetailView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAdminUser]
+    serializer_class = TestimonialSerializer
+    queryset = Testimonial.objects.all()
+
+
+class AdminHeroImagesView(generics.ListCreateAPIView):
+    permission_classes = [IsAdminUser]
+    serializer_class = HeroImageSerializer
+    queryset = HeroImage.objects.all()
+
+
+class AdminHeroImageView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAdminUser]
+    serializer_class = HeroImageSerializer
+    queryset = HeroImage.objects.all()
+
+
+class AdminWhyChooseItemsView(generics.ListCreateAPIView):
+    permission_classes = [IsAdminUser]
+    serializer_class = WhyChooseItemSerializer
+    queryset = WhyChooseItem.objects.all()
+
+
+class AdminWhyChooseItemDetailView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAdminUser]
+    serializer_class = WhyChooseItemSerializer
+    queryset = WhyChooseItem.objects.all()
+
+
+class AdminActivityLogsView(generics.ListAPIView):
+    permission_classes = [IsAdminUser]
+    serializer_class = AdminActivityLogSerializer
+    queryset = AdminActivityLog.objects.all()
+    ordering = ['-created_at']
 
 
 class SitemapView(APIView):

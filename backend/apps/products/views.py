@@ -162,3 +162,55 @@ class ProductReviewsView(generics.ListCreateAPIView):
         product_slug = self.kwargs.get('slug')
         product = Product.objects.get(slug=product_slug)
         serializer.save(product=product, is_approved=False)
+
+
+class AdminCategoryListView(generics.ListCreateAPIView):
+    permission_classes = [IsAdminUser]
+    serializer_class = CategoryDetailSerializer
+    queryset = Category.objects.all()
+
+
+class AdminCategoryDetailView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAdminUser]
+    serializer_class = CategoryDetailSerializer
+    queryset = Category.objects.all()
+
+
+class AdminReviewListView(generics.ListAPIView):
+    permission_classes = [IsAdminUser]
+    serializer_class = ProductReviewListSerializer
+    queryset = ProductReview.objects.all()
+
+
+class AdminReviewDetailView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAdminUser]
+    serializer_class = ProductReviewSerializer
+    queryset = ProductReview.objects.all()
+
+
+class AdminReviewApproveView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def patch(self, request, pk):
+        try:
+            review = ProductReview.objects.get(pk=pk)
+        except ProductReview.DoesNotExist:
+            return Response({'detail': 'Review not found.'}, status=status.HTTP_404_NOT_FOUND)
+        
+        review.is_approved = True
+        review.save()
+        return Response(ProductReviewListSerializer(review).data)
+
+
+class AdminReviewRejectView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def patch(self, request, pk):
+        try:
+            review = ProductReview.objects.get(pk=pk)
+        except ProductReview.DoesNotExist:
+            return Response({'detail': 'Review not found.'}, status=status.HTTP_404_NOT_FOUND)
+        
+        review.is_approved = False
+        review.save()
+        return Response(ProductReviewListSerializer(review).data)
