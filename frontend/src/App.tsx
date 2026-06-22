@@ -3,6 +3,7 @@ import { Routes, Route, useLocation } from 'react-router-dom';
 import MainLayout from '@/layouts/MainLayout';
 import AdminLayout from '@/pages/admin/AdminLayout';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import ScrollToTop from '@/components/ScrollToTop';
 import HomePage from '@/pages/HomePage';
 import ShopPage from '@/pages/ShopPage';
 import ProductPage from '@/pages/ProductPage';
@@ -28,7 +29,7 @@ const AdminSettings = lazy(() => import('@/pages/admin/AdminSettings'));
 const AdminActivityLogs = lazy(() => import('@/pages/admin/AdminActivityLogs'));
 const AdminNotifications = lazy(() => import('@/pages/admin/AdminNotifications'));
 
-function ScrollToTop() {
+function ScrollToTopOnRouteChange() {
   const { pathname } = useLocation();
 
   useEffect(() => {
@@ -41,6 +42,7 @@ function ScrollToTop() {
 export default function App() {
   return (
     <Suspense fallback={<LoadingSpinner fullScreen={false} />}>
+      <ScrollToTopOnRouteChange />
       <ScrollToTop />
       <Routes>
         <Route element={<MainLayout />}>

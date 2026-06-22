@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.accounts.permissions import IsAdminUser
+from apps.core.email_utils import send_newsletter_confirmation_email
 from apps.notifications.services import EmailService, NotificationService
 
 from .models import (
@@ -103,7 +104,14 @@ class NewsletterSubscribeView(APIView):
         serializer = NewsletterSubscribeSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         subscriber = serializer.save()
-        EmailService.send_newsletter_welcome(subscriber.email)
+        
+        # Send newsletter confirmation email
+        try:
+            send_newsletter_confirmation_email(subscriber)
+        except Exception as e:
+            # Log error but don't fail the subscription
+            print(f"Failed to send newsletter confirmation email: {e}")
+        
         return Response({'message': 'Successfully subscribed.'}, status=status.HTTP_201_CREATED)
 
 

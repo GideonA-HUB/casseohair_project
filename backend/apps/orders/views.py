@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.accounts.permissions import IsAdminUser
+from apps.core.email_utils import send_order_confirmation_email, send_order_notification_email
 from apps.notifications.services import NotificationService
 
 from .models import Order
@@ -18,6 +19,21 @@ class CheckoutView(APIView):
         serializer = CheckoutSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         order = serializer.save()
+        
+        # Send order confirmation email to customer
+        try:
+            send_order_confirmation_email(order)
+        except Exception as e:
+            # Log error but don't fail the order creation
+            print(f"Failed to send order confirmation email: {e}")
+        
+        # Send order notification email to admin/owner
+        try:
+            send_order_notification_email(order)
+        except Exception as e:
+            # Log error but don't fail the order creation
+            print(f"Failed to send order notification email: {e}")
+        
         return Response(OrderSerializer(order).data, status=status.HTTP_201_CREATED)
 
 

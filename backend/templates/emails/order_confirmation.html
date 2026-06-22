@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmation</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f8f8;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+        }
+        .header {
+            background-color: {{ brand_pink }};
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            color: #ffffff;
+            margin: 0;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .order-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: {{ brand_pink }};
+            margin-bottom: 20px;
+        }
+        .section {
+            margin-bottom: 30px;
+        }
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #1A1A1A;
+            margin-bottom: 15px;
+            border-bottom: 2px solid {{ brand_pink }};
+            padding-bottom: 10px;
+        }
+        .info-row {
+            margin-bottom: 10px;
+            color: #1A1A1A;
+        }
+        .info-label {
+            font-weight: bold;
+            color: #666;
+        }
+        .product-item {
+            padding: 15px;
+            background-color: #f8f8f8;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        .product-name {
+            font-weight: bold;
+            color: #1A1A1A;
+            margin-bottom: 5px;
+        }
+        .product-details {
+            color: #666;
+            font-size: 14px;
+        }
+        .total-section {
+            background-color: {{ brand_pink }};
+            color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .total-row.final {
+            font-size: 20px;
+            font-weight: bold;
+            border-top: 1px solid rgba(255,255,255,0.3);
+            padding-top: 15px;
+            margin-top: 15px;
+            margin-bottom: 0;
+        }
+        .footer {
+            background-color: #1A1A1A;
+            color: #ffffff;
+            padding: 30px;
+            text-align: center;
+        }
+        .social-links {
+            margin: 20px 0;
+        }
+        .social-link {
+            display: inline-block;
+            margin: 0 10px;
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .button {
+            display: inline-block;
+            background-color: {{ brand_pink }};
+            color: #ffffff;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>{{ site_name }}</h1>
+        </div>
+        
+        <div class="content">
+            <h2 style="color: {{ brand_pink }}; margin-top: 0;">Thank You for Your Order!</h2>
+            <p style="color: #666; margin-bottom: 30px;">
+                We're excited to let you know that we've received your order. Your order details are below.
+            </p>
+            
+            <div class="order-number">Order #{{ order.order_number }}</div>
+            
+            <div class="section">
+                <div class="section-title">Order Information</div>
+                <div class="info-row">
+                    <span class="info-label">Order Date:</span> {{ order.created_at|date:"F d, Y" }}
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Status:</span> {{ order.get_status_display }}
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Payment Method:</span> {{ order.payment_method|title }}
+                </div>
+                {% if order.payment_reference %}
+                <div class="info-row">
+                    <span class="info-label">Transaction ID:</span> {{ order.payment_reference }}
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Shipping Information</div>
+                <div class="info-row">
+                    <span class="info-label">Name:</span> {{ order.full_name }}
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Email:</span> {{ order.email }}
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Phone:</span> {{ order.phone }}
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Address:</span> {{ order.address }}
+                </div>
+                <div class="info-row">
+                    <span class="info-label">City:</span> {{ order.city }}
+                </div>
+                <div class="info-row">
+                    <span class="info-label">State:</span> {{ order.state }}
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Country:</span> {{ order.country }}
+                </div>
+                {% if order.order_notes %}
+                <div class="info-row">
+                    <span class="info-label">Order Notes:</span> {{ order.order_notes }}
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Order Items</div>
+                {% for item in order_items %}
+                <div class="product-item">
+                    <div class="product-name">{{ item.product_name }}</div>
+                    <div class="product-details">
+                        Quantity: {{ item.quantity }} × ₦{{ item.price }} = ₦{{ item.subtotal }}
+                    </div>
+                    {% if item.length %}
+                    <div class="product-details">Length: {{ item.length }}</div>
+                    {% endif %}
+                    {% if item.lace_type %}
+                    <div class="product-details">Lace Type: {{ item.lace_type }}</div>
+                    {% endif %}
+                    {% if item.color %}
+                    <div class="product-details">Color: {{ item.color }}</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="total-section">
+                <div class="total-row">
+                    <span>Subtotal:</span>
+                    <span>₦{{ order.subtotal }}</span>
+                </div>
+                <div class="total-row">
+                    <span>Delivery Fee:</span>
+                    <span>₦{{ order.delivery_fee }}</span>
+                </div>
+                <div class="total-row final">
+                    <span>Total:</span>
+                    <span>₦{{ order.total }}</span>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 30px;">
+                <a href="{{ site_url }}" class="button">Track Your Order</a>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p style="margin: 0 0 20px 0;">{{ site_name }}</p>
+            <div class="social-links">
+                <a href="https://instagram.com/casseohair" class="social-link">Instagram</a>
+                <a href="https://facebook.com/casseohair" class="social-link">Facebook</a>
+                <a href="https://twitter.com/casseohair" class="social-link">Twitter</a>
+                <a href="https://tiktok.com/@casseohair" class="social-link">TikTok</a>
+            </div>
+            <p style="margin: 0; font-size: 12px; color: #999;">
+                © {% now "Y" %} {{ site_name }}. All rights reserved.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
