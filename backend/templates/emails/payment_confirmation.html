@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment Confirmed</title>
+</head>
+<body style="margin:0;padding:0;background:#f4f4f5;font-family:'Segoe UI',Helvetica,Arial,sans-serif;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f4f4f5;padding:32px 16px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:620px;background:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 18px 50px rgba(0,0,0,0.08);">
+          <tr>
+            <td style="background:linear-gradient(135deg,#801337 0%,#E62E72 50%,#801337 100%);padding:36px 32px;text-align:center;">
+              <img src="{{ logo_url }}" alt="{{ site_name }}" width="72" height="72" style="display:block;margin:0 auto 16px;border-radius:16px;background:#ffffff;padding:8px;">
+              <p style="margin:0 0 8px;font-size:12px;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.85);">Payment Successful</p>
+              <h1 style="margin:0;font-size:28px;line-height:1.2;color:#ffffff;font-weight:700;">Your Payment Is Confirmed</h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:36px 32px;">
+              <p style="margin:0 0 18px;font-size:16px;line-height:1.7;color:#444444;">
+                Dear <strong style="color:#111111;">{{ order.full_name }}</strong>, your payment has been confirmed.
+                We are now preparing your luxury hair order with care.
+              </p>
+
+              <p style="margin:0 0 24px;font-size:22px;font-weight:700;color:#E62E72;">Order #{{ order.order_number }}</p>
+
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 24px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:14px;">
+                <tr>
+                  <td style="padding:18px 20px;">
+                    <p style="margin:0 0 8px;font-size:14px;color:#166534;"><strong>Payment Status:</strong> Confirmed</p>
+                    <p style="margin:0 0 8px;font-size:14px;color:#166534;"><strong>Amount Paid:</strong> ₦{{ order.total }}</p>
+                    <p style="margin:0 0 8px;font-size:14px;color:#166534;"><strong>Payment Method:</strong> {{ order.payment_method|title }}</p>
+                    <p style="margin:0;font-size:14px;color:#166534;"><strong>Transaction ID:</strong> {{ order.payment_reference }}</p>
+                  </td>
+                </tr>
+              </table>
+
+              <h2 style="margin:0 0 14px;font-size:15px;letter-spacing:0.08em;text-transform:uppercase;color:#111111;border-bottom:2px solid #E62E72;padding-bottom:8px;">Delivery Details</h2>
+              <p style="margin:0 0 8px;font-size:14px;color:#555555;"><strong>Phone:</strong> {{ order.phone }}</p>
+              <p style="margin:0 0 8px;font-size:14px;color:#555555;"><strong>Address:</strong> {{ order.address }}, {{ order.city }}, {{ order.state }}, {{ order.country }}</p>
+              {% if order.order_notes %}
+              <p style="margin:0 0 24px;font-size:14px;color:#555555;"><strong>Order Notes:</strong> {{ order.order_notes }}</p>
+              {% else %}
+              <p style="margin:0 0 24px;font-size:14px;color:#555555;"><strong>Order Notes:</strong> None</p>
+              {% endif %}
+
+              <h2 style="margin:0 0 14px;font-size:15px;letter-spacing:0.08em;text-transform:uppercase;color:#111111;border-bottom:2px solid #E62E72;padding-bottom:8px;">Items Purchased</h2>
+              {% for item in order_items %}
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 12px;background:#fafafa;border-radius:12px;">
+                <tr>
+                  <td style="padding:16px 18px;">
+                    <p style="margin:0 0 6px;font-size:15px;font-weight:700;color:#111111;">{{ item.product_name }}</p>
+                    <p style="margin:0;font-size:13px;color:#666666;">Qty {{ item.quantity }} × ₦{{ item.price }} = ₦{{ item.subtotal }}</p>
+                  </td>
+                </tr>
+              </table>
+              {% endfor %}
+
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-top:24px;background:linear-gradient(135deg,#801337,#E62E72);border-radius:16px;">
+                <tr>
+                  <td style="padding:22px 24px;color:#ffffff;">
+                    <p style="margin:0;font-size:20px;font-weight:700;display:flex;justify-content:space-between;"><span>Total Paid</span><span>₦{{ order.total }}</span></p>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin:28px 0 0;font-size:14px;line-height:1.7;color:#666666;text-align:center;">
+                Questions? Reply to this email or reach us on WhatsApp. We are here for you.
+              </p>
+            </td>
+          </tr>
+          {% include "emails/partials/social_footer.html" %}
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

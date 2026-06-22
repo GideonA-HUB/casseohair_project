@@ -1,66 +1,88 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+function ScrollButton({
+  direction,
+  onClick,
+  label,
+}: {
+  direction: 'up' | 'down';
+  onClick: () => void;
+  label: string;
+}) {
+  return (
+    <motion.button
+      type="button"
+      initial={{ opacity: 0, scale: 0.85 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.85 }}
+      whileHover={{ scale: 1.06 }}
+      whileTap={{ scale: 0.94 }}
+      onClick={onClick}
+      aria-label={label}
+      className="group relative flex h-9 w-9 items-center justify-center rounded-full bg-brand-pink text-white shadow-[0_8px_24px_rgba(230,46,114,0.35)] ring-1 ring-white/20 transition-colors hover:bg-brand-pink-dark"
+    >
+      <svg
+        className="h-4 w-4"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+      >
+        {direction === 'up' ? (
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M5 15l7-7 7 7" />
+        ) : (
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M19 9l-7 7-7-7" />
+        )}
+      </svg>
+    </motion.button>
+  );
+}
+
 export default function ScrollToTop() {
-  const [isVisible, setIsVisible] = useState(false);
+  const [showUp, setShowUp] = useState(false);
+  const [showDown, setShowDown] = useState(false);
 
-  useEffect(() => {
-    const toggleVisibility = () => {
-      if (window.pageYOffset > 300) {
-        setIsVisible(true);
-      } else {
-        setIsVisible(false);
-      }
-    };
-
-    window.addEventListener('scroll', toggleVisibility);
-    return () => window.removeEventListener('scroll', toggleVisibility);
+  const updateVisibility = useCallback(() => {
+    const scrollY = window.scrollY;
+    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+    setShowUp(scrollY > 240);
+    setShowDown(scrollY < maxScroll - 80);
   }, []);
 
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth',
-    });
-  };
+  useEffect(() => {
+    updateVisibility();
+    window.addEventListener('scroll', updateVisibility, { passive: true });
+    window.addEventListener('resize', updateVisibility);
+    return () => {
+      window.removeEventListener('scroll', updateVisibility);
+      window.removeEventListener('resize', updateVisibility);
+    };
+  }, [updateVisibility]);
+
+  const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+  const scrollToBottom = () =>
+    window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
+
+  if (!showUp && !showDown) return null;
 
   return (
-    <AnimatePresence>
-      {isVisible && (
-        <motion.button
-          initial={{ opacity: 0, scale: 0.8, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.8, y: 20 }}
-          transition={{ duration: 0.3 }}
-          onClick={scrollToTop}
-          className="fixed right-6 bottom-6 z-50 bg-brand-pink text-white p-4 rounded-full shadow-lg hover:bg-brand-pink/90 transition-all duration-300 hover:scale-110 active:scale-95 group"
-          aria-label="Scroll to top"
-        >
-          <motion.svg
-            initial={{ rotate: -45 }}
-            animate={{ rotate: 0 }}
-            whileHover={{ rotate: -10 }}
-            transition={{ duration: 0.3 }}
-            className="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <motion.path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M5 10l7-7m0 0l7 7m-7-7v18"
-              initial={{ pathLength: 0 }}
-              animate={{ pathLength: 1 }}
-              transition={{ duration: 0.5 }}
-            />
-          </motion.svg>
-          <span className="absolute right-full mr-3 bg-brand-pink text-white text-xs font-medium px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
-            Scroll to top
-          </span>
-        </motion.button>
-      )}
-    </AnimatePresence>
+    <div className="fixed bottom-5 right-4 z-50 flex flex-col gap-2 sm:right-5">
+      <AnimatePresence>
+        {showUp && (
+          <ScrollButton key="scroll-up" direction="up" onClick={scrollToTop} label="Scroll to top" />
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {showDown && (
+          <ScrollButton
+            key="scroll-down"
+            direction="down"
+            onClick={scrollToBottom}
+            label="Scroll to bottom"
+          />
+        )}
+      </AnimatePresence>
+    </div>
   );
 }

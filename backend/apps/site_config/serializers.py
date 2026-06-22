@@ -14,17 +14,6 @@ from .models import (
 )
 
 
-class SiteAssetSerializer(serializers.ModelSerializer):
-    image = serializers.SerializerMethodField()
-
-    class Meta:
-        model = SiteAsset
-        fields = ['id', 'asset_type', 'image', 'alt_text', 'is_active']
-
-    def get_image(self, obj):
-        return absolute_media_url(self.context.get('request'), obj.image)
-
-
 class SiteSettingsSerializer(serializers.ModelSerializer):
     ceo_photo = serializers.SerializerMethodField()
 
@@ -34,33 +23,28 @@ class SiteSettingsSerializer(serializers.ModelSerializer):
             'site_name', 'tagline', 'meta_description', 'meta_keywords',
             'contact_email', 'contact_phone', 'whatsapp_number', 'address',
             'instagram_url', 'facebook_url', 'twitter_url', 'tiktok_url', 'youtube_url',
-            'about_title', 'about_subtitle', 'about_content', 'mission', 'vision', 'brand_story',
+            'about_title', 'about_subtitle', 'about_content',
+            'mission', 'vision', 'brand_story',
             'ceo_name', 'ceo_title', 'ceo_bio', 'ceo_photo',
             'privacy_policy', 'terms_of_service', 'refund_policy',
             'delivery_fee', 'currency', 'currency_symbol',
-            'is_vat_inclusive', 'vat_rate', 'instagram_feed_enabled',
+            'is_vat_inclusive', 'vat_rate',
             'why_choose_title', 'why_choose_subtitle',
         ]
 
     def get_ceo_photo(self, obj):
-        return absolute_media_url(self.context.get('request'), obj.ceo_photo) if obj.ceo_photo else None
+        return absolute_media_url(self.context.get('request'), obj.ceo_photo)
 
 
-class WhyChooseItemSerializer(serializers.ModelSerializer):
+class SiteAssetSerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField()
 
     class Meta:
-        model = WhyChooseItem
-        fields = ['id', 'title', 'description', 'image', 'alt_text', 'order']
+        model = SiteAsset
+        fields = ['asset_type', 'image', 'alt_text']
 
     def get_image(self, obj):
-        return absolute_media_url(self.context.get('request'), obj.image) if obj.image else None
-
-
-class AdminActivityLogSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = AdminActivityLog
-        fields = ['id', 'user', 'action', 'description', 'ip_address', 'created_at']
+        return absolute_media_url(self.context.get('request'), obj.image)
 
 
 class TestimonialSerializer(serializers.ModelSerializer):
@@ -69,13 +53,49 @@ class TestimonialSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Testimonial
-        fields = ['id', 'name', 'role', 'content', 'rating', 'image', 'company_logo']
+        fields = [
+            'id', 'name', 'role', 'content', 'rating',
+            'image', 'company_logo', 'is_featured', 'is_active', 'order',
+        ]
 
     def get_image(self, obj):
         return absolute_media_url(self.context.get('request'), obj.image)
 
     def get_company_logo(self, obj):
         return absolute_media_url(self.context.get('request'), obj.company_logo)
+
+
+class ContactSubmissionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ContactSubmission
+        fields = ['id', 'name', 'email', 'phone', 'message', 'is_read', 'created_at']
+        read_only_fields = ['id', 'is_read', 'created_at']
+
+
+class NewsletterSubscribeSerializer(serializers.Serializer):
+    """Accept newsletter sign-ups; allow re-subscription without 400 on duplicate email."""
+
+    email = serializers.EmailField()
+
+    def validate_email(self, value):
+        return value.strip().lower()
+
+    def create(self, validated_data):
+        email = validated_data['email']
+        subscriber, _created = NewsletterSubscriber.objects.get_or_create(
+            email=email,
+            defaults={'is_active': True},
+        )
+        if not subscriber.is_active:
+            subscriber.is_active = True
+            subscriber.save(update_fields=['is_active'])
+        return subscriber
+
+
+class NewsletterSubscriberSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = NewsletterSubscriber
+        fields = ['id', 'email', 'is_active', 'subscribed_at']
 
 
 class HeroImageSerializer(serializers.ModelSerializer):
@@ -89,23 +109,23 @@ class HeroImageSerializer(serializers.ModelSerializer):
         return absolute_media_url(self.context.get('request'), obj.image)
 
 
-class ContactSubmissionSerializer(serializers.ModelSerializer):
+class WhyChooseItemSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+
     class Meta:
-        model = ContactSubmission
-        fields = ['name', 'email', 'phone', 'message']
+        model = WhyChooseItem
+        fields = ['id', 'title', 'description', 'image', 'alt_text', 'order', 'is_active']
+
+    def get_image(self, obj):
+        return absolute_media_url(self.context.get('request'), obj.image)
 
 
-class NewsletterSubscribeSerializer(serializers.ModelSerializer):
+class AdminActivityLogSerializer(serializers.ModelSerializer):
+    user = serializers.StringRelatedField()
+
     class Meta:
-        model = NewsletterSubscriber
-        fields = ['email']
-
-    def create(self, validated_data):
-        subscriber, created = NewsletterSubscriber.objects.get_or_create(
-            email=validated_data['email'],
-            defaults={'is_active': True},
-        )
-        if not created and not subscriber.is_active:
-            subscriber.is_active = True
-            subscriber.save()
-        return subscriber
+        model = AdminActivityLog
+        fields = [
+            'id', 'user', 'action', 'model_name', 'object_id',
+            'description', 'ip_address', 'created_at',
+        ]

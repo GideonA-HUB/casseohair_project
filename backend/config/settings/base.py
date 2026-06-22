@@ -188,22 +188,11 @@ FLUTTERWAVE_SECRET_KEY = config('FLUTTERWAVE_SECRET_KEY', default='')
 FLUTTERWAVE_PUBLIC_KEY = config('FLUTTERWAVE_PUBLIC_KEY', default='')
 FLUTTERWAVE_ENCRYPTION_KEY = config('FLUTTERWAVE_ENCRYPTION_KEY', default='')
 
-# Email
+# Email — delivered via Resend API (apps.core.resend_client), not SMTP
 RESEND_API_KEY = config('RESEND_API_KEY', default='')
-DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='orders@casseohair.com')
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='CasseoHair <orders@casseohair.com>')
 ADMIN_EMAIL = config('ADMIN_EMAIL', default='casseohair@gmail.com')
-SITE_NAME = config('SITE_NAME', default='CasseoHair')
-SITE_URL = config('SITE_URL', default='https://www.casseohair.com')
-
-# Email Backend Configuration
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.resend.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'resend'
-EMAIL_HOST_PASSWORD = RESEND_API_KEY
-DEFAULT_FROM_EMAIL = DEFAULT_FROM_EMAIL
-SERVER_EMAIL = DEFAULT_FROM_EMAIL
+EMAIL_BACKEND = 'django.core.mail.backends.dummy.EmailBackend'
 
 # Admin Dashboard Credentials
 ADMIN_USERNAME = config('ADMIN_USERNAME', default='admin')

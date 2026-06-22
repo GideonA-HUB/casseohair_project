@@ -1,3 +1,5 @@
+import logging
+
 from django.http import HttpResponse
 from django.utils import timezone
 from rest_framework import generics, status
@@ -23,11 +25,14 @@ from .serializers import (
     ContactSubmissionSerializer,
     HeroImageSerializer,
     NewsletterSubscribeSerializer,
+    NewsletterSubscriberSerializer,
     SiteAssetSerializer,
     SiteSettingsSerializer,
     TestimonialSerializer,
     WhyChooseItemSerializer,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class SiteSettingsView(APIView):
@@ -108,9 +113,8 @@ class NewsletterSubscribeView(APIView):
         # Send newsletter confirmation email
         try:
             send_newsletter_confirmation_email(subscriber)
-        except Exception as e:
-            # Log error but don't fail the subscription
-            print(f"Failed to send newsletter confirmation email: {e}")
+        except Exception:
+            logger.exception('Failed to send newsletter confirmation email to %s', subscriber.email)
         
         return Response({'message': 'Successfully subscribed.'}, status=status.HTTP_201_CREATED)
 
@@ -123,7 +127,7 @@ class AdminContactListView(generics.ListAPIView):
 
 class AdminNewsletterListView(generics.ListAPIView):
     permission_classes = [IsAdminUser]
-    serializer_class = NewsletterSubscribeSerializer
+    serializer_class = NewsletterSubscriberSerializer
     queryset = NewsletterSubscriber.objects.all()
 
 

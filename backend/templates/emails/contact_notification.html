@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>New Contact Message</title>
+</head>
+<body style="margin:0;padding:0;background:#f4f4f5;font-family:'Segoe UI',Helvetica,Arial,sans-serif;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="padding:32px 16px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" style="max-width:560px;background:#ffffff;border-radius:18px;overflow:hidden;">
+          <tr>
+            <td style="background:#111111;padding:24px 28px;">
+              <h1 style="margin:0;color:#ffffff;font-size:20px;">New Contact Message</h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:28px;">
+              <p style="margin:0 0 8px;font-size:14px;color:#555555;"><strong>Name:</strong> {{ submission.name }}</p>
+              <p style="margin:0 0 8px;font-size:14px;color:#555555;"><strong>Email:</strong> {{ submission.email }}</p>
+              <p style="margin:0 0 8px;font-size:14px;color:#555555;"><strong>Phone:</strong> {{ submission.phone|default:"Not provided" }}</p>
+              <p style="margin:0;font-size:14px;line-height:1.7;color:#444444;"><strong>Message:</strong><br>{{ submission.message }}</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

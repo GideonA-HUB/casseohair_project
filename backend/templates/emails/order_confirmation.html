@@ -1,238 +1,102 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Order Confirmation</title>
-    <style>
-        body {
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f8f8f8;
-        }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background-color: #ffffff;
-        }
-        .header {
-            background-color: {{ brand_pink }};
-            padding: 30px;
-            text-align: center;
-        }
-        .header h1 {
-            color: #ffffff;
-            margin: 0;
-            font-size: 28px;
-            font-weight: bold;
-        }
-        .content {
-            padding: 40px 30px;
-        }
-        .order-number {
-            font-size: 24px;
-            font-weight: bold;
-            color: {{ brand_pink }};
-            margin-bottom: 20px;
-        }
-        .section {
-            margin-bottom: 30px;
-        }
-        .section-title {
-            font-size: 18px;
-            font-weight: bold;
-            color: #1A1A1A;
-            margin-bottom: 15px;
-            border-bottom: 2px solid {{ brand_pink }};
-            padding-bottom: 10px;
-        }
-        .info-row {
-            margin-bottom: 10px;
-            color: #1A1A1A;
-        }
-        .info-label {
-            font-weight: bold;
-            color: #666;
-        }
-        .product-item {
-            padding: 15px;
-            background-color: #f8f8f8;
-            border-radius: 8px;
-            margin-bottom: 10px;
-        }
-        .product-name {
-            font-weight: bold;
-            color: #1A1A1A;
-            margin-bottom: 5px;
-        }
-        .product-details {
-            color: #666;
-            font-size: 14px;
-        }
-        .total-section {
-            background-color: {{ brand_pink }};
-            color: #ffffff;
-            padding: 20px;
-            border-radius: 8px;
-            margin-top: 20px;
-        }
-        .total-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-        }
-        .total-row.final {
-            font-size: 20px;
-            font-weight: bold;
-            border-top: 1px solid rgba(255,255,255,0.3);
-            padding-top: 15px;
-            margin-top: 15px;
-            margin-bottom: 0;
-        }
-        .footer {
-            background-color: #1A1A1A;
-            color: #ffffff;
-            padding: 30px;
-            text-align: center;
-        }
-        .social-links {
-            margin: 20px 0;
-        }
-        .social-link {
-            display: inline-block;
-            margin: 0 10px;
-            color: #ffffff;
-            text-decoration: none;
-            font-size: 14px;
-        }
-        .button {
-            display: inline-block;
-            background-color: {{ brand_pink }};
-            color: #ffffff;
-            padding: 15px 30px;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: bold;
-            margin-top: 20px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Received</title>
 </head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>{{ site_name }}</h1>
-        </div>
-        
-        <div class="content">
-            <h2 style="color: {{ brand_pink }}; margin-top: 0;">Thank You for Your Order!</h2>
-            <p style="color: #666; margin-bottom: 30px;">
-                We're excited to let you know that we've received your order. Your order details are below.
-            </p>
-            
-            <div class="order-number">Order #{{ order.order_number }}</div>
-            
-            <div class="section">
-                <div class="section-title">Order Information</div>
-                <div class="info-row">
-                    <span class="info-label">Order Date:</span> {{ order.created_at|date:"F d, Y" }}
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Status:</span> {{ order.get_status_display }}
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Payment Method:</span> {{ order.payment_method|title }}
-                </div>
-                {% if order.payment_reference %}
-                <div class="info-row">
-                    <span class="info-label">Transaction ID:</span> {{ order.payment_reference }}
-                </div>
-                {% endif %}
-            </div>
-            
-            <div class="section">
-                <div class="section-title">Shipping Information</div>
-                <div class="info-row">
-                    <span class="info-label">Name:</span> {{ order.full_name }}
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Email:</span> {{ order.email }}
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Phone:</span> {{ order.phone }}
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Address:</span> {{ order.address }}
-                </div>
-                <div class="info-row">
-                    <span class="info-label">City:</span> {{ order.city }}
-                </div>
-                <div class="info-row">
-                    <span class="info-label">State:</span> {{ order.state }}
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Country:</span> {{ order.country }}
-                </div>
-                {% if order.order_notes %}
-                <div class="info-row">
-                    <span class="info-label">Order Notes:</span> {{ order.order_notes }}
-                </div>
-                {% endif %}
-            </div>
-            
-            <div class="section">
-                <div class="section-title">Order Items</div>
-                {% for item in order_items %}
-                <div class="product-item">
-                    <div class="product-name">{{ item.product_name }}</div>
-                    <div class="product-details">
-                        Quantity: {{ item.quantity }} × ₦{{ item.price }} = ₦{{ item.subtotal }}
-                    </div>
-                    {% if item.length %}
-                    <div class="product-details">Length: {{ item.length }}</div>
-                    {% endif %}
-                    {% if item.lace_type %}
-                    <div class="product-details">Lace Type: {{ item.lace_type }}</div>
-                    {% endif %}
-                    {% if item.color %}
-                    <div class="product-details">Color: {{ item.color }}</div>
-                    {% endif %}
-                </div>
-                {% endfor %}
-            </div>
-            
-            <div class="total-section">
-                <div class="total-row">
-                    <span>Subtotal:</span>
-                    <span>₦{{ order.subtotal }}</span>
-                </div>
-                <div class="total-row">
-                    <span>Delivery Fee:</span>
-                    <span>₦{{ order.delivery_fee }}</span>
-                </div>
-                <div class="total-row final">
-                    <span>Total:</span>
-                    <span>₦{{ order.total }}</span>
-                </div>
-            </div>
-            
-            <div style="text-align: center; margin-top: 30px;">
-                <a href="{{ site_url }}" class="button">Track Your Order</a>
-            </div>
-        </div>
-        
-        <div class="footer">
-            <p style="margin: 0 0 20px 0;">{{ site_name }}</p>
-            <div class="social-links">
-                <a href="https://instagram.com/casseohair" class="social-link">Instagram</a>
-                <a href="https://facebook.com/casseohair" class="social-link">Facebook</a>
-                <a href="https://twitter.com/casseohair" class="social-link">Twitter</a>
-                <a href="https://tiktok.com/@casseohair" class="social-link">TikTok</a>
-            </div>
-            <p style="margin: 0; font-size: 12px; color: #999;">
-                © {% now "Y" %} {{ site_name }}. All rights reserved.
-            </p>
-        </div>
-    </div>
+<body style="margin:0;padding:0;background:#f4f4f5;font-family:'Segoe UI',Helvetica,Arial,sans-serif;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f4f4f5;padding:32px 16px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:620px;background:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 18px 50px rgba(0,0,0,0.08);">
+          <tr>
+            <td style="background:linear-gradient(135deg,#801337 0%,#E62E72 50%,#801337 100%);padding:36px 32px;text-align:center;">
+              <img src="{{ logo_url }}" alt="{{ site_name }}" width="72" height="72" style="display:block;margin:0 auto 16px;border-radius:16px;background:#ffffff;padding:8px;">
+              <p style="margin:0 0 8px;font-size:12px;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.85);">Luxury Hair Collection</p>
+              <h1 style="margin:0;font-size:28px;line-height:1.2;color:#ffffff;font-weight:700;">Your Order Is Received</h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:36px 32px;">
+              <p style="margin:0 0 18px;font-size:16px;line-height:1.7;color:#444444;">
+                Dear <strong style="color:#111111;">{{ order.full_name }}</strong>, thank you for choosing {{ site_name }}.
+                We have received your order and saved every detail below.
+              </p>
+
+              {% if not is_paid %}
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 24px;background:#fff7fb;border:1px solid #f5c2d9;border-radius:14px;">
+                <tr>
+                  <td style="padding:18px 20px;">
+                    <p style="margin:0;font-size:14px;line-height:1.6;color:#801337;">
+                      <strong>Next step:</strong> complete your payment to confirm this order. Once payment is successful, you will receive another email with your transaction ID.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+              {% endif %}
+
+              <p style="margin:0 0 24px;font-size:22px;font-weight:700;color:#E62E72;">Order #{{ order.order_number }}</p>
+
+              <h2 style="margin:0 0 14px;font-size:15px;letter-spacing:0.08em;text-transform:uppercase;color:#111111;border-bottom:2px solid #E62E72;padding-bottom:8px;">Order Summary</h2>
+              <p style="margin:0 0 8px;font-size:14px;color:#555555;"><strong>Date:</strong> {{ order.created_at|date:"F d, Y · g:i A" }}</p>
+              <p style="margin:0 0 8px;font-size:14px;color:#555555;"><strong>Status:</strong> {{ order.get_status_display }}</p>
+              <p style="margin:0 0 8px;font-size:14px;color:#555555;"><strong>Payment Method:</strong> {{ order.payment_method|title }}</p>
+              {% if order.payment_reference %}
+              <p style="margin:0 0 24px;font-size:14px;color:#555555;"><strong>Transaction ID:</strong> {{ order.payment_reference }}</p>
+              {% else %}
+              <p style="margin:0 0 24px;font-size:14px;color:#555555;"><strong>Transaction ID:</strong> Pending payment</p>
+              {% endif %}
+
+              <h2 style="margin:0 0 14px;font-size:15px;letter-spacing:0.08em;text-transform:uppercase;color:#111111;border-bottom:2px solid #E62E72;padding-bottom:8px;">Delivery Details</h2>
+              <p style="margin:0 0 8px;font-size:14px;color:#555555;"><strong>Full Name:</strong> {{ order.full_name }}</p>
+              <p style="margin:0 0 8px;font-size:14px;color:#555555;"><strong>Email:</strong> {{ order.email }}</p>
+              <p style="margin:0 0 8px;font-size:14px;color:#555555;"><strong>Phone:</strong> {{ order.phone }}</p>
+              <p style="margin:0 0 8px;font-size:14px;color:#555555;"><strong>Address:</strong> {{ order.address }}, {{ order.city }}, {{ order.state }}, {{ order.country }}</p>
+              {% if order.order_notes %}
+              <p style="margin:0 0 24px;font-size:14px;color:#555555;"><strong>Order Notes:</strong> {{ order.order_notes }}</p>
+              {% else %}
+              <p style="margin:0 0 24px;font-size:14px;color:#555555;"><strong>Order Notes:</strong> None</p>
+              {% endif %}
+
+              <h2 style="margin:0 0 14px;font-size:15px;letter-spacing:0.08em;text-transform:uppercase;color:#111111;border-bottom:2px solid #E62E72;padding-bottom:8px;">Items Purchased</h2>
+              {% for item in order_items %}
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 12px;background:#fafafa;border-radius:12px;">
+                <tr>
+                  <td style="padding:16px 18px;">
+                    <p style="margin:0 0 6px;font-size:15px;font-weight:700;color:#111111;">{{ item.product_name }}</p>
+                    <p style="margin:0 0 4px;font-size:13px;color:#666666;">Qty {{ item.quantity }} × ₦{{ item.price }} = ₦{{ item.subtotal }}</p>
+                    {% if item.length %}<p style="margin:0 0 4px;font-size:13px;color:#666666;">Length: {{ item.length }}</p>{% endif %}
+                    {% if item.lace_type %}<p style="margin:0 0 4px;font-size:13px;color:#666666;">Lace: {{ item.lace_type }}</p>{% endif %}
+                    {% if item.color %}<p style="margin:0;font-size:13px;color:#666666;">Color: {{ item.color }}</p>{% endif %}
+                  </td>
+                </tr>
+              </table>
+              {% endfor %}
+
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-top:24px;background:linear-gradient(135deg,#801337,#E62E72);border-radius:16px;">
+                <tr>
+                  <td style="padding:22px 24px;color:#ffffff;">
+                    <p style="margin:0 0 10px;display:flex;justify-content:space-between;font-size:14px;"><span>Subtotal</span><span>₦{{ order.subtotal }}</span></p>
+                    <p style="margin:0 0 10px;display:flex;justify-content:space-between;font-size:14px;"><span>Delivery Fee</span><span>₦{{ order.delivery_fee }}</span></p>
+                    <p style="margin:0;display:flex;justify-content:space-between;font-size:20px;font-weight:700;border-top:1px solid rgba(255,255,255,0.25);padding-top:14px;"><span>Total</span><span>₦{{ order.total }}</span></p>
+                  </td>
+                </tr>
+              </table>
+
+              <table role="presentation" cellspacing="0" cellpadding="0" style="margin:28px auto 0;">
+                <tr>
+                  <td align="center" style="border-radius:999px;background:#E62E72;">
+                    <a href="{{ site_url }}/shop" style="display:inline-block;padding:14px 28px;color:#ffffff;text-decoration:none;font-size:14px;font-weight:700;">Continue Shopping</a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          {% include "emails/partials/social_footer.html" %}
+        </table>
+      </td>
+    </tr>
+  </table>
 </body>
 </html>

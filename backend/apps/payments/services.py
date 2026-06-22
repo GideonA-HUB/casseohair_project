@@ -4,7 +4,8 @@ import requests
 from django.conf import settings
 from django.utils import timezone
 
-from apps.notifications.services import EmailService, NotificationService
+from apps.core.email_utils import send_payment_confirmation_email
+from apps.notifications.services import NotificationService
 from apps.orders.models import Order
 
 from .models import Payment
@@ -98,9 +99,7 @@ class PaystackService:
                 item.product.stock = max(0, item.product.stock - item.quantity)
                 item.product.save(update_fields=['stock'])
 
-        EmailService.send_payment_success(order)
-        EmailService.send_order_received(order)
-        NotificationService.notify_new_order(order)
+        send_payment_confirmation_email(order)
         NotificationService.notify_payment_received(order)
 
 
