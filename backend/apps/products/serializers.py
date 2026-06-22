@@ -95,10 +95,30 @@ class ProductDetailSerializer(ProductListSerializer):
 class ProductAdminSerializer(serializers.ModelSerializer):
     images = ProductImageSerializer(many=True, read_only=True)
     videos = ProductVideoSerializer(many=True, read_only=True)
+    category_name = serializers.CharField(source='category.name', read_only=True)
+    current_price = serializers.SerializerMethodField()
+    is_on_sale = serializers.SerializerMethodField()
+    primary_image = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
-        fields = '__all__'
+        fields = [
+            'id', 'name', 'slug', 'category', 'category_name', 'description', 'short_description',
+            'price', 'sale_price', 'current_price', 'is_on_sale', 'length', 'density', 'lace_type',
+            'color', 'stock', 'sku', 'is_featured', 'is_bestseller', 'is_new_arrival', 'is_flash_sale',
+            'flash_sale_end_at', 'is_active', 'is_archived', 'meta_title', 'meta_description',
+            'views_count', 'images', 'videos', 'primary_image', 'created_at', 'updated_at',
+        ]
+
+    def get_current_price(self, obj):
+        return obj.current_price
+
+    def get_is_on_sale(self, obj):
+        return obj.is_on_sale
+
+    def get_primary_image(self, obj):
+        primary = obj.images.filter(is_primary=True).first() or obj.images.first()
+        return absolute_media_url(self.context.get('request'), primary.image if primary else None)
 
 
 class ProductReviewCreateSerializer(serializers.ModelSerializer):

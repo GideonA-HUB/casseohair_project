@@ -79,43 +79,73 @@ class AdminMetricsView(APIView):
         month_ago = now - timedelta(days=30)
         year_ago = now - timedelta(days=365)
 
-        # Total metrics
         total_orders = Order.objects.count()
         total_revenue = Order.objects.aggregate(total=Sum('total'))['total'] or 0
 
-        # Today's metrics
         today_orders = Order.objects.filter(created_at__date=today).count()
         today_revenue = Order.objects.filter(created_at__date=today).aggregate(total=Sum('total'))['total'] or 0
 
-        # Week metrics
         week_orders = Order.objects.filter(created_at__gte=week_ago).count()
         week_revenue = Order.objects.filter(created_at__gte=week_ago).aggregate(total=Sum('total'))['total'] or 0
 
-        # Month metrics
         month_orders = Order.objects.filter(created_at__gte=month_ago).count()
         month_revenue = Order.objects.filter(created_at__gte=month_ago).aggregate(total=Sum('total'))['total'] or 0
 
-        # Year metrics
         year_orders = Order.objects.filter(created_at__gte=year_ago).count()
         year_revenue = Order.objects.filter(created_at__gte=year_ago).aggregate(total=Sum('total'))['total'] or 0
 
-        # Other metrics
         pending_reviews = ProductReview.objects.filter(is_approved=False).count()
         active_products = Product.objects.filter(is_active=True, is_archived=False).count()
         newsletter_subscribers = NewsletterSubscriber.objects.filter(is_active=True).count()
 
+        # Daily sales — last 7 days
+        daily_sales = []
+        for i in range(6, -1, -1):
+            day = today - timedelta(days=i)
+            day_orders = Order.objects.filter(created_at__date=day)
+            daily_sales.append({
+                'label': day.strftime('%a'),
+                'date': day.isoformat(),
+                'orders': day_orders.count(),
+                'revenue': float(day_orders.aggregate(total=Sum('total'))['total'] or 0),
+            })
+
+        # Monthly sales — last 6 months
+        monthly_sales = []
+        for i in range(5, -1, -1):
+            month_date = (now.replace(day=1) - timedelta(days=i * 30)).replace(day=1)
+            next_month = (month_date.replace(day=28) + timedelta(days=4)).replace(day=1)
+            month_orders_qs = Order.objects.filter(created_at__gte=month_date, created_at__lt=next_month)
+            monthly_sales.append({
+                'label': month_date.strftime('%b %Y'),
+                'orders': month_orders_qs.count(),
+                'revenue': float(month_orders_qs.aggregate(total=Sum('total'))['total'] or 0),
+            })
+
+        # Order status distribution
+        status_counts = Order.objects.values('status').annotate(count=Count('id')).order_by('-count')
+        order_status_distribution = [
+            {'status': entry['status'], 'count': entry['count']}
+            for entry in status_counts
+        ]
+        if not order_status_distribution:
+            order_status_distribution = [{'status': 'pending', 'count': 0}]
+
         return Response({
             'total_orders': total_orders,
-            'total_revenue': total_revenue,
+            'total_revenue': float(total_revenue),
             'today_orders': today_orders,
-            'today_revenue': today_revenue,
+            'today_revenue': float(today_revenue),
             'week_orders': week_orders,
-            'week_revenue': week_revenue,
+            'week_revenue': float(week_revenue),
             'month_orders': month_orders,
-            'month_revenue': month_revenue,
+            'month_revenue': float(month_revenue),
             'year_orders': year_orders,
-            'year_revenue': year_revenue,
+            'year_revenue': float(year_revenue),
             'pending_reviews': pending_reviews,
             'active_products': active_products,
             'newsletter_subscribers': newsletter_subscribers,
+            'daily_sales': daily_sales,
+            'monthly_sales': monthly_sales,
+            'order_status_distribution': order_status_distribution,
         })

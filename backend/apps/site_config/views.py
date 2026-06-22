@@ -123,9 +123,17 @@ class AdminContactListView(generics.ListAPIView):
     permission_classes = [IsAdminUser]
     serializer_class = ContactSubmissionSerializer
     queryset = ContactSubmission.objects.all()
+    pagination_class = None
 
 
 class AdminNewsletterListView(generics.ListAPIView):
+    permission_classes = [IsAdminUser]
+    serializer_class = NewsletterSubscriberSerializer
+    queryset = NewsletterSubscriber.objects.all()
+    pagination_class = None
+
+
+class AdminNewsletterDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAdminUser]
     serializer_class = NewsletterSubscriberSerializer
     queryset = NewsletterSubscriber.objects.all()
@@ -150,6 +158,7 @@ class AdminTestimonialsView(generics.ListCreateAPIView):
     permission_classes = [IsAdminUser]
     serializer_class = TestimonialSerializer
     queryset = Testimonial.objects.all()
+    pagination_class = None
 
 
 class AdminTestimonialDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -162,6 +171,7 @@ class AdminHeroImagesView(generics.ListCreateAPIView):
     permission_classes = [IsAdminUser]
     serializer_class = HeroImageSerializer
     queryset = HeroImage.objects.all()
+    pagination_class = None
 
 
 class AdminHeroImageView(generics.RetrieveUpdateDestroyAPIView):
@@ -174,6 +184,7 @@ class AdminWhyChooseItemsView(generics.ListCreateAPIView):
     permission_classes = [IsAdminUser]
     serializer_class = WhyChooseItemSerializer
     queryset = WhyChooseItem.objects.all()
+    pagination_class = None
 
 
 class AdminWhyChooseItemDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -187,6 +198,7 @@ class AdminActivityLogsView(generics.ListAPIView):
     serializer_class = AdminActivityLogSerializer
     queryset = AdminActivityLog.objects.all()
     ordering = ['-created_at']
+    pagination_class = None
 
 
 class SitemapView(APIView):

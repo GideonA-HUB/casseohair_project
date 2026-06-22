@@ -131,9 +131,28 @@ class AdminProductListCreateView(generics.ListCreateAPIView):
     serializer_class = ProductAdminSerializer
     filterset_class = ProductFilter
     search_fields = ['name', 'sku']
+    pagination_class = None
 
     def get_queryset(self):
-        return Product.objects.all().select_related('category')
+        return Product.objects.all().select_related('category').prefetch_related('images', 'videos')
+
+    def perform_create(self, serializer):
+        from .models import ProductImage, ProductVideo
+
+        product = serializer.save()
+        for index, image_file in enumerate(self.request.FILES.getlist('images')):
+            ProductImage.objects.create(
+                product=product,
+                image=image_file,
+                is_primary=index == 0,
+                order=index,
+            )
+        for index, video_file in enumerate(self.request.FILES.getlist('videos')):
+            ProductVideo.objects.create(
+                product=product,
+                video=video_file,
+                order=index,
+            )
 
 
 class AdminProductDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -168,6 +187,7 @@ class AdminCategoryListView(generics.ListCreateAPIView):
     permission_classes = [IsAdminUser]
     serializer_class = CategoryDetailSerializer
     queryset = Category.objects.all()
+    pagination_class = None
 
 
 class AdminCategoryDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -180,6 +200,7 @@ class AdminReviewListView(generics.ListAPIView):
     permission_classes = [IsAdminUser]
     serializer_class = ProductReviewListSerializer
     queryset = ProductReview.objects.all()
+    pagination_class = None
 
 
 class AdminReviewDetailView(generics.RetrieveUpdateDestroyAPIView):

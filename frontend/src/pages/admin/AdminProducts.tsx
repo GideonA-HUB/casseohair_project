@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { adminFetch, adminFetchList } from '@/lib/adminApi';
 
 interface Product {
   id: number;
@@ -52,31 +53,12 @@ export default function AdminProducts() {
 
   const { data: products, isLoading, error } = useQuery<Product[]>({
     queryKey: ['admin-products', statusFilter],
-    queryFn: async () => {
-      const token = localStorage.getItem('access_token');
-      const response = await fetch(`/api/v1/products/admin/`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (!response.ok) throw new Error('Failed to fetch products');
-      const data = await response.json();
-      return Array.isArray(data) ? data : data.results || [];
-    },
+    queryFn: () => adminFetchList<Product>('/api/v1/products/admin/'),
   });
 
   const { data: categories } = useQuery<Category[]>({
     queryKey: ['categories'],
-    queryFn: async () => {
-      const token = localStorage.getItem('access_token');
-      const response = await fetch('/api/v1/products/categories/', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (!response.ok) throw new Error('Failed to fetch categories');
-      return response.json();
-    },
+    queryFn: () => adminFetchList<Category>('/api/v1/products/categories/'),
   });
 
   const filteredProducts = products?.filter(product =>

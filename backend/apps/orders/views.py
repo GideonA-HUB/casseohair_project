@@ -46,6 +46,7 @@ class AdminOrderListView(generics.ListAPIView):
     search_fields = ['order_number', 'email', 'full_name', 'phone']
     ordering_fields = ['created_at', 'total']
     ordering = ['-created_at']
+    pagination_class = None
 
     def get_queryset(self):
         status_filter = self.request.query_params.get('status')

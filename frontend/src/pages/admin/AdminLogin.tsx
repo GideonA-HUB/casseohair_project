@@ -34,7 +34,8 @@ export default function AdminLogin() {
         localStorage.setItem('admin_user', JSON.stringify(data.user));
         navigate('/dashboard');
       } else {
-        setError(data.detail || 'Invalid credentials');
+        const detail = data.non_field_errors?.[0] || data.detail || 'Invalid credentials';
+        setError(typeof detail === 'string' ? detail : 'Invalid credentials');
       }
     } catch (err) {
       setError('Something went wrong. Please try again.');

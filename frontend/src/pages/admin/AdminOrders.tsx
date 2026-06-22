@@ -1,311 +1,268 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useQuery } from '@tanstack/react-query';
-
-interface Order {
-  id: number;
-  order_number: string;
-  customer_name: string;
-  customer_email: string;
-  customer_phone: string;
-  delivery_address: string;
-  city: string;
-  state: string;
-  total_amount: number;
-  payment_method: string;
-  transaction_id: string;
-  payment_status: string;
-  order_status: string;
-  created_at: string;
-  items: OrderItem[];
-}
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { adminFetch, adminFetchList, formatNaira } from '@/lib/adminApi';
 
 interface OrderItem {
   id: number;
   product_name: string;
   product_slug: string;
+  price: string;
   quantity: number;
-  price: number;
-  hair_length: string;
-  hair_density: string;
+  subtotal: string;
+  length: string;
   lace_type: string;
-  hair_color: string;
+  color: string;
 }
+
+interface Order {
+  id: number;
+  order_number: string;
+  full_name: string;
+  email: string;
+  phone: string;
+  address: string;
+  city: string;
+  state: string;
+  country: string;
+  order_notes: string;
+  subtotal: string;
+  delivery_fee: string;
+  total: string;
+  status: string;
+  payment_method: string;
+  payment_reference: string;
+  is_paid: boolean;
+  items: OrderItem[];
+  created_at: string;
+}
+
+const STATUS_COLORS: Record<string, string> = {
+  pending: 'bg-amber-100 text-amber-800',
+  paid: 'bg-emerald-100 text-emerald-800',
+  processing: 'bg-blue-100 text-blue-800',
+  confirmed: 'bg-violet-100 text-violet-800',
+  shipped: 'bg-cyan-100 text-cyan-800',
+  delivered: 'bg-green-100 text-green-800',
+  cancelled: 'bg-red-100 text-red-800',
+  refunded: 'bg-slate-100 text-slate-800',
+};
 
 export default function AdminOrders() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [statusFilter, setStatusFilter] = useState('all');
+  const queryClient = useQueryClient();
 
-  const { data: orders, isLoading } = useQuery<Order[]>({
+  const { data: orders = [], isLoading } = useQuery<Order[]>({
     queryKey: ['admin-orders', statusFilter],
-    queryFn: async () => {
-      const token = localStorage.getItem('access_token');
-      const response = await fetch(`/api/v1/orders/admin/?status=${statusFilter}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (!response.ok) throw new Error('Failed to fetch orders');
-      return response.json();
-    },
+    queryFn: () =>
+      adminFetchList<Order>(
+        `/api/v1/orders/admin/${statusFilter !== 'all' ? `?status=${statusFilter}` : ''}`,
+      ),
   });
 
   const updateOrderStatus = async (orderId: number, status: string) => {
-    const token = localStorage.getItem('access_token');
-    await fetch(`/api/v1/orders/admin/${orderId}/status/`, {
+    await adminFetch(`/api/v1/orders/admin/${orderId}/status/`, {
       method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
       body: JSON.stringify({ status }),
     });
-    // Refetch orders
-  };
-
-  const statusColors: Record<string, string> = {
-    pending: 'bg-yellow-100 text-yellow-800',
-    processing: 'bg-blue-100 text-blue-800',
-    shipped: 'bg-purple-100 text-purple-800',
-    delivered: 'bg-green-100 text-green-800',
-    cancelled: 'bg-red-100 text-red-800',
+    queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
+    if (selectedOrder) setSelectedOrder({ ...selectedOrder, status });
   };
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex items-center justify-between"
-      >
-        <h1 className="text-2xl font-bold text-brand-black">Orders Management</h1>
-        <div className="flex gap-4">
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-4 py-2 rounded-lg border border-brand-gray-200 focus:border-brand-pink outline-none"
-          >
-            <option value="all">All Orders</option>
-            <option value="pending">Pending</option>
-            <option value="processing">Processing</option>
-            <option value="shipped">Shipped</option>
-            <option value="delivered">Delivered</option>
-            <option value="cancelled">Cancelled</option>
-          </select>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Orders</h1>
+          <p className="text-sm text-slate-500">Full customer and delivery details for every order</p>
         </div>
-      </motion.div>
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-brand-pink"
+        >
+          <option value="all">All Orders</option>
+          <option value="pending">Pending</option>
+          <option value="paid">Paid</option>
+          <option value="processing">Processing</option>
+          <option value="shipped">Shipped</option>
+          <option value="delivered">Delivered</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
 
-      {/* Orders Table */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="bg-white rounded-2xl shadow-lg border border-brand-gray-100 overflow-hidden"
-      >
+      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         {isLoading ? (
-          <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-4 border-brand-pink border-t-transparent" />
+          <div className="flex h-64 items-center justify-center">
+            <div className="h-12 w-12 animate-spin rounded-full border-4 border-brand-pink border-t-transparent" />
           </div>
+        ) : orders.length === 0 ? (
+          <div className="py-16 text-center text-slate-400">No orders yet</div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-brand-gray-50">
+            <table className="w-full min-w-[900px]">
+              <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
                 <tr>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-brand-accent">Order #</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-brand-accent">Customer</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-brand-accent">Email</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-brand-accent">Phone</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-brand-accent">Total</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-brand-accent">Status</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-brand-accent">Date</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-brand-accent">Actions</th>
+                  <th className="px-5 py-4">Order #</th>
+                  <th className="px-5 py-4">Customer</th>
+                  <th className="px-5 py-4">Phone</th>
+                  <th className="px-5 py-4">Total</th>
+                  <th className="px-5 py-4">Payment</th>
+                  <th className="px-5 py-4">Status</th>
+                  <th className="px-5 py-4">Date</th>
+                  <th className="px-5 py-4">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-brand-gray-100">
-                {orders?.map((order, index) => (
-                  <motion.tr
-                    key={order.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                    className="hover:bg-brand-gray-50 transition-colors"
-                  >
-                    <td className="px-6 py-4 text-sm font-medium text-brand-pink">{order.order_number}</td>
-                    <td className="px-6 py-4 text-sm text-brand-accent">{order.customer_name}</td>
-                    <td className="px-6 py-4 text-sm text-brand-accent">{order.customer_email}</td>
-                    <td className="px-6 py-4 text-sm text-brand-accent">{order.customer_phone}</td>
-                    <td className="px-6 py-4 text-sm font-medium text-brand-accent">
-                      ₦{order.total_amount.toLocaleString()}
+              <tbody className="divide-y divide-slate-100">
+                {orders.map((order) => (
+                  <tr key={order.id} className="hover:bg-slate-50/80">
+                    <td className="px-5 py-4 text-sm font-semibold text-brand-pink">{order.order_number}</td>
+                    <td className="px-5 py-4">
+                      <p className="text-sm font-medium text-slate-900">{order.full_name}</p>
+                      <p className="text-xs text-slate-400">{order.email}</p>
                     </td>
-                    <td className="px-6 py-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusColors[order.order_status]}`}>
-                        {order.order_status}
+                    <td className="px-5 py-4 text-sm text-slate-600">{order.phone}</td>
+                    <td className="px-5 py-4 text-sm font-semibold text-slate-900">{formatNaira(order.total)}</td>
+                    <td className="px-5 py-4 text-xs capitalize text-slate-600">
+                      {order.payment_method}
+                      <br />
+                      <span className={order.is_paid ? 'text-emerald-600' : 'text-amber-600'}>
+                        {order.is_paid ? 'Paid' : 'Unpaid'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-brand-accent">
+                    <td className="px-5 py-4">
+                      <span
+                        className={`rounded-full px-2.5 py-1 text-xs font-medium capitalize ${STATUS_COLORS[order.status] || 'bg-slate-100 text-slate-700'}`}
+                      >
+                        {order.status}
+                      </span>
+                    </td>
+                    <td className="px-5 py-4 text-sm text-slate-500">
                       {new Date(order.created_at).toLocaleDateString()}
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-5 py-4">
                       <button
+                        type="button"
                         onClick={() => setSelectedOrder(order)}
-                        className="text-brand-pink hover:text-brand-pink/80 font-medium text-sm"
+                        className="text-sm font-medium text-brand-pink hover:underline"
                       >
                         View Details
                       </button>
                     </td>
-                  </motion.tr>
+                  </tr>
                 ))}
               </tbody>
             </table>
           </div>
         )}
-      </motion.div>
+      </div>
 
-      {/* Order Detail Modal */}
       {selectedOrder && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
           onClick={() => setSelectedOrder(null)}
         >
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
+            initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+            className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-white shadow-2xl"
           >
-            <div className="p-6 border-b border-brand-gray-200">
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-brand-black">Order #{selectedOrder.order_number}</h2>
-                <button
-                  onClick={() => setSelectedOrder(null)}
-                  className="text-brand-accent hover:text-brand-pink"
-                >
-                  ✕
-                </button>
+            <div className="sticky top-0 flex items-center justify-between border-b border-slate-100 bg-white px-6 py-4">
+              <div>
+                <h2 className="text-xl font-bold text-slate-900">Order #{selectedOrder.order_number}</h2>
+                <p className="text-sm text-slate-500">{new Date(selectedOrder.created_at).toLocaleString()}</p>
               </div>
+              <button type="button" onClick={() => setSelectedOrder(null)} className="text-slate-400 hover:text-slate-600">
+                ✕
+              </button>
             </div>
 
-            <div className="p-6 space-y-6">
-              {/* Customer Information */}
-              <div>
-                <h3 className="text-lg font-semibold text-brand-black mb-4">Customer Information</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm text-brand-accent/60">Name</p>
-                    <p className="font-medium text-brand-accent">{selectedOrder.customer_name}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-brand-accent/60">Email</p>
-                    <p className="font-medium text-brand-accent">{selectedOrder.customer_email}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-brand-accent/60">Phone</p>
-                    <p className="font-medium text-brand-accent">{selectedOrder.customer_phone}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-brand-accent/60">Delivery Address</p>
-                    <p className="font-medium text-brand-accent">{selectedOrder.delivery_address}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-brand-accent/60">City</p>
-                    <p className="font-medium text-brand-accent">{selectedOrder.city}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-brand-accent/60">State</p>
-                    <p className="font-medium text-brand-accent">{selectedOrder.state}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Payment Information */}
-              <div>
-                <h3 className="text-lg font-semibold text-brand-black mb-4">Payment Information</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm text-brand-accent/60">Payment Method</p>
-                    <p className="font-medium text-brand-accent">{selectedOrder.payment_method}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-brand-accent/60">Transaction ID</p>
-                    <p className="font-medium text-brand-accent">{selectedOrder.transaction_id}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-brand-accent/60">Payment Status</p>
-                    <p className="font-medium text-brand-accent">{selectedOrder.payment_status}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-brand-accent/60">Total Amount</p>
-                    <p className="font-medium text-brand-pink text-xl">₦{selectedOrder.total_amount.toLocaleString()}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Order Items */}
-              <div>
-                <h3 className="text-lg font-semibold text-brand-black mb-4">Order Items</h3>
-                <div className="space-y-4">
-                  {selectedOrder.items.map((item) => (
-                    <div key={item.id} className="bg-brand-gray-50 rounded-xl p-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <p className="text-sm text-brand-accent/60">Product</p>
-                          <p className="font-medium text-brand-accent">{item.product_name}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-brand-accent/60">Quantity</p>
-                          <p className="font-medium text-brand-accent">{item.quantity}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-brand-accent/60">Price</p>
-                          <p className="font-medium text-brand-accent">₦{item.price.toLocaleString()}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-brand-accent/60">Hair Length</p>
-                          <p className="font-medium text-brand-accent">{item.hair_length}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-brand-accent/60">Hair Density</p>
-                          <p className="font-medium text-brand-accent">{item.hair_density}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-brand-accent/60">Lace Type</p>
-                          <p className="font-medium text-brand-accent">{item.lace_type}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-brand-accent/60">Hair Color</p>
-                          <p className="font-medium text-brand-accent">{item.hair_color}</p>
-                        </div>
-                      </div>
+            <div className="space-y-6 p-6">
+              <section>
+                <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-brand-pink">Customer</h3>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {[
+                    ['Full Name', selectedOrder.full_name],
+                    ['Email', selectedOrder.email],
+                    ['Phone', selectedOrder.phone],
+                    ['Address', selectedOrder.address],
+                    ['City', selectedOrder.city],
+                    ['State', selectedOrder.state],
+                    ['Country', selectedOrder.country],
+                    ['Order Notes', selectedOrder.order_notes || 'None'],
+                  ].map(([label, value]) => (
+                    <div key={label} className="rounded-xl bg-slate-50 px-4 py-3">
+                      <p className="text-xs text-slate-400">{label}</p>
+                      <p className="text-sm font-medium text-slate-900">{value}</p>
                     </div>
                   ))}
                 </div>
-              </div>
+              </section>
 
-              {/* Order Status Update */}
-              <div>
-                <h3 className="text-lg font-semibold text-brand-black mb-4">Update Order Status</h3>
-                <div className="flex gap-4">
-                  {Object.keys(statusColors).map((status) => (
+              <section>
+                <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-brand-pink">Payment</h3>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {[
+                    ['Method', selectedOrder.payment_method],
+                    ['Transaction ID', selectedOrder.payment_reference || 'Pending'],
+                    ['Status', selectedOrder.is_paid ? 'Paid' : 'Unpaid'],
+                    ['Total', formatNaira(selectedOrder.total)],
+                    ['Subtotal', formatNaira(selectedOrder.subtotal)],
+                    ['Delivery Fee', formatNaira(selectedOrder.delivery_fee)],
+                  ].map(([label, value]) => (
+                    <div key={label} className="rounded-xl bg-slate-50 px-4 py-3">
+                      <p className="text-xs text-slate-400">{label}</p>
+                      <p className="text-sm font-medium capitalize text-slate-900">{value}</p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              <section>
+                <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-brand-pink">Items</h3>
+                <div className="space-y-3">
+                  {selectedOrder.items?.map((item) => (
+                    <div key={item.id} className="rounded-xl border border-slate-100 p-4">
+                      <p className="font-medium text-slate-900">{item.product_name}</p>
+                      <p className="mt-1 text-sm text-slate-500">
+                        Qty {item.quantity} × {formatNaira(item.price)} = {formatNaira(item.subtotal)}
+                      </p>
+                      {(item.length || item.lace_type || item.color) && (
+                        <p className="mt-1 text-xs text-slate-400">
+                          {[item.length && `Length: ${item.length}`, item.lace_type && `Lace: ${item.lace_type}`, item.color && `Color: ${item.color}`]
+                            .filter(Boolean)
+                            .join(' · ')}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              <section>
+                <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-brand-pink">Update Status</h3>
+                <div className="flex flex-wrap gap-2">
+                  {['pending', 'paid', 'processing', 'shipped', 'delivered', 'cancelled'].map((status) => (
                     <button
                       key={status}
+                      type="button"
                       onClick={() => updateOrderStatus(selectedOrder.id, status)}
-                      className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                        selectedOrder.order_status === status
-                          ? statusColors[status]
-                          : 'bg-brand-gray-100 text-brand-accent hover:bg-brand-gray-200'
+                      className={`rounded-lg px-3 py-1.5 text-xs font-medium capitalize ${
+                        selectedOrder.status === status
+                          ? STATUS_COLORS[status]
+                          : 'border border-slate-200 text-slate-600 hover:border-brand-pink/30'
                       }`}
                     >
-                      {status.charAt(0).toUpperCase() + status.slice(1)}
+                      {status}
                     </button>
                   ))}
                 </div>
-              </div>
+              </section>
             </div>
           </motion.div>
-        </motion.div>
+        </div>
       )}
     </div>
   );

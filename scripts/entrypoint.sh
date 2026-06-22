@@ -19,6 +19,9 @@ else:
 echo "Running migrations..."
 python manage.py migrate --noinput
 
+echo "Syncing admin user from environment variables..."
+python manage.py sync_admin_user
+
 echo "Removing legacy seed categories (if any)..."
 python manage.py cleanup_legacy_categories
 

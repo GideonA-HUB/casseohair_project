@@ -1,35 +1,48 @@
 import { useState, useEffect } from 'react';
-import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { Outlet, useNavigate, useLocation, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import {
+  LayoutDashboard,
+  ShoppingCart,
+  Package,
+  FolderOpen,
+  Star,
+  Bell,
+  Mail,
+  MessageSquare,
+  Image,
+  Newspaper,
+  Sparkles,
+  Settings,
+  ScrollText,
+  LogOut,
+  Menu,
+  X,
+  ExternalLink,
+} from 'lucide-react';
 
-interface NavItem {
-  id: string;
-  label: string;
-  icon: string;
-  path: string;
-}
-
-const navItems: NavItem[] = [
-  { id: 'dashboard', label: 'Dashboard', icon: '📊', path: '/dashboard' },
-  { id: 'orders', label: 'Orders', icon: '🛒', path: '/dashboard/orders' },
-  { id: 'products', label: 'Products', icon: '📦', path: '/dashboard/products' },
-  { id: 'categories', label: 'Categories', icon: '📁', path: '/dashboard/categories' },
-  { id: 'reviews', label: 'Reviews', icon: '⭐', path: '/dashboard/reviews' },
-  { id: 'notifications', label: 'Notifications', icon: '🔔', path: '/dashboard/notifications' },
-  { id: 'contacts', label: 'Contact Submissions', icon: '📧', path: '/dashboard/contacts' },
-  { id: 'hero-images', label: 'Hero Images', icon: '🖼️', path: '/dashboard/hero-images' },
-  { id: 'newsletter', label: 'Newsletter', icon: '📬', path: '/dashboard/newsletter' },
-  { id: 'testimonials', label: 'Testimonials', icon: '💬', path: '/dashboard/testimonials' },
-  { id: 'why-choose', label: 'Why Choose', icon: '✨', path: '/dashboard/why-choose' },
-  { id: 'settings', label: 'Site Settings', icon: '⚙️', path: '/dashboard/settings' },
-  { id: 'activity-logs', label: 'Activity Logs', icon: '📝', path: '/dashboard/activity-logs' },
+const navItems = [
+  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
+  { id: 'orders', label: 'Orders', icon: ShoppingCart, path: '/dashboard/orders' },
+  { id: 'products', label: 'Products', icon: Package, path: '/dashboard/products' },
+  { id: 'categories', label: 'Categories', icon: FolderOpen, path: '/dashboard/categories' },
+  { id: 'reviews', label: 'Reviews', icon: Star, path: '/dashboard/reviews' },
+  { id: 'notifications', label: 'Notifications', icon: Bell, path: '/dashboard/notifications' },
+  { id: 'contacts', label: 'Contacts', icon: Mail, path: '/dashboard/contacts' },
+  { id: 'hero-images', label: 'Hero Images', icon: Image, path: '/dashboard/hero-images' },
+  { id: 'newsletter', label: 'Newsletter', icon: Newspaper, path: '/dashboard/newsletter' },
+  { id: 'testimonials', label: 'Testimonials', icon: MessageSquare, path: '/dashboard/testimonials' },
+  { id: 'why-choose', label: 'Why Choose', icon: Sparkles, path: '/dashboard/why-choose' },
+  { id: 'settings', label: 'Site Settings', icon: Settings, path: '/dashboard/settings' },
+  { id: 'activity-logs', label: 'Activity Logs', icon: ScrollText, path: '/dashboard/activity-logs' },
 ];
 
 export default function AdminLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [user, setUser] = useState<any>(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [user, setUser] = useState<{ username: string; email: string } | null>(null);
 
   useEffect(() => {
     const adminUser = localStorage.getItem('admin_user');
@@ -48,122 +61,119 @@ export default function AdminLayout() {
   };
 
   const isActive = (path: string) => location.pathname === path;
+  const currentPage = navItems.find((item) => isActive(item.path))?.label || 'Dashboard';
+
+  const SidebarContent = () => (
+    <>
+      <div className="border-b border-white/10 p-6">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-pink text-sm font-bold text-white shadow-lg shadow-brand-pink/40">
+            CH
+          </div>
+          <div>
+            <h1 className="font-display text-lg font-bold text-white">CasseoHair</h1>
+            <p className="text-xs text-white/50">Owner Dashboard</p>
+          </div>
+        </div>
+      </div>
+
+      <nav className="flex-1 space-y-1 overflow-y-auto p-3">
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          const active = isActive(item.path);
+          return (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => {
+                navigate(item.path);
+                setMobileOpen(false);
+              }}
+              className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all ${
+                active
+                  ? 'bg-gradient-to-r from-brand-pink to-brand-pink-dark text-white shadow-lg shadow-brand-pink/30'
+                  : 'text-white/70 hover:bg-white/10 hover:text-white'
+              }`}
+            >
+              <Icon className="h-4 w-4 shrink-0" />
+              <span>{item.label}</span>
+            </button>
+          );
+        })}
+      </nav>
+
+      <div className="border-t border-white/10 p-4">
+        {user && (
+          <div className="mb-3 rounded-xl bg-white/5 px-3 py-2">
+            <p className="truncate text-sm font-medium text-white">{user.username}</p>
+            <p className="truncate text-xs text-white/50">{user.email}</p>
+          </div>
+        )}
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 py-2.5 text-sm font-medium text-white/80 transition hover:bg-white/10"
+        >
+          <LogOut className="h-4 w-4" />
+          Logout
+        </button>
+      </div>
+    </>
+  );
 
   return (
-    <div className="min-h-screen bg-brand-gray-50 flex">
-      {/* Sidebar */}
-      <AnimatePresence mode="wait">
+    <div className="min-h-screen bg-slate-50">
+      {/* Desktop sidebar */}
+      <AnimatePresence>
         {sidebarOpen && (
           <motion.aside
-            initial={{ x: -300 }}
+            initial={{ x: -280 }}
             animate={{ x: 0 }}
-            exit={{ x: -300 }}
-            transition={{ duration: 0.3, ease: 'easeInOut' }}
-            className="w-72 bg-white border-r border-brand-gray-200 fixed h-full z-30 overflow-y-auto"
+            exit={{ x: -280 }}
+            className="fixed z-30 hidden h-full w-64 flex-col bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 lg:flex"
           >
-            {/* Logo */}
-            <div className="p-6 border-b border-brand-gray-200">
-              <h1 className="text-2xl font-display font-bold text-brand-pink">
-                CasseoHair
-              </h1>
-              <p className="text-sm text-brand-accent/60 mt-1">Admin Dashboard</p>
-            </div>
-
-            {/* Navigation */}
-            <nav className="p-4 space-y-1">
-              {navItems.map((item) => (
-                <motion.button
-                  key={item.id}
-                  onClick={() => navigate(item.path)}
-                  whileHover={{ x: 4 }}
-                  whileTap={{ scale: 0.98 }}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-                    isActive(item.path)
-                      ? 'bg-brand-pink text-white shadow-lg shadow-brand-pink/30'
-                      : 'text-brand-accent hover:bg-brand-gray-100'
-                  }`}
-                >
-                  <span className="text-lg">{item.icon}</span>
-                  <span className="font-medium">{item.label}</span>
-                </motion.button>
-              ))}
-            </nav>
-
-            {/* User Info */}
-            <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-brand-gray-200 bg-white">
-              {user && (
-                <div className="mb-4">
-                  <p className="font-medium text-brand-black">{user.username}</p>
-                  <p className="text-sm text-brand-accent/60">{user.email}</p>
-                </div>
-              )}
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={handleLogout}
-                className="w-full bg-brand-gray-100 text-brand-accent font-medium py-2.5 px-4 rounded-xl hover:bg-brand-gray-200 transition-all"
-              >
-                Logout
-              </motion.button>
-            </div>
+            <SidebarContent />
           </motion.aside>
         )}
       </AnimatePresence>
 
-      {/* Main Content */}
-      <div className={`flex-1 ${sidebarOpen ? 'ml-72' : 'ml-0'} transition-all duration-300`}>
-        {/* Header */}
-        <header className="bg-white border-b border-brand-gray-200 px-6 py-4 sticky top-0 z-20">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="p-2 rounded-lg hover:bg-brand-gray-100 transition-colors"
+      {/* Mobile sidebar */}
+      {mobileOpen && (
+        <div className="fixed inset-0 z-40 lg:hidden">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setMobileOpen(false)} />
+          <aside className="absolute left-0 top-0 flex h-full w-64 flex-col bg-gradient-to-b from-slate-900 to-slate-950">
+            <SidebarContent />
+          </aside>
+        </div>
+      )}
+
+      <div className={`transition-all ${sidebarOpen ? 'lg:ml-64' : 'lg:ml-0'}`}>
+        <header className="sticky top-0 z-20 border-b border-slate-200/80 bg-white/80 backdrop-blur-xl">
+          <div className="flex items-center justify-between px-4 py-3 md:px-6">
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => (window.innerWidth < 1024 ? setMobileOpen(true) : setSidebarOpen(!sidebarOpen))}
+                className="rounded-lg p-2 text-slate-600 hover:bg-slate-100"
               >
-                <svg
-                  className="w-6 h-6 text-brand-accent"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  {sidebarOpen ? (
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  ) : (
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 6h16M4 12h16M4 18h16"
-                    />
-                  )}
-                </svg>
-              </motion.button>
-              <h2 className="text-xl font-semibold text-brand-black">
-                {navItems.find((item) => isActive(item.path))?.label || 'Dashboard'}
-              </h2>
+                {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              </button>
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wider text-brand-pink">Admin</p>
+                <h2 className="text-lg font-semibold text-slate-900">{currentPage}</h2>
+              </div>
             </div>
-            <div className="flex items-center gap-4">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => navigate('/')}
-                className="text-sm text-brand-accent hover:text-brand-pink transition-colors"
-              >
-                View Website
-              </motion.button>
-            </div>
+            <Link
+              to="/"
+              className="flex items-center gap-1.5 rounded-full border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:border-brand-pink/30 hover:text-brand-pink"
+            >
+              <ExternalLink className="h-3.5 w-3.5" />
+              View Website
+            </Link>
           </div>
         </header>
 
-        {/* Page Content */}
-        <main className="p-6">
+        <main className="p-4 md:p-6 lg:p-8">
           <Outlet />
         </main>
       </div>

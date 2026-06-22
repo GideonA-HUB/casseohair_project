@@ -11,6 +11,7 @@ from .serializers import NotificationSerializer
 class AdminNotificationListView(generics.ListAPIView):
     permission_classes = [IsAdminUser]
     serializer_class = NotificationSerializer
+    pagination_class = None
 
     def get_queryset(self):
         return Notification.objects.all()[:50]

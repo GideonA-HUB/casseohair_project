@@ -9,7 +9,7 @@ class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(max_length=120, unique=True, blank=True)
     description = models.TextField(blank=True)
-    image = models.ImageField(upload_to='categories/')
+    image = models.ImageField(upload_to='categories/', blank=True, null=True)
     item_count_display = models.PositiveIntegerField(default=0, help_text='Display count override')
     is_featured = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)

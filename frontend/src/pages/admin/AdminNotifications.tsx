@@ -1,28 +1,20 @@
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
+import { adminFetchList } from '@/lib/adminApi';
 
 interface Notification {
   id: number;
   title: string;
   message: string;
-  type: string;
+  notification_type: string;
   is_read: boolean;
   created_at: string;
 }
 
 export default function AdminNotifications() {
-  const { data: notifications, isLoading } = useQuery<Notification[]>({
+  const { data: notifications = [], isLoading } = useQuery<Notification[]>({
     queryKey: ['admin-notifications'],
-    queryFn: async () => {
-      const token = localStorage.getItem('access_token');
-      const response = await fetch('/api/v1/notifications/admin/list/', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (!response.ok) throw new Error('Failed to fetch notifications');
-      return response.json();
-    },
+    queryFn: () => adminFetchList<Notification>('/api/v1/notifications/admin/list/'),
   });
 
   const getTypeColor = (type: string) => {
@@ -70,8 +62,8 @@ export default function AdminNotifications() {
             >
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-3">
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${getTypeColor(notification.type)}`}>
-                    {notification.type}
+                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${getTypeColor(notification.notification_type)}`}>
+                    {notification.notification_type}
                   </span>
                   {!notification.is_read && (
                     <span className="w-2 h-2 rounded-full bg-brand-pink" />
