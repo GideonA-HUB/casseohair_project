@@ -33,6 +33,8 @@ interface Order {
   payment_method: string;
   payment_reference: string;
   is_paid: boolean;
+  agreed_to_terms?: boolean;
+  terms_agreed_at?: string | null;
   items: OrderItem[];
   created_at: string;
 }
@@ -109,6 +111,7 @@ export default function AdminOrders() {
                   <th className="px-5 py-4">Phone</th>
                   <th className="px-5 py-4">Total</th>
                   <th className="px-5 py-4">Payment</th>
+                  <th className="px-5 py-4">Terms</th>
                   <th className="px-5 py-4">Status</th>
                   <th className="px-5 py-4">Date</th>
                   <th className="px-5 py-4">Actions</th>
@@ -130,6 +133,17 @@ export default function AdminOrders() {
                       <span className={order.is_paid ? 'text-emerald-600' : 'text-amber-600'}>
                         {order.is_paid ? 'Paid' : 'Unpaid'}
                       </span>
+                    </td>
+                    <td className="px-5 py-4">
+                      {order.agreed_to_terms ? (
+                        <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-medium text-emerald-700">
+                          Agreed
+                        </span>
+                      ) : (
+                        <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-500">
+                          —
+                        </span>
+                      )}
                     </td>
                     <td className="px-5 py-4">
                       <span
@@ -192,6 +206,31 @@ export default function AdminOrders() {
                     ['State', selectedOrder.state],
                     ['Country', selectedOrder.country],
                     ['Order Notes', selectedOrder.order_notes || 'None'],
+                  ].map(([label, value]) => (
+                    <div key={label} className="rounded-xl bg-slate-50 px-4 py-3">
+                      <p className="text-xs text-slate-400">{label}</p>
+                      <p className="text-sm font-medium text-slate-900">{value}</p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              <section>
+                <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-brand-pink">Legal Agreement</h3>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {[
+                    [
+                      'Terms & Refund Policy',
+                      selectedOrder.agreed_to_terms ? 'Customer agreed at checkout' : 'Not recorded',
+                    ],
+                    [
+                      'Agreed At',
+                      selectedOrder.terms_agreed_at
+                        ? new Date(selectedOrder.terms_agreed_at).toLocaleString()
+                        : selectedOrder.agreed_to_terms
+                          ? 'At checkout'
+                          : '—',
+                    ],
                   ].map(([label, value]) => (
                     <div key={label} className="rounded-xl bg-slate-50 px-4 py-3">
                       <p className="text-xs text-slate-400">{label}</p>

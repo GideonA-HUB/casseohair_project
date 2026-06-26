@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { readPersistedTheme } from '@/store/themeStore';
 import { Outlet, useNavigate, useLocation, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -19,11 +20,13 @@ import {
   Menu,
   X,
   ExternalLink,
+  ShieldCheck,
 } from 'lucide-react';
 
 const navItems = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
   { id: 'orders', label: 'Orders', icon: ShoppingCart, path: '/dashboard/orders' },
+  { id: 'legal-agreements', label: 'Legal Agreements', icon: ShieldCheck, path: '/dashboard/legal-agreements' },
   { id: 'products', label: 'Products', icon: Package, path: '/dashboard/products' },
   { id: 'categories', label: 'Categories', icon: FolderOpen, path: '/dashboard/categories' },
   { id: 'reviews', label: 'Reviews', icon: Star, path: '/dashboard/reviews' },
@@ -52,6 +55,22 @@ export default function AdminLayout() {
       setUser(JSON.parse(adminUser));
     }
   }, [navigate]);
+
+  // Owner dashboard keeps its own light UI — storefront dark mode must not bleed in
+  useEffect(() => {
+    document.documentElement.classList.remove('dark');
+    document.documentElement.style.colorScheme = 'light';
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', '#E62E72');
+
+    return () => {
+      if (readPersistedTheme() === 'dark') {
+        document.documentElement.classList.add('dark');
+        document.documentElement.style.colorScheme = 'dark';
+        if (meta) meta.setAttribute('content', '#0a0a0a');
+      }
+    };
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('access_token');

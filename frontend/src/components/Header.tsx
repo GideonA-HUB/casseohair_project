@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCartStore } from '@/store/cartStore';
 import MobileMenu from './MobileMenu';
+import ThemeToggle from './ThemeToggle';
 import { BRAND_WHATSAPP } from '@/constants/brand';
 
 interface HeaderProps {
@@ -48,9 +49,12 @@ export default function Header({ whatsappNumber }: HeaderProps) {
               </svg>
               Contact Us
             </a>
-            <div className="flex items-center gap-1.5 text-white/90">
-              <span className="text-sm leading-none">🇳🇬</span>
-              <span className="font-medium text-white">NGN</span>
+            <div className="flex items-center gap-3">
+              <ThemeToggle compact />
+              <div className="flex items-center gap-1.5 text-white/90">
+                <span className="text-sm leading-none">🇳🇬</span>
+                <span className="font-medium text-white">NGN</span>
+              </div>
             </div>
           </div>
         </div>

@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { ShieldCheck } from 'lucide-react';
 import SEO from '@/components/SEO';
 import { ordersApi, paymentsApi } from '@/api';
 import { useCartStore } from '@/store/cartStore';
@@ -18,6 +19,9 @@ const checkoutSchema = z.object({
   country: z.string().default('Nigeria'),
   order_notes: z.string().optional(),
   payment_method: z.enum(['paystack', 'flutterwave']),
+  agreed_to_terms: z.boolean().refine((val) => val === true, {
+    message: 'You must agree to our Terms of Service and Refund Policy before placing your order.',
+  }),
 });
 
 type CheckoutForm = z.infer<typeof checkoutSchema>;
@@ -45,10 +49,12 @@ export default function CheckoutPage() {
     defaultValues: {
       country: 'Nigeria',
       payment_method: 'paystack',
+      agreed_to_terms: false,
     },
   });
 
   const paymentMethod = watch('payment_method');
+  const agreedToTerms = watch('agreed_to_terms');
 
   if (items.length === 0) {
     return (
@@ -76,13 +82,19 @@ export default function CheckoutPage() {
       clearCart();
       window.location.href = paymentRes.data.authorization_url;
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Checkout failed. Please try again.';
+      let message = err instanceof Error ? err.message : 'Checkout failed. Please try again.';
       if (typeof err === 'object' && err !== null && 'response' in err) {
-        const axiosErr = err as { response?: { data?: { detail?: string } } };
-        setError(axiosErr.response?.data?.detail || message);
-      } else {
-        setError(message);
+        const axiosErr = err as {
+          response?: { data?: { detail?: string; agreed_to_terms?: string[] } };
+        };
+        const data = axiosErr.response?.data;
+        if (data?.agreed_to_terms?.[0]) {
+          message = data.agreed_to_terms[0];
+        } else if (data?.detail) {
+          message = data.detail;
+        }
       }
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -303,16 +315,74 @@ export default function CheckoutPage() {
               </div>
             </div>
 
+            <div className="surface-card p-5 md:p-6">
+              <div className="flex items-start gap-3 mb-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-pink/10 text-brand-pink">
+                  <ShieldCheck className="h-5 w-5" strokeWidth={2} />
+                </div>
+                <div>
+                  <h2 className="text-lg font-display font-semibold page-heading">
+                    Legal Agreement
+                  </h2>
+                  <p className="text-sm page-muted mt-0.5">
+                    Please review our policies before completing your purchase.
+                  </p>
+                </div>
+              </div>
+
+              <label
+                className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition-all duration-200 ${
+                  agreedToTerms
+                    ? 'border-brand-pink bg-brand-pink/5 shadow-sm'
+                    : errors.agreed_to_terms
+                      ? 'border-red-300 bg-red-50/80 dark:border-red-500/40 dark:bg-red-950/30'
+                      : 'border-brand-gray-200 hover:border-brand-pink/40 dark:border-white/15'
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  {...register('agreed_to_terms')}
+                  className="mt-0.5 h-4 w-4 shrink-0 rounded border-brand-gray-300 accent-brand-pink"
+                />
+                <span className="text-sm leading-relaxed text-brand-accent dark:text-gray-200">
+                  I have read and agree to the{' '}
+                  <Link
+                    to="/terms"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-medium text-brand-pink hover:underline"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    Terms of Service
+                  </Link>{' '}
+                  and{' '}
+                  <Link
+                    to="/refund"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-medium text-brand-pink hover:underline"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    Refund Policy
+                  </Link>
+                  . I understand these agreements are binding and apply to this order.
+                </span>
+              </label>
+              {errors.agreed_to_terms && (
+                <p className={`${errorClass} mt-2`}>{errors.agreed_to_terms.message}</p>
+              )}
+            </div>
+
             {error && (
-              <div className="rounded-card border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+              <div className="rounded-card border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600 dark:border-red-500/30 dark:bg-red-950/40 dark:text-red-300">
                 {error}
               </div>
             )}
 
             <button
               type="submit"
-              disabled={loading}
-              className="btn-primary w-full py-3.5 rounded-full text-sm md:text-base disabled:opacity-50"
+              disabled={loading || !agreedToTerms}
+              className="btn-primary w-full py-3.5 rounded-full text-sm md:text-base disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Processing...' : `Pay ${formatPrice(total)}`}
             </button>

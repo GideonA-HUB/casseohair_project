@@ -38,6 +38,8 @@ class Order(models.Model):
     cancelled_at = models.DateTimeField(null=True, blank=True)
     refund_amount = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
     refund_reason = models.TextField(blank=True)
+    agreed_to_terms = models.BooleanField(default=False)
+    terms_agreed_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

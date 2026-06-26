@@ -13,7 +13,7 @@ export default function MainLayout() {
   });
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-brand-white dark:bg-dark-surface transition-colors duration-300">
       <Header whatsappNumber={settings?.whatsapp_number} />
       <main className="flex-1">
         <Outlet />

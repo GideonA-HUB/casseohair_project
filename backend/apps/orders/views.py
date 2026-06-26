@@ -9,6 +9,7 @@ from apps.notifications.services import NotificationService
 
 from .models import Order
 from .serializers import CheckoutSerializer, OrderSerializer, OrderStatusUpdateSerializer, AdminOrderSerializer
+from .agreement_serializers import TermsAgreementSerializer
 
 
 class CheckoutView(APIView):
@@ -37,6 +38,16 @@ class OrderDetailView(APIView):
         except Order.DoesNotExist:
             return Response({'detail': 'Order not found.'}, status=status.HTTP_404_NOT_FOUND)
         return Response(OrderSerializer(order).data)
+
+
+class AdminTermsAgreementListView(generics.ListAPIView):
+    """Orders where the customer agreed to Terms of Service & Refund Policy at checkout."""
+    permission_classes = [IsAdminUser]
+    serializer_class = TermsAgreementSerializer
+    pagination_class = None
+
+    def get_queryset(self):
+        return Order.objects.filter(agreed_to_terms=True).order_by('-terms_agreed_at')
 
 
 class AdminOrderListView(generics.ListAPIView):

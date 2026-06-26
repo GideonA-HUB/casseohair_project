@@ -140,6 +140,8 @@ export interface Order {
   status: string;
   payment_method: string;
   is_paid: boolean;
+  agreed_to_terms?: boolean;
+  terms_agreed_at?: string | null;
   items: OrderItem[];
   created_at: string;
 }
@@ -171,6 +173,7 @@ export interface CheckoutFormData {
   country: string;
   order_notes?: string;
   payment_method: 'paystack' | 'flutterwave';
+  agreed_to_terms: boolean;
   items: { product_id: number; quantity: number }[];
 }
 

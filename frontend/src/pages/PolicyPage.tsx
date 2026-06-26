@@ -61,7 +61,11 @@ export default function PolicyPage() {
   if (isLoading) return <LoadingSpinner fullScreen={false} />;
 
   const adminContent = settings?.[policy.field];
-  const content = adminContent?.trim() ? adminContent : policy.defaultContent;
+  const rawContent = adminContent?.trim() ? adminContent : policy.defaultContent;
+  const content = rawContent.replace(
+    /casseohairproject-production\.up\.railway\.app/gi,
+    'www.casseohair.com',
+  );
 
   const otherPolicies = (Object.keys(POLICY_META) as PolicyType[]).filter((k) => k !== pageType);
 

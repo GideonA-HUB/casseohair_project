@@ -1,6 +1,7 @@
 from decimal import Decimal
 
 from django.conf import settings
+from django.utils import timezone
 from rest_framework import serializers
 
 from apps.products.models import Product
@@ -33,7 +34,15 @@ class CheckoutSerializer(serializers.Serializer):
     country = serializers.CharField(max_length=100, default='Nigeria')
     order_notes = serializers.CharField(required=False, allow_blank=True)
     payment_method = serializers.ChoiceField(choices=['paystack', 'flutterwave'])
+    agreed_to_terms = serializers.BooleanField()
     items = CartItemSerializer(many=True)
+
+    def validate_agreed_to_terms(self, value):
+        if not value:
+            raise serializers.ValidationError(
+                'You must agree to our Terms of Service and Refund Policy before placing an order.'
+            )
+        return value
 
     def validate_items(self, items):
         if not items:
@@ -91,12 +100,16 @@ class CheckoutSerializer(serializers.Serializer):
         delivery_fee = Decimal(str(settings.DELIVERY_FEE))
         total = subtotal + delivery_fee
 
+        validated_data.pop('agreed_to_terms', None)
+
         order = Order.objects.create(
             **validated_data,
             subtotal=subtotal,
             delivery_fee=delivery_fee,
             total=total,
             payment_method=payment_method,
+            agreed_to_terms=True,
+            terms_agreed_at=timezone.now(),
         )
 
         for item in order_items:
@@ -114,7 +127,8 @@ class OrderSerializer(serializers.ModelSerializer):
             'id', 'order_number', 'full_name', 'email', 'phone',
             'address', 'city', 'state', 'country', 'order_notes',
             'subtotal', 'delivery_fee', 'total', 'status', 'payment_method',
-            'payment_reference', 'is_paid', 'paid_at', 'items', 'created_at',
+            'payment_reference', 'is_paid', 'paid_at', 'agreed_to_terms', 'terms_agreed_at',
+            'items', 'created_at',
         ]
 
 
@@ -134,6 +148,8 @@ class AdminOrderSerializer(serializers.ModelSerializer):
             'address', 'city', 'state', 'country', 'order_notes',
             'subtotal', 'delivery_fee', 'total', 'status', 'payment_method',
             'payment_reference', 'is_paid', 'paid_at', 'shipped_at', 'delivered_at',
-            'cancelled_at', 'refund_amount', 'refund_reason', 'items', 'created_at', 'updated_at',
+            'cancelled_at', 'refund_amount', 'refund_reason',
+            'agreed_to_terms', 'terms_agreed_at',
+            'items', 'created_at', 'updated_at',
         ]
         read_only_fields = ['order_number', 'created_at', 'updated_at']

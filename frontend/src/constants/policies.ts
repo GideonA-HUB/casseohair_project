@@ -1,7 +1,7 @@
 export const DEFAULT_PRIVACY_POLICY = `Last updated: March 2026
 
 1. Introduction
-CasseoHair ("we", "us", "our") operates casseohairproject-production.up.railway.app and is committed to protecting your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your data when you visit our website, create an account, place an order, or contact us.
+CasseoHair ("we", "us", "our") operates www.casseohair.com and is committed to protecting your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your data when you visit our website, create an account, place an order, or contact us.
 
 2. Information We Collect
 We may collect the following categories of personal data:

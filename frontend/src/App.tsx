@@ -28,6 +28,7 @@ const AdminWhyChoose = lazy(() => import('@/pages/admin/AdminWhyChoose'));
 const AdminSettings = lazy(() => import('@/pages/admin/AdminSettings'));
 const AdminActivityLogs = lazy(() => import('@/pages/admin/AdminActivityLogs'));
 const AdminNotifications = lazy(() => import('@/pages/admin/AdminNotifications'));
+const AdminLegalAgreements = lazy(() => import('@/pages/admin/AdminLegalAgreements'));
 
 function ScrollToTopOnRouteChange() {
   const { pathname } = useLocation();
@@ -64,6 +65,7 @@ export default function App() {
         <Route element={<AdminLayout />}>
           <Route path="/dashboard" element={<AdminDashboard />} />
           <Route path="/dashboard/orders" element={<AdminOrders />} />
+          <Route path="/dashboard/legal-agreements" element={<AdminLegalAgreements />} />
           <Route path="/dashboard/products" element={<AdminProducts />} />
           <Route path="/dashboard/categories" element={<AdminCategories />} />
           <Route path="/dashboard/reviews" element={<AdminReviews />} />

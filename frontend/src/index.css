@@ -10,7 +10,11 @@
   }
 
   body {
-    @apply bg-brand-white text-brand-accent font-sans;
+    @apply bg-brand-white text-brand-accent font-sans transition-colors duration-300;
+  }
+
+  .dark body {
+    @apply bg-dark-surface text-gray-100;
   }
 
   * {
@@ -28,17 +32,25 @@
   .btn-outline {
     @apply border border-brand-accent/20 text-brand-accent font-medium px-6 py-3 rounded-full
            hover:border-brand-pink hover:text-brand-pink transition-all duration-300
-           active:scale-[0.98];
+           active:scale-[0.98]
+           dark:border-white/20 dark:text-gray-200 dark:hover:border-brand-pink dark:hover:text-brand-pink;
   }
 
   .btn-ghost {
     @apply border border-brand-gray-200 text-brand-accent text-sm font-medium px-4 py-2 rounded-full
-           hover:border-brand-pink hover:text-brand-pink transition-all duration-300;
+           hover:border-brand-pink hover:text-brand-pink transition-all duration-300
+           dark:border-white/15 dark:text-gray-200 dark:hover:border-brand-pink;
   }
 
   .luxury-card {
     @apply bg-white rounded-card shadow-card overflow-hidden
-           transition-all duration-300 hover:shadow-luxury;
+           transition-all duration-300 hover:shadow-luxury
+           dark:bg-dark-card dark:border dark:border-white/10 dark:shadow-none dark:hover:shadow-none;
+  }
+
+  .surface-card {
+    @apply bg-white rounded-luxury shadow-luxury border border-brand-gray-100
+           dark:bg-dark-card dark:border-white/10 dark:shadow-none;
   }
 
   .section-padding {
@@ -48,10 +60,21 @@
   .input-luxury {
     @apply w-full px-4 py-3 rounded-xl border border-brand-gray-200
            focus:border-brand-pink focus:ring-2 focus:ring-brand-pink/20
-           outline-none transition-all duration-200 bg-white;
+           outline-none transition-all duration-200 bg-white text-brand-accent
+           dark:bg-dark-elevated dark:border-white/15 dark:text-gray-100
+           dark:placeholder:text-gray-500 dark:focus:border-brand-pink;
+  }
+
+  .page-muted {
+    @apply text-brand-accent/60 dark:text-gray-400;
+  }
+
+  .page-heading {
+    @apply text-brand-black dark:text-gray-50;
   }
 }
 
+/* Global dark-mode readability overrides for existing utility classes */
 @layer utilities {
   .text-balance {
     text-wrap: balance;
@@ -64,6 +87,61 @@
 
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
+  }
+
+  .dark .text-brand-black {
+    @apply text-gray-50;
+  }
+
+  .dark .text-brand-accent {
+    @apply text-gray-200;
+  }
+
+  .dark .bg-white {
+    @apply !bg-dark-card;
+  }
+
+  .dark .bg-brand-white {
+    @apply !bg-dark-surface;
+  }
+
+  .dark .bg-brand-gray-50 {
+    @apply !bg-dark-elevated;
+  }
+
+  .dark .border-brand-gray-100,
+  .dark .border-brand-gray-200 {
+    @apply !border-white/10;
+  }
+
+  .dark .shadow-luxury,
+  .dark .shadow-card,
+  .dark .shadow-luxury-lg {
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+  }
+
+  .dark .text-brand-accent\/75 {
+    color: rgb(203 213 225);
+  }
+
+  .dark .text-brand-accent\/60 {
+    color: rgb(163 163 163);
+  }
+
+  .dark .text-brand-accent\/50 {
+    color: rgb(163 163 163);
+  }
+
+  .dark .text-brand-accent\/40 {
+    color: rgb(115 115 115);
+  }
+
+  .dark .bg-red-50 {
+    @apply !bg-red-950/40;
+  }
+
+  .dark .hover\:bg-brand-gray-50:hover {
+    @apply !bg-white/5;
   }
 }
 
