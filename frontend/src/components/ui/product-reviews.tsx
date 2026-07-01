@@ -89,7 +89,7 @@ export default function ProductReviews({
   };
 
   return (
-    <section ref={sectionRef} className="relative overflow-hidden bg-brand-gray-50">
+    <section ref={sectionRef} className="relative overflow-hidden bg-brand-gray-50 dark:bg-dark-surface">
       <div className="relative section-padding max-w-7xl mx-auto">
         {/* Heading block (pink only here) */}
         <motion.div
@@ -202,7 +202,7 @@ export default function ProductReviews({
                   </div>
                   <StarRating value={review.rating} size="sm" />
                 </div>
-                <p className="text-brand-accent/80 leading-relaxed text-sm md:text-base">
+                <p className="text-brand-accent/80 dark:text-gray-300 leading-relaxed text-sm md:text-base">
                   &ldquo;{review.comment}&rdquo;
                 </p>
               </motion.article>
