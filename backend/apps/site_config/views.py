@@ -85,7 +85,7 @@ class HeroImagesView(generics.ListAPIView):
     pagination_class = None
 
     def get_queryset(self):
-        return HeroImage.objects.filter(is_active=True)[:16]
+        return HeroImage.objects.filter(is_active=True).order_by('order', '-created_at')[:16]
 
 
 class ContactSubmitView(APIView):
