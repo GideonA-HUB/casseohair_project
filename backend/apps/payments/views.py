@@ -28,8 +28,8 @@ class InitializePaymentView(APIView):
         if order.is_paid:
             return Response({'detail': 'Order already paid.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        callback_url = f"{settings.FRONTEND_URL}/checkout/verify?provider={provider}"
         provider = serializer.validated_data['provider']
+        callback_url = f"{settings.FRONTEND_URL}/checkout/verify?provider={provider}"
 
         try:
             if provider == 'paystack':
