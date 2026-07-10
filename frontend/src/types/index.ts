@@ -139,6 +139,7 @@ export interface Order {
   total: string;
   status: string;
   payment_method: string;
+  payment_reference?: string;
   is_paid: boolean;
   agreed_to_terms?: boolean;
   terms_agreed_at?: string | null;
