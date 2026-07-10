@@ -4,10 +4,36 @@ import threading
 from django.conf import settings
 from django.template.loader import render_to_string
 
+from apps.core.media import absolute_media_url
+
 logger = logging.getLogger(__name__)
 
 BRAND_PINK = '#E62E72'
 BRAND_PINK_DARK = '#801337'
+
+
+def get_logo_url():
+    """Public HTTPS logo URL for email clients."""
+    from apps.site_config.models import SiteAsset
+
+    frontend_url = (
+        getattr(settings, 'FRONTEND_URL', None)
+        or getattr(settings, 'SITE_URL', None)
+        or 'https://www.casseohair.com'
+    ).rstrip('/')
+
+    for asset_type in ('logo', 'logo_light'):
+        try:
+            asset = SiteAsset.objects.get(asset_type=asset_type, is_active=True)
+            url = absolute_media_url(None, asset.image)
+            if url:
+                if url.startswith(('http://', 'https://')):
+                    return url
+                return f'{frontend_url}{url if url.startswith("/") else f"/{url}"}'
+        except SiteAsset.DoesNotExist:
+            continue
+
+    return f'{frontend_url}/logo.png'
 
 
 def get_email_context(extra=None):
@@ -15,11 +41,14 @@ def get_email_context(extra=None):
     from apps.site_config.models import SiteSettings
 
     site = SiteSettings.get_settings()
-    site_url = getattr(settings, 'SITE_URL', 'https://www.casseohair.com').rstrip('/')
+    site_url = (
+        getattr(settings, 'FRONTEND_URL', None)
+        or getattr(settings, 'SITE_URL', 'https://www.casseohair.com')
+    ).rstrip('/')
     ctx = {
         'site_name': getattr(settings, 'SITE_NAME', 'CasseoHair'),
         'site_url': site_url,
-        'logo_url': f'{site_url}/logo.png',
+        'logo_url': get_logo_url(),
         'brand_pink': BRAND_PINK,
         'brand_pink_dark': BRAND_PINK_DARK,
         'instagram_url': site.instagram_url or 'https://www.instagram.com/casseohair?igsh=dHgxaG5maWVucXZl',

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -7,6 +7,7 @@ import { ShieldCheck } from 'lucide-react';
 import SEO from '@/components/SEO';
 import { ordersApi, paymentsApi } from '@/api';
 import { useCartStore } from '@/store/cartStore';
+import { saveCheckoutDraft, loadCheckoutDraft, savePendingOrder } from '@/lib/checkoutSession';
 import { formatPrice } from '@/utils/format';
 
 const checkoutSchema = z.object({
@@ -18,7 +19,7 @@ const checkoutSchema = z.object({
   state: z.string().min(2, 'State is required'),
   country: z.string().default('Nigeria'),
   order_notes: z.string().optional(),
-  payment_method: z.enum(['paystack', 'flutterwave']),
+  payment_method: z.literal('flutterwave'),
   agreed_to_terms: z.boolean().refine((val) => val === true, {
     message: 'You must agree to our Terms of Service and Refund Policy before placing your order.',
   }),
@@ -31,7 +32,7 @@ const errorClass = 'text-red-500 text-xs mt-1';
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
-  const { items, getTotal, clearCart } = useCartStore();
+  const { items, getTotal } = useCartStore();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -43,18 +44,29 @@ export default function CheckoutPage() {
     register,
     handleSubmit,
     watch,
+    reset,
     formState: { errors },
   } = useForm<CheckoutForm>({
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
       country: 'Nigeria',
-      payment_method: 'paystack',
+      payment_method: 'flutterwave',
       agreed_to_terms: false,
     },
   });
 
-  const paymentMethod = watch('payment_method');
   const agreedToTerms = watch('agreed_to_terms');
+
+  useEffect(() => {
+    const draft = loadCheckoutDraft<CheckoutForm>();
+    if (draft) {
+      reset({
+        ...draft,
+        payment_method: 'flutterwave',
+        agreed_to_terms: draft.agreed_to_terms ?? false,
+      });
+    }
+  }, [reset]);
 
   if (items.length === 0) {
     return (
@@ -78,8 +90,10 @@ export default function CheckoutPage() {
       const orderRes = await ordersApi.checkout(orderData);
       const order = orderRes.data;
 
-      const paymentRes = await paymentsApi.initialize(order.order_number, data.payment_method);
-      clearCart();
+      saveCheckoutDraft(data);
+      savePendingOrder(order.order_number);
+
+      const paymentRes = await paymentsApi.initialize(order.order_number, 'flutterwave');
       window.location.href = paymentRes.data.authorization_url;
     } catch (err: unknown) {
       let message = err instanceof Error ? err.message : 'Checkout failed. Please try again.';
@@ -274,45 +288,21 @@ export default function CheckoutPage() {
                 Payment Method
               </h2>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <label
-                  className={`flex items-center gap-3 p-4 rounded-card border cursor-pointer transition-all ${
-                    paymentMethod === 'paystack'
-                      ? 'border-brand-pink bg-brand-pink/5 shadow-sm'
-                      : 'border-brand-gray-200 hover:border-brand-pink/40'
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    {...register('payment_method')}
-                    value="paystack"
-                    className="accent-brand-pink"
-                  />
-                  <div>
-                    <span className="text-sm font-semibold text-brand-black block">Paystack</span>
-                    <span className="text-xs text-brand-accent/50">Card, bank transfer & USSD</span>
-                  </div>
-                </label>
+              <input type="hidden" {...register('payment_method')} />
 
-                <label
-                  className={`flex items-center gap-3 p-4 rounded-card border cursor-pointer transition-all ${
-                    paymentMethod === 'flutterwave'
-                      ? 'border-brand-pink bg-brand-pink/5 shadow-sm'
-                      : 'border-brand-gray-200 hover:border-brand-pink/40'
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    {...register('payment_method')}
-                    value="flutterwave"
-                    className="accent-brand-pink"
-                  />
-                  <div>
-                    <span className="text-sm font-semibold text-brand-black block">Flutterwave</span>
-                    <span className="text-xs text-brand-accent/50">Card & mobile money</span>
-                  </div>
-                </label>
+              <div className="flex items-center gap-3 p-4 rounded-card border border-brand-pink bg-brand-pink/5 shadow-sm">
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-pink">
+                  <span className="h-2 w-2 rounded-full bg-white" />
+                </span>
+                <div>
+                  <span className="text-sm font-semibold text-brand-black block">Flutterwave</span>
+                  <span className="text-xs text-brand-accent/50">Card, bank transfer &amp; mobile money</span>
+                </div>
               </div>
+
+              <p className="mt-3 text-xs text-brand-accent/50 dark:text-gray-500">
+                Paystack is temporarily unavailable. All payments are processed securely via Flutterwave.
+              </p>
             </div>
 
             <div className="surface-card p-5 md:p-6">

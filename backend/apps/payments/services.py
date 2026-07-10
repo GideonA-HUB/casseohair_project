@@ -174,6 +174,10 @@ class FlutterwaveService:
             payment.status = 'success'
             payment.verified_at = timezone.now()
             payment.save()
+            flw_ref = data.get('data', {}).get('flw_ref') or data.get('data', {}).get('id')
+            if flw_ref:
+                payment.reference = str(flw_ref)
+                payment.save(update_fields=['reference'])
             PaystackService._complete_order(payment)
         else:
             payment.status = 'failed'
