@@ -48,7 +48,7 @@ def send_payment_admin_notification(order):
     """Owner email when payment is confirmed."""
     send_html_email_async(
         to=settings.ADMIN_EMAIL,
-        subject=f'Payment Confirmed — {order.order_number} | ₦{order.total:,.0f}',
+        subject=f'Payment Received — {order.full_name} paid for {order.order_number} | ₦{order.total:,.0f}',
         template_name='emails/payment_admin_notification.html',
         context={
             'order': order,

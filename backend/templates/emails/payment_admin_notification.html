@@ -14,32 +14,59 @@
             <td style="background:#111111;padding:28px 32px;text-align:center;">
               <img src="{{ logo_url }}" alt="{{ site_name }}" width="64" height="64" style="display:block;margin:0 auto 12px;border-radius:14px;background:#ffffff;padding:6px;">
               <p style="margin:0;font-size:13px;letter-spacing:0.14em;text-transform:uppercase;color:#E62E72;font-weight:700;">Payment Received</p>
-              <h1 style="margin:8px 0 0;font-size:24px;color:#ffffff;">Order Payment Confirmed</h1>
+              <h1 style="margin:8px 0 0;font-size:24px;color:#ffffff;">Customer Payment Confirmed</h1>
             </td>
           </tr>
           <tr>
             <td style="padding:32px;">
-              <p style="margin:0 0 20px;font-size:22px;font-weight:700;color:#E62E72;">Order #{{ order.order_number }}</p>
-
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 24px;background:#f0fdf4;border-left:4px solid #22c55e;border-radius:10px;">
                 <tr>
-                  <td style="padding:16px 18px;">
-                    <p style="margin:0 0 6px;font-size:14px;color:#166534;"><strong>Customer:</strong> {{ order.full_name }}</p>
-                    <p style="margin:0 0 6px;font-size:14px;color:#166534;"><strong>Amount:</strong> ₦{{ order.total }}</p>
-                    <p style="margin:0 0 6px;font-size:14px;color:#166534;"><strong>Method:</strong> {{ order.payment_method|title }}</p>
-                    <p style="margin:0;font-size:14px;color:#166534;"><strong>Transaction ID:</strong> {{ order.payment_reference }}</p>
+                  <td style="padding:16px 18px;font-size:14px;color:#166534;">
+                    <strong>{{ order.full_name }}</strong> has successfully paid for order <strong>#{{ order.order_number }}</strong>.
+                    Payment is confirmed and the order is ready for processing.
                   </td>
                 </tr>
               </table>
 
+              <p style="margin:0 0 20px;font-size:22px;font-weight:700;color:#E62E72;">Order #{{ order.order_number }}</p>
+
+              <h2 style="margin:0 0 12px;font-size:14px;text-transform:uppercase;letter-spacing:0.08em;color:#111111;border-bottom:2px solid #E62E72;padding-bottom:8px;">Payment Details</h2>
+              <p style="margin:0 0 8px;font-size:14px;color:#555555;"><strong>Payment Status:</strong> Paid</p>
+              <p style="margin:0 0 8px;font-size:14px;color:#555555;"><strong>Amount Received:</strong> ₦{{ order.total }}</p>
+              <p style="margin:0 0 8px;font-size:14px;color:#555555;"><strong>Payment Method:</strong> {{ order.payment_method|title }}</p>
+              <p style="margin:0 0 8px;font-size:14px;color:#555555;"><strong>Transaction ID:</strong> {{ order.payment_reference }}</p>
+              {% if order.paid_at %}
+              <p style="margin:0 0 24px;font-size:14px;color:#555555;"><strong>Paid At:</strong> {{ order.paid_at|date:"F d, Y · g:i A" }}</p>
+              {% else %}
+              <p style="margin:0 0 24px;font-size:14px;color:#555555;"><strong>Paid At:</strong> Just now</p>
+              {% endif %}
+
+              <h2 style="margin:0 0 12px;font-size:14px;text-transform:uppercase;letter-spacing:0.08em;color:#111111;border-bottom:2px solid #E62E72;padding-bottom:8px;">Customer Information</h2>
+              <p style="margin:0 0 8px;font-size:14px;color:#555555;"><strong>Full Name:</strong> {{ order.full_name }}</p>
               <p style="margin:0 0 8px;font-size:14px;color:#555555;"><strong>Email:</strong> {{ order.email }}</p>
               <p style="margin:0 0 8px;font-size:14px;color:#555555;"><strong>Phone:</strong> {{ order.phone }}</p>
-              <p style="margin:0 0 8px;font-size:14px;color:#555555;"><strong>Address:</strong> {{ order.address }}, {{ order.city }}, {{ order.state }}</p>
-              <p style="margin:0 0 24px;font-size:14px;color:#555555;"><strong>Notes:</strong> {% if order.order_notes %}{{ order.order_notes }}{% else %}None{% endif %}</p>
+              <p style="margin:0 0 8px;font-size:14px;color:#555555;"><strong>Address:</strong> {{ order.address }}, {{ order.city }}, {{ order.state }}, {{ order.country }}</p>
+              <p style="margin:0 0 24px;font-size:14px;color:#555555;"><strong>Order Notes:</strong> {% if order.order_notes %}{{ order.order_notes }}{% else %}None{% endif %}</p>
 
+              <h2 style="margin:0 0 12px;font-size:14px;text-transform:uppercase;letter-spacing:0.08em;color:#111111;border-bottom:2px solid #E62E72;padding-bottom:8px;">Items Purchased</h2>
               {% for item in order_items %}
-              <p style="margin:0 0 6px;font-size:14px;color:#444444;">• {{ item.product_name }} (×{{ item.quantity }}) — ₦{{ item.subtotal }}</p>
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 10px;background:#fafafa;border-radius:10px;">
+                <tr>
+                  <td style="padding:14px 16px;">
+                    <p style="margin:0 0 4px;font-size:14px;font-weight:700;color:#111111;">{{ item.product_name }}</p>
+                    <p style="margin:0;font-size:13px;color:#666666;">Qty {{ item.quantity }} × ₦{{ item.price }} = ₦{{ item.subtotal }}</p>
+                  </td>
+                </tr>
+              </table>
               {% endfor %}
+
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-top:20px;background:linear-gradient(135deg,#801337,#E62E72);border-radius:14px;">
+                <tr>
+                  <td style="padding:20px 22px;color:#ffffff;">
+                    <p style="margin:0;font-size:18px;font-weight:700;display:flex;justify-content:space-between;"><span>Total Received</span><span>₦{{ order.total }}</span></p>
+                  </td>
+                </tr>
+              </table>
 
               <table role="presentation" cellspacing="0" cellpadding="0" style="margin:24px auto 0;">
                 <tr>
