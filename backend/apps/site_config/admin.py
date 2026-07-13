@@ -8,6 +8,7 @@ from .models import (
     NewsletterSubscriber,
     SiteAsset,
     SiteSettings,
+    CurrencySettings,
     Testimonial,
     WhyChooseItem,
 )
@@ -46,6 +47,28 @@ class SiteSettingsAdmin(admin.ModelAdmin):
 
     def has_add_permission(self, request):
         return not SiteSettings.objects.exists()
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(CurrencySettings)
+class CurrencySettingsAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Exchange rates (NGN base)', {
+            'fields': ('ngn_per_usd', 'ngn_per_gbp', 'ngn_per_cad'),
+            'description': 'All product prices are stored in NGN. These rates convert NGN to international currencies.',
+        }),
+        ('Delivery fees (NGN)', {
+            'fields': ('local_delivery_fee', 'international_delivery_fee'),
+            'description': 'Local fee applies to Nigeria. International fee applies to US, UK, and Canada.',
+        }),
+        ('Meta', {'fields': ('updated_at',)}),
+    )
+    readonly_fields = ['updated_at']
+
+    def has_add_permission(self, request):
+        return not CurrencySettings.objects.exists()
 
     def has_delete_permission(self, request, obj=None):
         return False

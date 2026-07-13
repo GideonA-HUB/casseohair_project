@@ -1,11 +1,13 @@
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCartStore } from '@/store/cartStore';
+import { useCurrencyStore } from '@/store/currencyStore';
 import { formatPrice } from '@/utils/format';
 
 export default function CartDrawer() {
   const { items, isOpen, closeCart, removeItem, updateQuantity, getTotal } = useCartStore();
-  const deliveryFee = 4000;
+  const currencySettings = useCurrencyStore((s) => s.settings);
+  const deliveryFee = parseFloat(currencySettings.local_delivery_fee) || 4000;
   const subtotal = getTotal();
 
   return (
@@ -90,9 +92,12 @@ export default function CartDrawer() {
                   <span className="font-medium">{formatPrice(subtotal)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-brand-accent/60">Delivery</span>
+                  <span className="text-brand-accent/60">Delivery (Nigeria)</span>
                   <span className="font-medium">{formatPrice(deliveryFee)}</span>
                 </div>
+                <p className="text-[11px] text-brand-accent/40">
+                  International delivery (US, UK, Canada) is calculated at checkout.
+                </p>
                 <div className="flex justify-between text-base font-semibold pt-2 border-t border-brand-gray-100">
                   <span>Total</span>
                   <span>{formatPrice(subtotal + deliveryFee)}</span>

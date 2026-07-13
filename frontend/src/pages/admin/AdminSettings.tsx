@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
+import type { CurrencySettings } from '@/types';
 
 interface SiteSettings {
   id: number;
@@ -28,6 +29,7 @@ interface SiteSettings {
 
 export default function AdminSettings() {
   const [formData, setFormData] = useState<Partial<SiteSettings>>({});
+  const [currencyFormData, setCurrencyFormData] = useState<Partial<CurrencySettings>>({});
   const [saving, setSaving] = useState(false);
 
   const { data: settings, isLoading, refetch } = useQuery<SiteSettings>({
@@ -44,26 +46,57 @@ export default function AdminSettings() {
     },
   });
 
+  const { data: currencySettings, refetch: refetchCurrency } = useQuery<CurrencySettings>({
+    queryKey: ['admin-currency-settings'],
+    queryFn: async () => {
+      const token = localStorage.getItem('access_token');
+      const response = await fetch('/api/v1/site/admin/currency-settings/', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!response.ok) throw new Error('Failed to fetch currency settings');
+      return response.json();
+    },
+  });
+
   const handleSave = async () => {
     setSaving(true);
     try {
       const token = localStorage.getItem('access_token');
-      await fetch('/api/v1/site/admin/settings/', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(formData),
-      });
+      if (Object.keys(formData).length > 0) {
+        await fetch('/api/v1/site/admin/settings/', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(formData),
+        });
+      }
+      if (Object.keys(currencyFormData).length > 0) {
+        await fetch('/api/v1/site/admin/currency-settings/', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(currencyFormData),
+        });
+      }
       refetch();
+      refetchCurrency();
+      setFormData({});
+      setCurrencyFormData({});
     } finally {
       setSaving(false);
     }
   };
 
-  const handleInputChange = (field: keyof SiteSettings, value: any) => {
+  const handleInputChange = (field: keyof SiteSettings, value: string | number | boolean) => {
     setFormData({ ...formData, [field]: value });
+  };
+
+  const handleCurrencyChange = (field: keyof CurrencySettings, value: string | number) => {
+    setCurrencyFormData({ ...currencyFormData, [field]: value });
   };
 
   if (isLoading) {
@@ -208,26 +241,96 @@ export default function AdminSettings() {
         </div>
       </motion.div>
 
-      {/* Payment & Currency */}
+      {/* Store Currency & FX */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
         className="bg-white rounded-2xl p-6 shadow-lg border border-brand-gray-100"
       >
-        <h3 className="text-lg font-semibold text-brand-black mb-4">Payment & Currency</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <h3 className="text-lg font-semibold text-brand-black mb-1">Store Currency &amp; FX</h3>
+        <p className="text-sm text-brand-accent/60 mb-4">
+          All product prices are in NGN. These rates convert prices to USD, GBP, and CAD on the storefront.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium text-brand-accent mb-2">Delivery Fee</label>
+            <label className="block text-sm font-medium text-brand-accent mb-2">NGN per USD</label>
             <input
               type="number"
-              defaultValue={settings?.delivery_fee}
-              onChange={(e) => handleInputChange('delivery_fee', parseFloat(e.target.value))}
+              step="0.0001"
+              defaultValue={currencySettings?.ngn_per_usd}
+              onChange={(e) => handleCurrencyChange('ngn_per_usd', e.target.value)}
+              className="w-full px-4 py-3 rounded-xl border border-brand-gray-200 focus:border-brand-pink focus:ring-2 focus:ring-brand-pink/20 outline-none transition-all"
+            />
+            <p className="mt-1 text-xs text-brand-accent/50">e.g. 1450 means $1 = ₦1,450</p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-brand-accent mb-2">NGN per GBP</label>
+            <input
+              type="number"
+              step="0.0001"
+              defaultValue={currencySettings?.ngn_per_gbp}
+              onChange={(e) => handleCurrencyChange('ngn_per_gbp', e.target.value)}
+              className="w-full px-4 py-3 rounded-xl border border-brand-gray-200 focus:border-brand-pink focus:ring-2 focus:ring-brand-pink/20 outline-none transition-all"
+            />
+            <p className="mt-1 text-xs text-brand-accent/50">e.g. 1920 means £1 = ₦1,920</p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-brand-accent mb-2">NGN per CAD</label>
+            <input
+              type="number"
+              step="0.0001"
+              defaultValue={currencySettings?.ngn_per_cad}
+              onChange={(e) => handleCurrencyChange('ngn_per_cad', e.target.value)}
+              className="w-full px-4 py-3 rounded-xl border border-brand-gray-200 focus:border-brand-pink focus:ring-2 focus:ring-brand-pink/20 outline-none transition-all"
+            />
+            <p className="mt-1 text-xs text-brand-accent/50">e.g. 1100 means C$1 = ₦1,100</p>
+          </div>
+        </div>
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-brand-accent mb-2">
+              Local Delivery Fee (Nigeria)
+            </label>
+            <input
+              type="number"
+              step="0.01"
+              defaultValue={currencySettings?.local_delivery_fee}
+              onChange={(e) => handleCurrencyChange('local_delivery_fee', e.target.value)}
               className="w-full px-4 py-3 rounded-xl border border-brand-gray-200 focus:border-brand-pink focus:ring-2 focus:ring-brand-pink/20 outline-none transition-all"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-brand-accent mb-2">Currency</label>
+            <label className="block text-sm font-medium text-brand-accent mb-2">
+              International Delivery Fee (US, UK, Canada)
+            </label>
+            <input
+              type="number"
+              step="0.01"
+              defaultValue={currencySettings?.international_delivery_fee}
+              onChange={(e) => handleCurrencyChange('international_delivery_fee', e.target.value)}
+              className="w-full px-4 py-3 rounded-xl border border-brand-gray-200 focus:border-brand-pink focus:ring-2 focus:ring-brand-pink/20 outline-none transition-all"
+            />
+          </div>
+        </div>
+        {currencySettings?.updated_at && (
+          <p className="mt-3 text-xs text-brand-accent/40">
+            Last updated: {new Date(currencySettings.updated_at).toLocaleString()}
+          </p>
+        )}
+      </motion.div>
+
+      {/* Payment & VAT */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.35 }}
+        className="bg-white rounded-2xl p-6 shadow-lg border border-brand-gray-100"
+      >
+        <h3 className="text-lg font-semibold text-brand-black mb-4">Payment &amp; VAT</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-brand-accent mb-2">Currency Code</label>
             <input
               type="text"
               defaultValue={settings?.currency}

@@ -3,6 +3,7 @@ import { unwrapList } from '@/utils/api';
 import type {
   Category,
   CheckoutFormData,
+  CurrencySettings,
   DashboardMetrics,
   Order,
   PaginatedResponse,
@@ -54,6 +55,10 @@ export const productsApi = {
 
 export const siteApi = {
   settings: () => apiClient.get<SiteSettings>('/site/settings/'),
+  currencySettings: () => apiClient.get<CurrencySettings>('/site/currency-settings/'),
+  adminCurrencySettings: () => apiClient.get<CurrencySettings>('/site/admin/currency-settings/'),
+  updateCurrencySettings: (data: Partial<CurrencySettings>) =>
+    apiClient.patch<CurrencySettings>('/site/admin/currency-settings/', data),
   assets: () => apiClient.get<Record<string, { image: string }>>('/site/assets/'),
   testimonials: (): Promise<Testimonial[]> =>
     apiClient

@@ -73,6 +73,17 @@ export interface CartItem {
   quantity: number;
 }
 
+export type DisplayCurrency = 'NGN' | 'USD' | 'GBP' | 'CAD';
+
+export interface CurrencySettings {
+  ngn_per_usd: string;
+  ngn_per_gbp: string;
+  ngn_per_cad: string;
+  local_delivery_fee: string;
+  international_delivery_fee: string;
+  updated_at: string;
+}
+
 export interface SiteSettings {
   site_name: string;
   tagline: string;
@@ -134,6 +145,10 @@ export interface Order {
   city: string;
   state: string;
   country: string;
+  delivery_type?: 'local' | 'international';
+  international_region?: '' | 'US' | 'UK' | 'CA';
+  delivery_type_display?: string;
+  international_region_display?: string;
   subtotal: string;
   delivery_fee: string;
   total: string;
@@ -171,10 +186,12 @@ export interface CheckoutFormData {
   address: string;
   city: string;
   state: string;
-  country: string;
+  country?: string;
   order_notes?: string;
   payment_method: 'paystack' | 'flutterwave';
   agreed_to_terms: boolean;
+  is_international_delivery: boolean;
+  international_region?: '' | 'US' | 'UK' | 'CA';
   items: { product_id: number; quantity: number }[];
 }
 

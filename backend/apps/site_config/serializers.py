@@ -9,6 +9,7 @@ from .models import (
     NewsletterSubscriber,
     SiteAsset,
     SiteSettings,
+    CurrencySettings,
     Testimonial,
     WhyChooseItem,
 )
@@ -129,3 +130,17 @@ class AdminActivityLogSerializer(serializers.ModelSerializer):
             'id', 'user', 'action', 'model_name', 'object_id',
             'description', 'ip_address', 'created_at',
         ]
+
+
+class CurrencySettingsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CurrencySettings
+        fields = [
+            'ngn_per_usd',
+            'ngn_per_gbp',
+            'ngn_per_cad',
+            'local_delivery_fee',
+            'international_delivery_fee',
+            'updated_at',
+        ]
+        read_only_fields = ['updated_at']

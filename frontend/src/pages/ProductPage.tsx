@@ -11,8 +11,10 @@ import SEO from '@/components/SEO';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import ProductReviews from '@/components/ui/product-reviews';
 import StarRating from '@/components/StarRating';
+import MultiCurrencyPrice from '@/components/MultiCurrencyPrice';
 import { productsApi } from '@/api';
 import { useCartStore } from '@/store/cartStore';
+import { useCurrencyStore } from '@/store/currencyStore';
 import { formatPrice, getLaceTypeLabel, getLengthLabel } from '@/utils/format';
 
 export default function ProductPage() {
@@ -20,6 +22,7 @@ export default function ProductPage() {
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
   const { addItem } = useCartStore();
+  const currencySettings = useCurrencyStore((s) => s.settings);
 
   const { data: product, isLoading, error } = useQuery({
     queryKey: ['product', slug],
@@ -137,14 +140,18 @@ export default function ProductPage() {
               </div>
             )}
 
-            <div className="flex items-center gap-3">
-              <span className="text-2xl font-semibold">{formatPrice(product.current_price)}</span>
+            <div className="flex items-start gap-3 flex-wrap">
+              <MultiCurrencyPrice
+                amountNgn={product.current_price}
+                settings={currencySettings}
+                size="lg"
+              />
               {product.is_on_sale && (
                 <>
-                  <span className="text-lg text-brand-accent/40 line-through">
+                  <span className="text-lg text-brand-accent/40 line-through self-center">
                     {formatPrice(product.price)}
                   </span>
-                  <span className="bg-brand-pink text-white text-xs font-semibold px-2 py-1 rounded-full">
+                  <span className="bg-brand-pink text-white text-xs font-semibold px-2 py-1 rounded-full self-center">
                     -{product.discount_percentage}%
                   </span>
                 </>

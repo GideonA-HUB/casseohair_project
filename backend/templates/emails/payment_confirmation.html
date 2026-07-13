@@ -40,6 +40,7 @@
               <h2 style="margin:0 0 14px;font-size:15px;letter-spacing:0.08em;text-transform:uppercase;color:#111111;border-bottom:2px solid #E62E72;padding-bottom:8px;">Delivery Details</h2>
               <p style="margin:0 0 8px;font-size:14px;color:#555555;"><strong>Phone:</strong> {{ order.phone }}</p>
               <p style="margin:0 0 8px;font-size:14px;color:#555555;"><strong>Address:</strong> {{ order.address }}, {{ order.city }}, {{ order.state }}, {{ order.country }}</p>
+              <p style="margin:0 0 8px;font-size:14px;color:#555555;"><strong>Delivery Type:</strong> {{ order.get_delivery_type_display }}{% if order.delivery_type == 'international' %} — {{ order.get_international_region_display }}{% endif %}</p>
               {% if order.order_notes %}
               <p style="margin:0 0 24px;font-size:14px;color:#555555;"><strong>Order Notes:</strong> {{ order.order_notes }}</p>
               {% else %}

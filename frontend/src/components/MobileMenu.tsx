@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import ThemeToggle from './ThemeToggle';
+import CurrencySelector from './CurrencySelector';
 import { useThemeStore } from '@/store/themeStore';
 
 interface MobileMenuProps {
@@ -70,6 +71,13 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
               ))}
             </div>
             <div className="p-4 border-t border-brand-gray-100 dark:border-white/10 space-y-4">
+              <div className="flex items-center justify-between rounded-xl bg-brand-gray-50 dark:bg-dark-elevated px-4 py-3">
+                <div>
+                  <p className="text-sm font-medium text-brand-black dark:text-gray-100">Currency</p>
+                  <p className="text-xs text-brand-accent/50 dark:text-gray-400">Price display preference</p>
+                </div>
+                <CurrencySelector variant="light" compact />
+              </div>
               <div className="flex items-center justify-between rounded-xl bg-brand-gray-50 dark:bg-dark-elevated px-4 py-3">
                 <div>
                   <p className="text-sm font-medium text-brand-black dark:text-gray-100">Appearance</p>

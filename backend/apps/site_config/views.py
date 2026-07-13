@@ -17,12 +17,14 @@ from .models import (
     NewsletterSubscriber,
     SiteAsset,
     SiteSettings,
+    CurrencySettings,
     Testimonial,
     WhyChooseItem,
 )
 from .serializers import (
     AdminActivityLogSerializer,
     ContactSubmissionSerializer,
+    CurrencySettingsSerializer,
     HeroImageSerializer,
     NewsletterSubscribeSerializer,
     NewsletterSubscriberSerializer,
@@ -42,6 +44,30 @@ class SiteSettingsView(APIView):
     def get(self, request):
         settings_obj = SiteSettings.get_settings()
         return Response(SiteSettingsSerializer(settings_obj, context={'request': request}).data)
+
+
+class CurrencySettingsView(APIView):
+    authentication_classes = []
+    permission_classes = []
+
+    def get(self, request):
+        settings_obj = CurrencySettings.get_settings()
+        return Response(CurrencySettingsSerializer(settings_obj).data)
+
+
+class AdminCurrencySettingsView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def get(self, request):
+        settings_obj = CurrencySettings.get_settings()
+        return Response(CurrencySettingsSerializer(settings_obj).data)
+
+    def patch(self, request):
+        settings_obj = CurrencySettings.get_settings()
+        serializer = CurrencySettingsSerializer(settings_obj, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(CurrencySettingsSerializer(settings_obj).data)
 
 
 class SiteAssetsView(APIView):

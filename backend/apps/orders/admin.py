@@ -13,10 +13,14 @@ class OrderItemInline(admin.TabularInline):
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     list_display = [
-        'order_number', 'full_name', 'email', 'total', 'status',
-        'is_paid', 'agreed_to_terms', 'payment_method', 'created_at',
+        'order_number', 'full_name', 'email', 'total', 'delivery_type',
+        'international_region', 'status', 'is_paid', 'agreed_to_terms',
+        'payment_method', 'created_at',
     ]
-    list_filter = ['status', 'is_paid', 'agreed_to_terms', 'payment_method', 'created_at']
+    list_filter = [
+        'status', 'delivery_type', 'international_region', 'is_paid',
+        'agreed_to_terms', 'payment_method', 'created_at',
+    ]
     search_fields = ['order_number', 'email', 'full_name', 'phone']
     readonly_fields = [
         'order_number', 'subtotal', 'delivery_fee', 'total',
@@ -26,7 +30,12 @@ class OrderAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Order Info', {'fields': ('order_number', 'status', 'is_paid', 'paid_at')}),
         ('Customer', {'fields': ('full_name', 'email', 'phone', 'agreed_to_terms', 'terms_agreed_at')}),
-        ('Delivery', {'fields': ('address', 'city', 'state', 'country', 'order_notes')}),
+        ('Delivery', {
+            'fields': (
+                'delivery_type', 'international_region',
+                'address', 'city', 'state', 'country', 'order_notes',
+            ),
+        }),
         ('Payment', {'fields': ('payment_method', 'payment_reference')}),
         ('Totals', {'fields': ('subtotal', 'delivery_fee', 'total')}),
         ('Refund', {'fields': ('refund_amount', 'refund_reason'), 'classes': ('collapse',)}),

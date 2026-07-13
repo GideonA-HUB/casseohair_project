@@ -4,8 +4,11 @@ import Header from '@/components/Header';
 import MinimalFooter from '@/components/ui/minimal-footer';
 import CartDrawer from '@/components/CartDrawer';
 import { siteApi } from '@/api';
+import { useCurrencySettings } from '@/hooks/useCurrencySettings';
 
 export default function MainLayout() {
+  useCurrencySettings();
+
   const { data: settings } = useQuery({
     queryKey: ['site-settings'],
     queryFn: () => siteApi.settings().then((r) => r.data),

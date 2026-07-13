@@ -2,6 +2,7 @@ from django.urls import path
 
 from .views import (
     AdminContactListView,
+    AdminCurrencySettingsView,
     AdminHeroImagesView,
     AdminHeroImageView,
     AdminNewsletterListView,
@@ -13,6 +14,7 @@ from .views import (
     AdminWhyChooseItemDetailView,
     AdminActivityLogsView,
     ContactSubmitView,
+    CurrencySettingsView,
     HeroImagesView,
     NewsletterSubscribeView,
     SiteAssetsView,
@@ -23,6 +25,7 @@ from .views import (
 
 urlpatterns = [
     path('settings/', SiteSettingsView.as_view(), name='site-settings'),
+    path('currency-settings/', CurrencySettingsView.as_view(), name='currency-settings'),
     path('assets/', SiteAssetsView.as_view(), name='site-assets'),
     path('testimonials/', TestimonialListView.as_view(), name='testimonials'),
     path('hero-images/', HeroImagesView.as_view(), name='hero-images'),
@@ -33,6 +36,7 @@ urlpatterns = [
     path('admin/newsletter/', AdminNewsletterListView.as_view(), name='admin-newsletter'),
     path('admin/newsletter/<int:pk>/', AdminNewsletterDetailView.as_view(), name='admin-newsletter-detail'),
     path('admin/settings/', AdminSettingsView.as_view(), name='admin-settings'),
+    path('admin/currency-settings/', AdminCurrencySettingsView.as_view(), name='admin-currency-settings'),
     path('admin/testimonials/', AdminTestimonialsView.as_view(), name='admin-testimonials'),
     path('admin/testimonials/<int:pk>/', AdminTestimonialDetailView.as_view(), name='admin-testimonial-detail'),
     path('admin/hero-images/', AdminHeroImagesView.as_view(), name='admin-hero-images'),

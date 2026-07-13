@@ -1,12 +1,18 @@
 from decimal import Decimal
 
-from django.conf import settings
 from django.utils import timezone
 from rest_framework import serializers
 
 from apps.products.models import Product
+from apps.site_config.models import CurrencySettings
 
 from .models import Order, OrderItem
+
+INTERNATIONAL_REGION_LABELS = {
+    'US': 'United States',
+    'UK': 'United Kingdom',
+    'CA': 'Canada',
+}
 
 
 class OrderItemSerializer(serializers.ModelSerializer):
@@ -31,10 +37,16 @@ class CheckoutSerializer(serializers.Serializer):
     address = serializers.CharField()
     city = serializers.CharField(max_length=100)
     state = serializers.CharField(max_length=100)
-    country = serializers.CharField(max_length=100, default='Nigeria')
+    country = serializers.CharField(max_length=100, required=False, allow_blank=True, default='Nigeria')
     order_notes = serializers.CharField(required=False, allow_blank=True)
     payment_method = serializers.ChoiceField(choices=['paystack', 'flutterwave'])
     agreed_to_terms = serializers.BooleanField()
+    is_international_delivery = serializers.BooleanField(default=False)
+    international_region = serializers.ChoiceField(
+        choices=[('US', 'United States'), ('UK', 'United Kingdom'), ('CA', 'Canada')],
+        required=False,
+        allow_blank=True,
+    )
     items = CartItemSerializer(many=True)
 
     def validate_agreed_to_terms(self, value):
@@ -49,9 +61,36 @@ class CheckoutSerializer(serializers.Serializer):
             raise serializers.ValidationError('Cart cannot be empty.')
         return items
 
+    def validate(self, data):
+        is_international = data.get('is_international_delivery', False)
+        region = data.get('international_region') or ''
+
+        if is_international:
+            if not region:
+                raise serializers.ValidationError({
+                    'international_region': 'Please select whether you are in the US, UK, or Canada.',
+                })
+            data['delivery_type'] = 'international'
+            data['country'] = INTERNATIONAL_REGION_LABELS[region]
+        else:
+            data['delivery_type'] = 'local'
+            data['international_region'] = ''
+            data['country'] = 'Nigeria'
+
+        return data
+
     def create(self, validated_data):
         items_data = validated_data.pop('items')
         payment_method = validated_data.pop('payment_method')
+        validated_data.pop('is_international_delivery', None)
+        delivery_type = validated_data.get('delivery_type', 'local')
+
+        currency_settings = CurrencySettings.get_settings()
+        if delivery_type == 'international':
+            delivery_fee = Decimal(str(currency_settings.international_delivery_fee))
+        else:
+            delivery_fee = Decimal(str(currency_settings.local_delivery_fee))
+
         subtotal = Decimal('0')
         order_items = []
 
@@ -97,7 +136,6 @@ class CheckoutSerializer(serializers.Serializer):
                 'subtotal': item_subtotal,
             })
 
-        delivery_fee = Decimal(str(settings.DELIVERY_FEE))
         total = subtotal + delivery_fee
 
         validated_data.pop('agreed_to_terms', None)
@@ -125,7 +163,9 @@ class OrderSerializer(serializers.ModelSerializer):
         model = Order
         fields = [
             'id', 'order_number', 'full_name', 'email', 'phone',
-            'address', 'city', 'state', 'country', 'order_notes',
+            'address', 'city', 'state', 'country',
+            'delivery_type', 'international_region',
+            'order_notes',
             'subtotal', 'delivery_fee', 'total', 'status', 'payment_method',
             'payment_reference', 'is_paid', 'paid_at', 'agreed_to_terms', 'terms_agreed_at',
             'items', 'created_at',
@@ -140,12 +180,17 @@ class OrderStatusUpdateSerializer(serializers.ModelSerializer):
 
 class AdminOrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True, read_only=True)
+    delivery_type_display = serializers.CharField(source='get_delivery_type_display', read_only=True)
+    international_region_display = serializers.SerializerMethodField()
 
     class Meta:
         model = Order
         fields = [
             'id', 'order_number', 'full_name', 'email', 'phone',
-            'address', 'city', 'state', 'country', 'order_notes',
+            'address', 'city', 'state', 'country',
+            'delivery_type', 'delivery_type_display',
+            'international_region', 'international_region_display',
+            'order_notes',
             'subtotal', 'delivery_fee', 'total', 'status', 'payment_method',
             'payment_reference', 'is_paid', 'paid_at', 'shipped_at', 'delivered_at',
             'cancelled_at', 'refund_amount', 'refund_reason',
@@ -153,3 +198,8 @@ class AdminOrderSerializer(serializers.ModelSerializer):
             'items', 'created_at', 'updated_at',
         ]
         read_only_fields = ['order_number', 'created_at', 'updated_at']
+
+    def get_international_region_display(self, obj):
+        if not obj.international_region:
+            return ''
+        return dict(Order.INTERNATIONAL_REGION_CHOICES).get(obj.international_region, obj.international_region)

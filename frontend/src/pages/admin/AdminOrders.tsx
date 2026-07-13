@@ -25,6 +25,10 @@ interface Order {
   city: string;
   state: string;
   country: string;
+  delivery_type?: 'local' | 'international';
+  delivery_type_display?: string;
+  international_region?: '' | 'US' | 'UK' | 'CA';
+  international_region_display?: string;
   order_notes: string;
   subtotal: string;
   delivery_fee: string;
@@ -53,14 +57,20 @@ const STATUS_COLORS: Record<string, string> = {
 export default function AdminOrders() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [statusFilter, setStatusFilter] = useState('all');
+  const [deliveryFilter, setDeliveryFilter] = useState('all');
   const queryClient = useQueryClient();
 
+  const buildQuery = () => {
+    const params = new URLSearchParams();
+    if (statusFilter !== 'all') params.set('status', statusFilter);
+    if (deliveryFilter !== 'all') params.set('delivery_type', deliveryFilter);
+    const query = params.toString();
+    return query ? `?${query}` : '';
+  };
+
   const { data: orders = [], isLoading } = useQuery<Order[]>({
-    queryKey: ['admin-orders', statusFilter],
-    queryFn: () =>
-      adminFetchList<Order>(
-        `/api/v1/orders/admin/${statusFilter !== 'all' ? `?status=${statusFilter}` : ''}`,
-      ),
+    queryKey: ['admin-orders', statusFilter, deliveryFilter],
+    queryFn: () => adminFetchList<Order>(`/api/v1/orders/admin/${buildQuery()}`),
   });
 
   const updateOrderStatus = async (orderId: number, status: string) => {
@@ -79,19 +89,30 @@ export default function AdminOrders() {
           <h1 className="text-2xl font-bold text-slate-900">Orders</h1>
           <p className="text-sm text-slate-500">Full customer and delivery details for every order</p>
         </div>
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-brand-pink"
-        >
-          <option value="all">All Orders</option>
-          <option value="pending">Pending</option>
-          <option value="paid">Paid</option>
-          <option value="processing">Processing</option>
-          <option value="shipped">Shipped</option>
-          <option value="delivered">Delivered</option>
-          <option value="cancelled">Cancelled</option>
-        </select>
+        <div className="flex flex-wrap gap-3">
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-brand-pink"
+          >
+            <option value="all">All Statuses</option>
+            <option value="pending">Pending</option>
+            <option value="paid">Paid</option>
+            <option value="processing">Processing</option>
+            <option value="shipped">Shipped</option>
+            <option value="delivered">Delivered</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+          <select
+            value={deliveryFilter}
+            onChange={(e) => setDeliveryFilter(e.target.value)}
+            className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-brand-pink"
+          >
+            <option value="all">All Delivery Types</option>
+            <option value="local">Local (Nigeria)</option>
+            <option value="international">International</option>
+          </select>
+        </div>
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
@@ -108,6 +129,7 @@ export default function AdminOrders() {
                 <tr>
                   <th className="px-5 py-4">Order #</th>
                   <th className="px-5 py-4">Customer</th>
+                  <th className="px-5 py-4">Delivery</th>
                   <th className="px-5 py-4">Phone</th>
                   <th className="px-5 py-4">Total</th>
                   <th className="px-5 py-4">Payment</th>
@@ -124,6 +146,22 @@ export default function AdminOrders() {
                     <td className="px-5 py-4">
                       <p className="text-sm font-medium text-slate-900">{order.full_name}</p>
                       <p className="text-xs text-slate-400">{order.email}</p>
+                    </td>
+                    <td className="px-5 py-4">
+                      {order.delivery_type === 'international' ? (
+                        <span className="rounded-full bg-violet-100 px-2.5 py-1 text-xs font-medium text-violet-800">
+                          International
+                          {order.international_region_display
+                            ? ` · ${order.international_region_display}`
+                            : order.international_region
+                              ? ` · ${order.international_region}`
+                              : ''}
+                        </span>
+                      ) : (
+                        <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-medium text-emerald-800">
+                          Local (Nigeria)
+                        </span>
+                      )}
                     </td>
                     <td className="px-5 py-4 text-sm text-slate-600">{order.phone}</td>
                     <td className="px-5 py-4 text-sm font-semibold text-slate-900">{formatNaira(order.total)}</td>
@@ -201,6 +239,13 @@ export default function AdminOrders() {
                     ['Full Name', selectedOrder.full_name],
                     ['Email', selectedOrder.email],
                     ['Phone', selectedOrder.phone],
+                    ['Delivery Type', selectedOrder.delivery_type_display || selectedOrder.delivery_type || 'Local'],
+                    [
+                      'International Region',
+                      selectedOrder.international_region_display ||
+                        selectedOrder.international_region ||
+                        'N/A',
+                    ],
                     ['Address', selectedOrder.address],
                     ['City', selectedOrder.city],
                     ['State', selectedOrder.state],

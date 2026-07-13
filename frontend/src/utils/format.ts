@@ -4,6 +4,20 @@ export function formatPrice(amount: string | number, symbol = '₦'): string {
   return `${symbol}${num.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
+export function formatForeignPrice(amount: number, currency: 'USD' | 'GBP' | 'CAD'): string {
+  if (isNaN(amount)) return `${currency} 0.00`;
+  return `${currency} ${amount.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+}
+
+export function formatNgnCompact(amount: string | number): string {
+  const num = typeof amount === 'string' ? parseFloat(amount) : amount;
+  if (isNaN(num)) return 'NGN 0';
+  return `NGN ${num.toLocaleString('en-NG', { maximumFractionDigits: 0 })}`;
+}
+
 export function truncateText(text: string, maxLength: number): string {
   if (text.length <= maxLength) return text;
   return text.slice(0, maxLength).trim() + '...';

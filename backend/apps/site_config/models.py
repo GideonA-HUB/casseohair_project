@@ -90,6 +90,58 @@ class SiteSettings(models.Model):
         return obj
 
 
+class CurrencySettings(models.Model):
+    """Singleton FX rates and delivery fees — base prices are always in NGN."""
+
+    ngn_per_usd = models.DecimalField(
+        max_digits=12,
+        decimal_places=4,
+        default=1450,
+        help_text='NGN per 1 USD (e.g. 1450 means $1 = ₦1,450)',
+    )
+    ngn_per_gbp = models.DecimalField(
+        max_digits=12,
+        decimal_places=4,
+        default=1920,
+        help_text='NGN per 1 GBP (e.g. 1920 means £1 = ₦1,920)',
+    )
+    ngn_per_cad = models.DecimalField(
+        max_digits=12,
+        decimal_places=4,
+        default=1100,
+        help_text='NGN per 1 CAD (e.g. 1100 means C$1 = ₦1,100)',
+    )
+    local_delivery_fee = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=4000,
+        help_text='Flat delivery fee for orders within Nigeria (NGN)',
+    )
+    international_delivery_fee = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=50000,
+        help_text='Flat delivery fee for US, UK, and Canada orders (NGN)',
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Store currency & FX'
+        verbose_name_plural = 'Store currency & FX'
+
+    def __str__(self):
+        return 'Store currency & FX'
+
+    def save(self, *args, **kwargs):
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def get_settings(cls):
+        obj, _ = cls.objects.get_or_create(pk=1)
+        return obj
+
+
 class Testimonial(models.Model):
     name = models.CharField(max_length=100)
     role = models.CharField(max_length=100, blank=True)

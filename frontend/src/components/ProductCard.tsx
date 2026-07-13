@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import StarRating from '@/components/StarRating';
+import MultiCurrencyPrice from '@/components/MultiCurrencyPrice';
 import type { Product } from '@/types';
 import { formatPrice, truncateText } from '@/utils/format';
+import { useCurrencyStore } from '@/store/currencyStore';
 
 interface ProductCardProps {
   product: Product;
@@ -10,6 +12,8 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, index = 0 }: ProductCardProps) {
+  const currencySettings = useCurrencyStore((s) => s.settings);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -61,12 +65,10 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
             <span className="text-xs text-brand-accent/40">({product.review_count})</span>
           </div>
         )}
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-sm font-semibold text-brand-accent">
-            {formatPrice(product.current_price)}
-          </span>
+        <div className="space-y-1">
+          <MultiCurrencyPrice amountNgn={product.current_price} settings={currencySettings} />
           {product.is_on_sale && (
-            <span className="text-xs text-brand-accent/40 line-through">
+            <span className="text-xs text-brand-accent/40 line-through block">
               {formatPrice(product.price)}
             </span>
           )}

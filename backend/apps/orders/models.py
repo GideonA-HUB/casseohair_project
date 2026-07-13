@@ -5,6 +5,16 @@ from django.db import models
 
 
 class Order(models.Model):
+    DELIVERY_TYPE_CHOICES = [
+        ('local', 'Local (Nigeria)'),
+        ('international', 'International'),
+    ]
+    INTERNATIONAL_REGION_CHOICES = [
+        ('US', 'United States'),
+        ('UK', 'United Kingdom'),
+        ('CA', 'Canada'),
+    ]
+
     STATUS_CHOICES = [
         ('pending', 'Pending'),
         ('paid', 'Paid'),
@@ -24,6 +34,17 @@ class Order(models.Model):
     city = models.CharField(max_length=100)
     state = models.CharField(max_length=100)
     country = models.CharField(max_length=100, default='Nigeria')
+    delivery_type = models.CharField(
+        max_length=20,
+        choices=DELIVERY_TYPE_CHOICES,
+        default='local',
+    )
+    international_region = models.CharField(
+        max_length=5,
+        choices=INTERNATIONAL_REGION_CHOICES,
+        blank=True,
+        default='',
+    )
     order_notes = models.TextField(blank=True)
     subtotal = models.DecimalField(max_digits=12, decimal_places=2)
     delivery_fee = models.DecimalField(max_digits=10, decimal_places=2, default=4000)

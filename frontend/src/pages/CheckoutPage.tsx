@@ -7,38 +7,59 @@ import { ShieldCheck } from 'lucide-react';
 import SEO from '@/components/SEO';
 import { ordersApi, paymentsApi } from '@/api';
 import { useCartStore } from '@/store/cartStore';
+import { useCurrencyStore } from '@/store/currencyStore';
 import { saveCheckoutDraft, loadCheckoutDraft, savePendingOrder } from '@/lib/checkoutSession';
 import { formatPrice } from '@/utils/format';
 
-const checkoutSchema = z.object({
-  full_name: z.string().min(2, 'Full name is required'),
-  email: z.string().email('Valid email is required'),
-  phone: z.string().min(10, 'Valid phone number is required'),
-  address: z.string().min(5, 'Delivery address is required'),
-  city: z.string().min(2, 'City is required'),
-  state: z.string().min(2, 'State is required'),
-  country: z.string().default('Nigeria'),
-  order_notes: z.string().optional(),
-  payment_method: z.literal('flutterwave'),
-  agreed_to_terms: z.boolean().refine((val) => val === true, {
-    message: 'You must agree to our Terms of Service and Refund Policy before placing your order.',
-  }),
-});
+const checkoutSchema = z
+  .object({
+    full_name: z.string().min(2, 'Full name is required'),
+    email: z.string().email('Valid email is required'),
+    phone: z.string().min(10, 'Valid phone number is required'),
+    address: z.string().min(5, 'Delivery address is required'),
+    city: z.string().min(2, 'City is required'),
+    state: z.string().min(2, 'State / Province is required'),
+    country: z.string().optional(),
+    order_notes: z.string().optional(),
+    payment_method: z.literal('flutterwave'),
+    agreed_to_terms: z.boolean().refine((val) => val === true, {
+      message: 'You must agree to our Terms of Service and Refund Policy before placing your order.',
+    }),
+    is_international_delivery: z.boolean(),
+    international_region: z.enum(['US', 'UK', 'CA', '']).optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.is_international_delivery && !data.international_region) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Please select whether you are in the US, UK, or Canada.',
+        path: ['international_region'],
+      });
+    }
+  });
 
 type CheckoutForm = z.infer<typeof checkoutSchema>;
 
 const labelClass = 'text-sm font-medium mb-2 block text-brand-accent';
 const errorClass = 'text-red-500 text-xs mt-1';
 
+const REGION_LABELS: Record<'US' | 'UK' | 'CA', string> = {
+  US: 'United States',
+  UK: 'United Kingdom',
+  CA: 'Canada',
+};
+
 export default function CheckoutPage() {
   const navigate = useNavigate();
   const { items, getTotal } = useCartStore();
+  const currencySettings = useCurrencyStore((s) => s.settings);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   const subtotal = getTotal();
-  const deliveryFee = 4000;
-  const total = subtotal + deliveryFee;
+  const localDeliveryFee = parseFloat(currencySettings.local_delivery_fee) || 4000;
+  const internationalDeliveryFee =
+    parseFloat(currencySettings.international_delivery_fee) || 50000;
 
   const {
     register,
@@ -52,10 +73,17 @@ export default function CheckoutPage() {
       country: 'Nigeria',
       payment_method: 'flutterwave',
       agreed_to_terms: false,
+      is_international_delivery: false,
+      international_region: '',
     },
   });
 
   const agreedToTerms = watch('agreed_to_terms');
+  const isInternational = watch('is_international_delivery');
+  const internationalRegion = watch('international_region');
+
+  const deliveryFee = isInternational ? internationalDeliveryFee : localDeliveryFee;
+  const total = subtotal + deliveryFee;
 
   useEffect(() => {
     const draft = loadCheckoutDraft<CheckoutForm>();
@@ -64,6 +92,8 @@ export default function CheckoutPage() {
         ...draft,
         payment_method: 'flutterwave',
         agreed_to_terms: draft.agreed_to_terms ?? false,
+        is_international_delivery: draft.is_international_delivery ?? false,
+        international_region: draft.international_region ?? '',
       });
     }
   }, [reset]);
@@ -85,6 +115,7 @@ export default function CheckoutPage() {
     try {
       const orderData = {
         ...data,
+        international_region: data.is_international_delivery ? data.international_region : '',
         items: items.map((i) => ({ product_id: i.product.id, quantity: i.quantity })),
       };
       const orderRes = await ordersApi.checkout(orderData);
@@ -99,13 +130,21 @@ export default function CheckoutPage() {
       let message = err instanceof Error ? err.message : 'Checkout failed. Please try again.';
       if (typeof err === 'object' && err !== null && 'response' in err) {
         const axiosErr = err as {
-          response?: { data?: { detail?: string; agreed_to_terms?: string[] } };
+          response?: {
+            data?: {
+              detail?: string;
+              agreed_to_terms?: string[];
+              international_region?: string[];
+            };
+          };
         };
-        const data = axiosErr.response?.data;
-        if (data?.agreed_to_terms?.[0]) {
-          message = data.agreed_to_terms[0];
-        } else if (data?.detail) {
-          message = data.detail;
+        const responseData = axiosErr.response?.data;
+        if (responseData?.agreed_to_terms?.[0]) {
+          message = responseData.agreed_to_terms[0];
+        } else if (responseData?.international_region?.[0]) {
+          message = responseData.international_region[0];
+        } else if (responseData?.detail) {
+          message = responseData.detail;
         }
       }
       setError(message);
@@ -113,6 +152,18 @@ export default function CheckoutPage() {
       setLoading(false);
     }
   };
+
+  const stateLabel = isInternational
+    ? internationalRegion === 'US'
+      ? 'State *'
+      : internationalRegion === 'CA'
+        ? 'Province *'
+        : 'County / Region *'
+    : 'State *';
+
+  const addressPlaceholder = isInternational
+    ? 'Full street address including apartment, suite, or unit number...'
+    : 'Street address, building, apartment...';
 
   return (
     <>
@@ -132,7 +183,6 @@ export default function CheckoutPage() {
         </div>
 
         <div className="flex flex-col gap-6 lg:grid lg:grid-cols-12 lg:gap-8">
-          {/* Order summary — first on mobile, sticky right on desktop */}
           <aside className="order-1 lg:order-2 lg:col-span-5">
             <div className="bg-white rounded-luxury shadow-luxury border border-brand-gray-100 p-5 md:p-6 lg:sticky lg:top-24">
               <h2 className="text-lg font-display font-semibold text-brand-black mb-4">
@@ -174,19 +224,24 @@ export default function CheckoutPage() {
                   <span>{formatPrice(subtotal)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-brand-accent/60">Delivery (Flat Rate)</span>
+                  <span className="text-brand-accent/60">
+                    {isInternational
+                      ? `International Delivery (${internationalRegion ? REGION_LABELS[internationalRegion as 'US' | 'UK' | 'CA'] : 'US / UK / Canada'})`
+                      : 'Delivery (Nigeria)'}
+                  </span>
                   <span>{formatPrice(deliveryFee)}</span>
                 </div>
                 <div className="flex justify-between font-semibold text-base pt-2 border-t border-brand-gray-100">
                   <span>Total</span>
                   <span className="text-brand-pink">{formatPrice(total)}</span>
                 </div>
-                <p className="text-xs text-brand-accent/40 pt-1">VAT not applicable</p>
+                <p className="text-xs text-brand-accent/40 pt-1">
+                  All payments are processed in Nigerian Naira (NGN) via Flutterwave.
+                </p>
               </div>
             </div>
           </aside>
 
-          {/* Checkout form */}
           <form
             onSubmit={handleSubmit(onSubmit)}
             className="order-2 lg:order-1 lg:col-span-7 space-y-6"
@@ -200,6 +255,52 @@ export default function CheckoutPage() {
               </p>
 
               <div className="space-y-5">
+                <div
+                  className={`rounded-xl border p-4 transition-colors ${
+                    isInternational
+                      ? 'border-brand-pink bg-brand-pink/5'
+                      : 'border-brand-gray-200 dark:border-white/15'
+                  }`}
+                >
+                  <label className="flex cursor-pointer items-start gap-3">
+                    <input
+                      type="checkbox"
+                      {...register('is_international_delivery')}
+                      className="mt-0.5 h-4 w-4 shrink-0 rounded border-brand-gray-300 accent-brand-pink"
+                    />
+                    <span className="text-sm leading-relaxed text-brand-accent dark:text-gray-200">
+                      <span className="font-semibold text-brand-black dark:text-white block mb-1">
+                        International delivery (US, UK, or Canada)
+                      </span>
+                      Check this box if your order should be shipped outside Nigeria. You must
+                      provide your complete and accurate international address so we can deliver
+                      correctly.
+                    </span>
+                  </label>
+
+                  {isInternational && (
+                    <div className="mt-4 pl-7">
+                      <label className={labelClass}>Your location *</label>
+                      <select
+                        {...register('international_region')}
+                        className="input-luxury"
+                        defaultValue=""
+                      >
+                        <option value="">Select country</option>
+                        <option value="US">United States</option>
+                        <option value="UK">United Kingdom</option>
+                        <option value="CA">Canada</option>
+                      </select>
+                      {errors.international_region && (
+                        <p className={errorClass}>{errors.international_region.message}</p>
+                      )}
+                      <p className="mt-2 text-xs text-brand-accent/50">
+                        International delivery fee: {formatPrice(internationalDeliveryFee)}
+                      </p>
+                    </div>
+                  )}
+                </div>
+
                 <div>
                   <label className={labelClass}>Full Name *</label>
                   <input
@@ -229,7 +330,7 @@ export default function CheckoutPage() {
                       {...register('phone')}
                       type="tel"
                       className="input-luxury"
-                      placeholder="+234..."
+                      placeholder={isInternational ? '+1...' : '+234...'}
                       required
                     />
                     {errors.phone && <p className={errorClass}>{errors.phone.message}</p>}
@@ -242,7 +343,7 @@ export default function CheckoutPage() {
                     {...register('address')}
                     rows={3}
                     className="input-luxury resize-none"
-                    placeholder="Street address, building, apartment..."
+                    placeholder={addressPlaceholder}
                     required
                   />
                   {errors.address && <p className={errorClass}>{errors.address.message}</p>}
@@ -260,16 +361,18 @@ export default function CheckoutPage() {
                     {errors.city && <p className={errorClass}>{errors.city.message}</p>}
                   </div>
                   <div>
-                    <label className={labelClass}>State *</label>
+                    <label className={labelClass}>{stateLabel}</label>
                     <input
                       {...register('state')}
                       className="input-luxury"
-                      placeholder="State"
+                      placeholder={isInternational ? 'State / Province / County' : 'State'}
                       required
                     />
                     {errors.state && <p className={errorClass}>{errors.state.message}</p>}
                   </div>
                 </div>
+
+                {!isInternational && <input type="hidden" {...register('country')} value="Nigeria" />}
 
                 <div>
                   <label className={labelClass}>Order Notes (optional)</label>
@@ -296,7 +399,9 @@ export default function CheckoutPage() {
                 </span>
                 <div>
                   <span className="text-sm font-semibold text-brand-black block">Flutterwave</span>
-                  <span className="text-xs text-brand-accent/50">Card, bank transfer &amp; mobile money</span>
+                  <span className="text-xs text-brand-accent/50">
+                    Card, bank transfer &amp; mobile money (international cards accepted)
+                  </span>
                 </div>
               </div>
 

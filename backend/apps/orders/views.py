@@ -61,9 +61,12 @@ class AdminOrderListView(generics.ListAPIView):
 
     def get_queryset(self):
         status_filter = self.request.query_params.get('status')
+        delivery_type = self.request.query_params.get('delivery_type')
         queryset = Order.objects.prefetch_related('items').all()
         if status_filter and status_filter != 'all':
             queryset = queryset.filter(status=status_filter)
+        if delivery_type and delivery_type != 'all':
+            queryset = queryset.filter(delivery_type=delivery_type)
         return queryset
 
 
