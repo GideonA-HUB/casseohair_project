@@ -9,6 +9,7 @@ from .models import (
     SiteAsset,
     SiteSettings,
     CurrencySettings,
+    SaleAnnouncement,
     Testimonial,
     WhyChooseItem,
 )
@@ -132,3 +133,34 @@ class AdminActivityLogAdmin(admin.ModelAdmin):
     list_display = ['user', 'action', 'model_name', 'created_at']
     list_filter = ['action', 'created_at']
     readonly_fields = ['user', 'action', 'model_name', 'object_id', 'description', 'ip_address', 'created_at']
+
+
+@admin.register(SaleAnnouncement)
+class SaleAnnouncementAdmin(admin.ModelAdmin):
+    list_display = [
+        'title', 'badge_text', 'start_date', 'end_date',
+        'is_active', 'order', 'updated_at',
+    ]
+    list_filter = ['is_active', 'start_date', 'end_date']
+    list_editable = ['is_active', 'order']
+    search_fields = ['title', 'headline', 'marquee_text']
+    fieldsets = (
+        ('Visibility', {
+            'fields': ('is_active', 'order', 'start_date', 'end_date'),
+            'description': 'Inactive announcements are hidden. Optional dates auto-hide outside the sale window.',
+        }),
+        ('Copy', {
+            'fields': (
+                'title', 'badge_text', 'headline',
+                'offer_website', 'offer_whatsapp', 'offer_extra',
+                'marquee_text',
+            ),
+        }),
+        ('Images', {
+            'fields': ('megaphone_image', 'poster_image'),
+            'description': 'Upload the megaphone graphic and/or the preorder poster. Leave blank to use site defaults.',
+        }),
+        ('Call to action', {
+            'fields': ('cta_label', 'cta_url'),
+        }),
+    )

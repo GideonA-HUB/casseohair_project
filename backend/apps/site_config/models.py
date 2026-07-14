@@ -252,3 +252,55 @@ class AdminActivityLog(models.Model):
 
     def __str__(self):
         return f'{self.user} - {self.action} - {self.created_at}'
+
+
+class SaleAnnouncement(models.Model):
+    """Homepage sale / preorder announcement — images and copy managed in Django admin."""
+
+    title = models.CharField(max_length=120, default='Mid Year Preorder Sales')
+    badge_text = models.CharField(max_length=80, blank=True, default='PREORDER SALE')
+    headline = models.CharField(
+        max_length=160,
+        blank=True,
+        default='Bringing factory prices to your doorstep',
+    )
+    offer_website = models.CharField(max_length=80, blank=True, default='30% OFF WEBSITE ORDERS')
+    offer_whatsapp = models.CharField(max_length=80, blank=True, default='20% OFF WHATSAPP ORDERS')
+    offer_extra = models.CharField(max_length=80, blank=True, default='FREE WIGGING')
+    marquee_text = models.TextField(
+        default=(
+            'CasseoHair presents Mid Year Preorder Sales — bringing factory prices to your doorstep '
+            'with 30% off website orders, 20% off WhatsApp orders, and free wigging. '
+            'Running July 20th – 25th, 2026. Please read our Terms of Service before ordering.'
+        ),
+        help_text='Continuous scrolling announcement text shown on the homepage banner.',
+    )
+    megaphone_image = models.ImageField(
+        upload_to='announcements/',
+        blank=True,
+        null=True,
+        help_text='Optional megaphone / shout graphic (left side on desktop).',
+    )
+    poster_image = models.ImageField(
+        upload_to='announcements/',
+        blank=True,
+        null=True,
+        help_text='Optional sale poster graphic (right side / mobile hero).',
+    )
+    cta_label = models.CharField(max_length=60, blank=True, default='Shop Preorder Looks')
+    cta_url = models.CharField(max_length=255, blank=True, default='/shop')
+    start_date = models.DateField(null=True, blank=True, help_text='Sale start date (e.g. July 20, 2026)')
+    end_date = models.DateField(null=True, blank=True, help_text='Sale end date (e.g. July 25, 2026)')
+    is_active = models.BooleanField(default=True)
+    order = models.PositiveIntegerField(default=0, help_text='Lower numbers appear first when several are active.')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['order', '-updated_at']
+        verbose_name = 'Sale announcement'
+        verbose_name_plural = 'Sale announcements'
+
+    def __str__(self):
+        return self.title
+

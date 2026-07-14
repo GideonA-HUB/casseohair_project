@@ -18,6 +18,7 @@ from .models import (
     SiteAsset,
     SiteSettings,
     CurrencySettings,
+    SaleAnnouncement,
     Testimonial,
     WhyChooseItem,
 )
@@ -28,6 +29,7 @@ from .serializers import (
     HeroImageSerializer,
     NewsletterSubscribeSerializer,
     NewsletterSubscriberSerializer,
+    SaleAnnouncementSerializer,
     SiteAssetSerializer,
     SiteSettingsSerializer,
     TestimonialSerializer,
@@ -53,6 +55,36 @@ class CurrencySettingsView(APIView):
     def get(self, request):
         settings_obj = CurrencySettings.get_settings()
         return Response(CurrencySettingsSerializer(settings_obj).data)
+
+
+class SaleAnnouncementsView(generics.ListAPIView):
+    authentication_classes = []
+    permission_classes = []
+    serializer_class = SaleAnnouncementSerializer
+    pagination_class = None
+
+    def get_queryset(self):
+        from datetime import date
+        from django.db.models import Q
+
+        today = date.today()
+        # Show active announcements until the sale ends (allow publishing before start_date)
+        return SaleAnnouncement.objects.filter(is_active=True).filter(
+            Q(end_date__isnull=True) | Q(end_date__gte=today),
+        )[:5]
+
+
+class AdminSaleAnnouncementsView(generics.ListCreateAPIView):
+    permission_classes = [IsAdminUser]
+    serializer_class = SaleAnnouncementSerializer
+    queryset = SaleAnnouncement.objects.all()
+    pagination_class = None
+
+
+class AdminSaleAnnouncementDetailView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAdminUser]
+    serializer_class = SaleAnnouncementSerializer
+    queryset = SaleAnnouncement.objects.all()
 
 
 class AdminCurrencySettingsView(APIView):

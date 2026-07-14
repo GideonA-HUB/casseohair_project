@@ -9,6 +9,7 @@ import type {
   PaginatedResponse,
   Product,
   ProductReview,
+  SaleAnnouncement,
   SiteSettings,
   Testimonial,
   WhyChooseItem,
@@ -56,6 +57,10 @@ export const productsApi = {
 export const siteApi = {
   settings: () => apiClient.get<SiteSettings>('/site/settings/'),
   currencySettings: () => apiClient.get<CurrencySettings>('/site/currency-settings/'),
+  saleAnnouncements: (): Promise<SaleAnnouncement[]> =>
+    apiClient
+      .get<SaleAnnouncement[] | PaginatedResponse<SaleAnnouncement>>('/site/sale-announcements/')
+      .then((r) => unwrapList<SaleAnnouncement>(r.data)),
   adminCurrencySettings: () => apiClient.get<CurrencySettings>('/site/admin/currency-settings/'),
   updateCurrencySettings: (data: Partial<CurrencySettings>) =>
     apiClient.patch<CurrencySettings>('/site/admin/currency-settings/', data),

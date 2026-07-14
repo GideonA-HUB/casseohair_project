@@ -10,6 +10,7 @@ from .models import (
     SiteAsset,
     SiteSettings,
     CurrencySettings,
+    SaleAnnouncement,
     Testimonial,
     WhyChooseItem,
 )
@@ -144,3 +145,35 @@ class CurrencySettingsSerializer(serializers.ModelSerializer):
             'updated_at',
         ]
         read_only_fields = ['updated_at']
+
+
+class SaleAnnouncementSerializer(serializers.ModelSerializer):
+    megaphone_image = serializers.SerializerMethodField()
+    poster_image = serializers.SerializerMethodField()
+
+    class Meta:
+        model = SaleAnnouncement
+        fields = [
+            'id',
+            'title',
+            'badge_text',
+            'headline',
+            'offer_website',
+            'offer_whatsapp',
+            'offer_extra',
+            'marquee_text',
+            'megaphone_image',
+            'poster_image',
+            'cta_label',
+            'cta_url',
+            'start_date',
+            'end_date',
+            'is_active',
+            'order',
+        ]
+
+    def get_megaphone_image(self, obj):
+        return absolute_media_url(self.context.get('request'), obj.megaphone_image)
+
+    def get_poster_image(self, obj):
+        return absolute_media_url(self.context.get('request'), obj.poster_image)

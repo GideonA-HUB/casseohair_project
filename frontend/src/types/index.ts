@@ -84,6 +84,25 @@ export interface CurrencySettings {
   updated_at: string;
 }
 
+export interface SaleAnnouncement {
+  id: number;
+  title: string;
+  badge_text: string;
+  headline: string;
+  offer_website: string;
+  offer_whatsapp: string;
+  offer_extra: string;
+  marquee_text: string;
+  megaphone_image: string | null;
+  poster_image: string | null;
+  cta_label: string;
+  cta_url: string;
+  start_date: string | null;
+  end_date: string | null;
+  is_active: boolean;
+  order: number;
+}
+
 export interface SiteSettings {
   site_name: string;
   tagline: string;

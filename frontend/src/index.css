@@ -165,3 +165,22 @@
 .animate-x-slider {
   animation: x-slider 30s linear infinite;
 }
+
+@keyframes announcement-marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-announcement-marquee {
+  animation: announcement-marquee 28s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-announcement-marquee {
+    animation: none;
+  }
+}

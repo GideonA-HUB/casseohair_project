@@ -71,7 +71,7 @@ class FeaturedProductsView(generics.ListAPIView):
     def get_queryset(self):
         return Product.objects.filter(
             is_active=True, is_archived=False, is_featured=True
-        ).select_related('category').prefetch_related('images', 'reviews')[:12]
+        ).select_related('category').prefetch_related('images', 'reviews')[:100]
 
 
 class BestsellerProductsView(generics.ListAPIView):
@@ -81,7 +81,7 @@ class BestsellerProductsView(generics.ListAPIView):
     def get_queryset(self):
         return Product.objects.filter(
             is_active=True, is_archived=False, is_bestseller=True
-        ).select_related('category').prefetch_related('images', 'reviews')[:12]
+        ).select_related('category').prefetch_related('images', 'reviews')[:100]
 
 
 class NewArrivalProductsView(generics.ListAPIView):
@@ -91,7 +91,7 @@ class NewArrivalProductsView(generics.ListAPIView):
     def get_queryset(self):
         return Product.objects.filter(
             is_active=True, is_archived=False, is_new_arrival=True
-        ).select_related('category').prefetch_related('images', 'reviews')[:12]
+        ).select_related('category').prefetch_related('images', 'reviews')[:100]
 
 
 class FlashSaleProductsView(generics.ListAPIView):
@@ -103,7 +103,7 @@ class FlashSaleProductsView(generics.ListAPIView):
             is_active=True,
             is_archived=False,
             is_flash_sale=True,
-        ).select_related('category').prefetch_related('images', 'reviews')[:20]
+        ).select_related('category').prefetch_related('images', 'reviews')[:100]
 
 
 class ProductSearchView(APIView):

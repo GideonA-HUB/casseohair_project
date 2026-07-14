@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import SEO from '@/components/SEO';
-import ProductCard from '@/components/ProductCard';
+import PaginatedProductGrid from '@/components/PaginatedProductGrid';
+import SaleAnnouncementBanner from '@/components/SaleAnnouncementBanner';
 import CategoryCard from '@/components/CategoryCard';
 import { ShuffleHero } from '@/components/ui/shuffle-grid';
 import SlidingTestimonial from '@/components/ui/sliding-testimonial';
@@ -81,6 +82,9 @@ export default function HomePage() {
       {/* Hero */}
       <ShuffleHero />
 
+      {/* Sale / Preorder Announcement */}
+      <SaleAnnouncementBanner />
+
       {/* Categories */}
       {categories.length > 0 && (
         <section className="section-padding max-w-7xl mx-auto">
@@ -131,11 +135,7 @@ export default function HomePage() {
         </div>
 
         {flashSales.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {flashSales.map((product, i) => (
-              <ProductCard key={product.id} product={product} index={i} />
-            ))}
-          </div>
+          <PaginatedProductGrid products={flashSales} itemLabel="flash sales" dark />
         ) : (
           <div className="text-sm text-white/60 py-6">No sales at the moment</div>
         )}
@@ -150,11 +150,7 @@ export default function HomePage() {
               All Products →
             </Link>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {featured.map((product, i) => (
-              <ProductCard key={product.id} product={product} index={i} />
-            ))}
-          </div>
+          <PaginatedProductGrid products={featured} itemLabel="featured items" />
         </section>
       )}
 
@@ -165,11 +161,7 @@ export default function HomePage() {
             <h2 className="text-xl font-display font-semibold">New Arrivals</h2>
             <Link to="/shop?filter=new-arrivals" className="btn-ghost text-xs">View All →</Link>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {newArrivals.map((product, i) => (
-              <ProductCard key={product.id} product={product} index={i} />
-            ))}
-          </div>
+          <PaginatedProductGrid products={newArrivals} itemLabel="new arrivals" />
         </section>
       )}
 
@@ -180,11 +172,7 @@ export default function HomePage() {
             <h2 className="text-xl font-display font-semibold">Best Sellers</h2>
             <Link to="/shop?filter=bestsellers" className="btn-ghost text-xs">View All →</Link>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {bestsellers.map((product, i) => (
-              <ProductCard key={product.id} product={product} index={i} />
-            ))}
-          </div>
+          <PaginatedProductGrid products={bestsellers} itemLabel="best sellers" />
         </section>
       )}
 

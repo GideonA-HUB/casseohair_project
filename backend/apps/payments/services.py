@@ -2,11 +2,15 @@ import uuid
 
 import requests
 from django.conf import settings
+from django.db import transaction
+from django.db.models import F, Value
+from django.db.models.functions import Greatest
 from django.utils import timezone
 
 from apps.core.email_utils import send_payment_confirmation_email
 from apps.notifications.services import NotificationService
 from apps.orders.models import Order
+from apps.products.models import Product
 
 from .models import Payment
 
@@ -84,21 +88,33 @@ class PaystackService:
 
     @classmethod
     def _complete_order(cls, payment: Payment):
-        order = payment.order
-        if order.is_paid:
+        """Mark order paid and deduct product stock once payment verifies successfully."""
+        order_id = None
+        with transaction.atomic():
+            order = Order.objects.select_for_update().get(pk=payment.order_id)
+            if order.is_paid:
+                return
+
+            order.is_paid = True
+            order.status = 'paid'
+            order.payment_reference = payment.reference
+            order.paid_at = timezone.now()
+            order.save(update_fields=['is_paid', 'status', 'payment_reference', 'paid_at'])
+
+            for item in order.items.select_related('product'):
+                if not item.product_id:
+                    continue
+                # Atomic stock decrement — never go below zero
+                Product.objects.filter(pk=item.product_id).update(
+                    stock=Greatest(F('stock') - item.quantity, Value(0)),
+                )
+
+            order_id = order.pk
+
+        if order_id is None:
             return
 
-        order.is_paid = True
-        order.status = 'paid'
-        order.payment_reference = payment.reference
-        order.paid_at = timezone.now()
-        order.save()
-
-        for item in order.items.select_related('product'):
-            if item.product:
-                item.product.stock = max(0, item.product.stock - item.quantity)
-                item.product.save(update_fields=['stock'])
-
+        order = Order.objects.prefetch_related('items').get(pk=order_id)
         send_payment_confirmation_email(order)
         NotificationService.notify_payment_received(order)
 
