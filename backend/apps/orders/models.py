@@ -70,6 +70,16 @@ class Order(models.Model):
     def __str__(self):
         return self.order_number
 
+    @property
+    def payment_method_display(self):
+        labels = {
+            'paystack': 'Paystack',
+            'flutterwave': 'Flutterwave',
+        }
+        if not self.payment_method:
+            return '—'
+        return labels.get(self.payment_method, self.payment_method.replace('_', ' ').title())
+
     def save(self, *args, **kwargs):
         if not self.order_number:
             self.order_number = f'CH{uuid.uuid4().hex[:8].upper()}'

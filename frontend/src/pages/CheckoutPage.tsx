@@ -21,7 +21,7 @@ const checkoutSchema = z
     state: z.string().min(2, 'State / Province is required'),
     country: z.string().optional(),
     order_notes: z.string().optional(),
-    payment_method: z.literal('flutterwave'),
+    payment_method: z.enum(['paystack', 'flutterwave']),
     agreed_to_terms: z.boolean().refine((val) => val === true, {
       message: 'You must agree to our Terms of Service and Refund Policy before placing your order.',
     }),
@@ -71,7 +71,7 @@ export default function CheckoutPage() {
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
       country: 'Nigeria',
-      payment_method: 'flutterwave',
+      payment_method: 'paystack',
       agreed_to_terms: false,
       is_international_delivery: false,
       international_region: '',
@@ -81,6 +81,7 @@ export default function CheckoutPage() {
   const agreedToTerms = watch('agreed_to_terms');
   const isInternational = watch('is_international_delivery');
   const internationalRegion = watch('international_region');
+  const paymentMethod = watch('payment_method');
 
   const deliveryFee = isInternational ? internationalDeliveryFee : localDeliveryFee;
   const total = subtotal + deliveryFee;
@@ -90,7 +91,7 @@ export default function CheckoutPage() {
     if (draft) {
       reset({
         ...draft,
-        payment_method: 'flutterwave',
+        payment_method: draft.payment_method === 'flutterwave' ? 'flutterwave' : 'paystack',
         agreed_to_terms: draft.agreed_to_terms ?? false,
         is_international_delivery: draft.is_international_delivery ?? false,
         international_region: draft.international_region ?? '',
@@ -124,7 +125,10 @@ export default function CheckoutPage() {
       saveCheckoutDraft(data);
       savePendingOrder(order.order_number);
 
-      const paymentRes = await paymentsApi.initialize(order.order_number, 'flutterwave');
+      const paymentRes = await paymentsApi.initialize(
+        order.order_number,
+        data.payment_method,
+      );
       window.location.href = paymentRes.data.authorization_url;
     } catch (err: unknown) {
       let message = err instanceof Error ? err.message : 'Checkout failed. Please try again.';
@@ -391,22 +395,74 @@ export default function CheckoutPage() {
                 Payment Method
               </h2>
 
-              <input type="hidden" {...register('payment_method')} />
-
-              <div className="flex items-center gap-3 p-4 rounded-card border border-brand-pink bg-brand-pink/5 shadow-sm">
-                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-pink">
-                  <span className="h-2 w-2 rounded-full bg-white" />
-                </span>
-                <div>
-                  <span className="text-sm font-semibold text-brand-black block">Flutterwave</span>
-                  <span className="text-xs text-brand-accent/50">
-                    Card, bank transfer &amp; mobile money (international cards accepted)
+              <div className="space-y-3">
+                <label
+                  className={`flex cursor-pointer items-center gap-3 p-4 rounded-card border transition-all ${
+                    paymentMethod === 'paystack'
+                      ? 'border-brand-pink bg-brand-pink/5 shadow-sm'
+                      : 'border-brand-gray-200 hover:border-brand-pink/40'
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    value="paystack"
+                    {...register('payment_method')}
+                    className="sr-only"
+                  />
+                  <span
+                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border ${
+                      paymentMethod === 'paystack'
+                        ? 'border-brand-pink bg-brand-pink'
+                        : 'border-brand-gray-300'
+                    }`}
+                  >
+                    {paymentMethod === 'paystack' && (
+                      <span className="h-2 w-2 rounded-full bg-white" />
+                    )}
                   </span>
-                </div>
+                  <div>
+                    <span className="text-sm font-semibold text-brand-black block">Paystack</span>
+                    <span className="text-xs text-brand-accent/50">
+                      Cards, bank transfer &amp; USSD
+                    </span>
+                  </div>
+                </label>
+
+                <label
+                  className={`flex cursor-pointer items-center gap-3 p-4 rounded-card border transition-all ${
+                    paymentMethod === 'flutterwave'
+                      ? 'border-brand-pink bg-brand-pink/5 shadow-sm'
+                      : 'border-brand-gray-200 hover:border-brand-pink/40'
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    value="flutterwave"
+                    {...register('payment_method')}
+                    className="sr-only"
+                  />
+                  <span
+                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border ${
+                      paymentMethod === 'flutterwave'
+                        ? 'border-brand-pink bg-brand-pink'
+                        : 'border-brand-gray-300'
+                    }`}
+                  >
+                    {paymentMethod === 'flutterwave' && (
+                      <span className="h-2 w-2 rounded-full bg-white" />
+                    )}
+                  </span>
+                  <div>
+                    <span className="text-sm font-semibold text-brand-black block">Flutterwave</span>
+                    <span className="text-xs text-brand-accent/50">
+                      Card, bank transfer &amp; mobile money (international cards accepted)
+                    </span>
+                  </div>
+                </label>
               </div>
 
               <p className="mt-3 text-xs text-brand-accent/50 dark:text-gray-500">
-                Paystack is temporarily unavailable. All payments are processed securely via Flutterwave.
+                All payments are processed securely. Choose your preferred payment provider.
               </p>
             </div>
 

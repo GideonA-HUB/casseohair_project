@@ -20,6 +20,9 @@ class PaystackService:
 
     @classmethod
     def initialize_payment(cls, order: Order, callback_url: str) -> dict:
+        if not settings.PAYSTACK_SECRET_KEY:
+            raise ValueError('Paystack is not configured. Please contact support.')
+
         reference = f'CH-PS-{uuid.uuid4().hex[:12].upper()}'
         payment = Payment.objects.create(
             order=order,
@@ -97,9 +100,12 @@ class PaystackService:
 
             order.is_paid = True
             order.status = 'paid'
+            order.payment_method = payment.provider
             order.payment_reference = payment.reference
             order.paid_at = timezone.now()
-            order.save(update_fields=['is_paid', 'status', 'payment_reference', 'paid_at'])
+            order.save(update_fields=[
+                'is_paid', 'status', 'payment_method', 'payment_reference', 'paid_at',
+            ])
 
             for item in order.items.select_related('product'):
                 if not item.product_id:
@@ -124,6 +130,9 @@ class FlutterwaveService:
 
     @classmethod
     def initialize_payment(cls, order: Order, callback_url: str) -> dict:
+        if not settings.FLUTTERWAVE_SECRET_KEY:
+            raise ValueError('Flutterwave is not configured. Please contact support.')
+
         reference = f'CH-FW-{uuid.uuid4().hex[:12].upper()}'
         payment = Payment.objects.create(
             order=order,

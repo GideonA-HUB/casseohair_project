@@ -35,6 +35,7 @@ interface Order {
   total: string;
   status: string;
   payment_method: string;
+  payment_method_display?: string;
   payment_reference: string;
   is_paid: boolean;
   agreed_to_terms?: boolean;
@@ -165,8 +166,8 @@ export default function AdminOrders() {
                     </td>
                     <td className="px-5 py-4 text-sm text-slate-600">{order.phone}</td>
                     <td className="px-5 py-4 text-sm font-semibold text-slate-900">{formatNaira(order.total)}</td>
-                    <td className="px-5 py-4 text-xs capitalize text-slate-600">
-                      {order.payment_method}
+                    <td className="px-5 py-4 text-xs text-slate-600">
+                      {order.payment_method_display || order.payment_method || '—'}
                       <br />
                       <span className={order.is_paid ? 'text-emerald-600' : 'text-amber-600'}>
                         {order.is_paid ? 'Paid' : 'Unpaid'}
@@ -289,7 +290,7 @@ export default function AdminOrders() {
                 <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-brand-pink">Payment</h3>
                 <div className="grid gap-3 sm:grid-cols-2">
                   {[
-                    ['Method', selectedOrder.payment_method],
+                    ['Method', selectedOrder.payment_method_display || selectedOrder.payment_method || '—'],
                     ['Transaction ID', selectedOrder.payment_reference || 'Pending'],
                     ['Status', selectedOrder.is_paid ? 'Paid' : 'Unpaid'],
                     ['Total', formatNaira(selectedOrder.total)],
@@ -298,7 +299,13 @@ export default function AdminOrders() {
                   ].map(([label, value]) => (
                     <div key={label} className="rounded-xl bg-slate-50 px-4 py-3">
                       <p className="text-xs text-slate-400">{label}</p>
-                      <p className="text-sm font-medium capitalize text-slate-900">{value}</p>
+                      <p
+                        className={`text-sm font-medium text-slate-900 ${
+                          label === 'Method' || label === 'Status' ? 'capitalize' : ''
+                        }`}
+                      >
+                        {value}
+                      </p>
                     </div>
                   ))}
                 </div>

@@ -19,7 +19,7 @@ function detectProvider(
   }
   if (reference?.startsWith('CH-FW-')) return 'flutterwave';
   if (reference?.startsWith('CH-PS-')) return 'paystack';
-  return 'flutterwave';
+  return 'paystack';
 }
 
 export default function CheckoutVerifyPage() {
@@ -99,6 +99,12 @@ export default function CheckoutVerifyPage() {
                 <span className="text-brand-accent/50 dark:text-gray-500">Email:</span>{' '}
                 {order.email}
               </p>
+              <p className="text-sm">
+                <span className="text-brand-accent/50 dark:text-gray-500">Payment Method:</span>{' '}
+                <strong className="text-brand-black dark:text-gray-100 capitalize">
+                  {order.payment_method_display || order.payment_method || '—'}
+                </strong>
+              </p>
               {order.payment_reference && (
                 <p className="text-sm">
                   <span className="text-brand-accent/50 dark:text-gray-500">Transaction ID:</span>{' '}
@@ -122,7 +128,7 @@ export default function CheckoutVerifyPage() {
             </div>
             <h1 className="text-2xl font-display font-semibold page-heading mb-2">Payment Cancelled</h1>
             <p className="text-brand-accent/60 dark:text-gray-400 mb-4">
-              You cancelled the payment on Flutterwave. No money was charged.
+              You cancelled the payment. No money was charged.
             </p>
             <p className="text-sm text-brand-accent/50 dark:text-gray-500 mb-8">
               Your bag and checkout details are still saved. You can return to checkout and try again whenever you are ready.

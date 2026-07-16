@@ -158,6 +158,7 @@ class CheckoutSerializer(serializers.Serializer):
 
 class OrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True, read_only=True)
+    payment_method_display = serializers.ReadOnlyField()
 
     class Meta:
         model = Order
@@ -167,6 +168,7 @@ class OrderSerializer(serializers.ModelSerializer):
             'delivery_type', 'international_region',
             'order_notes',
             'subtotal', 'delivery_fee', 'total', 'status', 'payment_method',
+            'payment_method_display',
             'payment_reference', 'is_paid', 'paid_at', 'agreed_to_terms', 'terms_agreed_at',
             'items', 'created_at',
         ]
@@ -182,6 +184,7 @@ class AdminOrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True, read_only=True)
     delivery_type_display = serializers.CharField(source='get_delivery_type_display', read_only=True)
     international_region_display = serializers.SerializerMethodField()
+    payment_method_display = serializers.ReadOnlyField()
 
     class Meta:
         model = Order
@@ -192,6 +195,7 @@ class AdminOrderSerializer(serializers.ModelSerializer):
             'international_region', 'international_region_display',
             'order_notes',
             'subtotal', 'delivery_fee', 'total', 'status', 'payment_method',
+            'payment_method_display',
             'payment_reference', 'is_paid', 'paid_at', 'shipped_at', 'delivered_at',
             'cancelled_at', 'refund_amount', 'refund_reason',
             'agreed_to_terms', 'terms_agreed_at',

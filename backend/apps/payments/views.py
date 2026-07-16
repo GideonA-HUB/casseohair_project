@@ -31,6 +31,11 @@ class InitializePaymentView(APIView):
         provider = serializer.validated_data['provider']
         callback_url = f"{settings.FRONTEND_URL}/checkout/verify?provider={provider}"
 
+        # Keep order.payment_method in sync with the gateway the customer chose
+        if order.payment_method != provider:
+            order.payment_method = provider
+            order.save(update_fields=['payment_method'])
+
         try:
             if provider == 'paystack':
                 result = PaystackService.initialize_payment(order, callback_url)

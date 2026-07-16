@@ -36,7 +36,7 @@
               <h2 style="margin:0 0 12px;font-size:14px;text-transform:uppercase;letter-spacing:0.08em;color:#111111;border-bottom:2px solid #E62E72;padding-bottom:8px;">Order & Payment</h2>
               <p style="margin:0 0 8px;font-size:14px;color:#555555;"><strong>Order Date:</strong> {{ order.created_at|date:"F d, Y · g:i A" }}</p>
               <p style="margin:0 0 8px;font-size:14px;color:#555555;"><strong>Status:</strong> {{ order.get_status_display }}</p>
-              <p style="margin:0 0 8px;font-size:14px;color:#555555;"><strong>Payment Method:</strong> {{ order.payment_method|title }}</p>
+              <p style="margin:0 0 8px;font-size:14px;color:#555555;"><strong>Payment Method:</strong> {{ order.payment_method_display }}</p>
               <p style="margin:0 0 8px;font-size:14px;color:#555555;"><strong>Payment Status:</strong> {% if order.is_paid %}Paid{% else %}Pending{% endif %}</p>
               <p style="margin:0 0 24px;font-size:14px;color:#555555;"><strong>Transaction ID:</strong> {% if order.payment_reference %}{{ order.payment_reference }}{% else %}Pending{% endif %}</p>
 

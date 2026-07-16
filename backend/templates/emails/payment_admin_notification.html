@@ -33,7 +33,7 @@
               <h2 style="margin:0 0 12px;font-size:14px;text-transform:uppercase;letter-spacing:0.08em;color:#111111;border-bottom:2px solid #E62E72;padding-bottom:8px;">Payment Details</h2>
               <p style="margin:0 0 8px;font-size:14px;color:#555555;"><strong>Payment Status:</strong> Paid</p>
               <p style="margin:0 0 8px;font-size:14px;color:#555555;"><strong>Amount Received:</strong> ₦{{ order.total }}</p>
-              <p style="margin:0 0 8px;font-size:14px;color:#555555;"><strong>Payment Method:</strong> {{ order.payment_method|title }}</p>
+              <p style="margin:0 0 8px;font-size:14px;color:#555555;"><strong>Payment Method:</strong> {{ order.payment_method_display }}</p>
               <p style="margin:0 0 8px;font-size:14px;color:#555555;"><strong>Transaction ID:</strong> {{ order.payment_reference }}</p>
               {% if order.paid_at %}
               <p style="margin:0 0 24px;font-size:14px;color:#555555;"><strong>Paid At:</strong> {{ order.paid_at|date:"F d, Y · g:i A" }}</p>

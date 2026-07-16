@@ -31,7 +31,7 @@
                   <td style="padding:18px 20px;">
                     <p style="margin:0 0 8px;font-size:14px;color:#166534;"><strong>Payment Status:</strong> Confirmed</p>
                     <p style="margin:0 0 8px;font-size:14px;color:#166534;"><strong>Amount Paid:</strong> ₦{{ order.total }}</p>
-                    <p style="margin:0 0 8px;font-size:14px;color:#166534;"><strong>Payment Method:</strong> {{ order.payment_method|title }}</p>
+                    <p style="margin:0 0 8px;font-size:14px;color:#166534;"><strong>Payment Method:</strong> {{ order.payment_method_display }}</p>
                     <p style="margin:0;font-size:14px;color:#166534;"><strong>Transaction ID:</strong> {{ order.payment_reference }}</p>
                   </td>
                 </tr>

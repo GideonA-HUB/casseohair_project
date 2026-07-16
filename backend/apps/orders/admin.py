@@ -15,7 +15,7 @@ class OrderAdmin(admin.ModelAdmin):
     list_display = [
         'order_number', 'full_name', 'email', 'total', 'delivery_type',
         'international_region', 'status', 'is_paid', 'agreed_to_terms',
-        'payment_method', 'created_at',
+        'payment_method_label', 'created_at',
     ]
     list_filter = [
         'status', 'delivery_type', 'international_region', 'is_paid',
@@ -24,7 +24,8 @@ class OrderAdmin(admin.ModelAdmin):
     search_fields = ['order_number', 'email', 'full_name', 'phone']
     readonly_fields = [
         'order_number', 'subtotal', 'delivery_fee', 'total',
-        'payment_reference', 'paid_at', 'created_at', 'updated_at',
+        'payment_method_label', 'payment_reference', 'paid_at',
+        'created_at', 'updated_at',
     ]
     inlines = [OrderItemInline]
     fieldsets = (
@@ -36,8 +37,12 @@ class OrderAdmin(admin.ModelAdmin):
                 'address', 'city', 'state', 'country', 'order_notes',
             ),
         }),
-        ('Payment', {'fields': ('payment_method', 'payment_reference')}),
+        ('Payment', {'fields': ('payment_method', 'payment_method_label', 'payment_reference')}),
         ('Totals', {'fields': ('subtotal', 'delivery_fee', 'total')}),
         ('Refund', {'fields': ('refund_amount', 'refund_reason'), 'classes': ('collapse',)}),
         ('Timestamps', {'fields': ('shipped_at', 'delivered_at', 'cancelled_at', 'created_at', 'updated_at')}),
     )
+
+    @admin.display(description='Payment method', ordering='payment_method')
+    def payment_method_label(self, obj):
+        return obj.payment_method_display

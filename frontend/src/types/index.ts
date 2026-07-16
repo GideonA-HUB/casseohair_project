@@ -173,6 +173,7 @@ export interface Order {
   total: string;
   status: string;
   payment_method: string;
+  payment_method_display?: string;
   payment_reference?: string;
   is_paid: boolean;
   agreed_to_terms?: boolean;
