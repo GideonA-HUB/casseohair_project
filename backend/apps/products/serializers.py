@@ -17,9 +17,14 @@ class ProductImageSerializer(serializers.ModelSerializer):
 
 
 class ProductVideoSerializer(serializers.ModelSerializer):
+    video = serializers.SerializerMethodField()
+
     class Meta:
         model = ProductVideo
         fields = ['id', 'video', 'title', 'order']
+
+    def get_video(self, obj):
+        return absolute_media_url(self.context.get('request'), obj.video)
 
 
 class CategoryListSerializer(serializers.ModelSerializer):
@@ -109,6 +114,17 @@ class ProductAdminSerializer(serializers.ModelSerializer):
             'flash_sale_end_at', 'is_active', 'is_archived', 'meta_title', 'meta_description',
             'views_count', 'images', 'videos', 'primary_image', 'created_at', 'updated_at',
         ]
+        extra_kwargs = {
+            'sale_price': {'required': False, 'allow_null': True},
+            'sku': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'slug': {'required': False, 'allow_blank': True},
+            'description': {'required': False, 'allow_blank': True},
+        }
+
+    def validate_sale_price(self, value):
+        if value in ('', None):
+            return None
+        return value
 
     def get_current_price(self, obj):
         return obj.current_price

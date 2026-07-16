@@ -158,7 +158,27 @@ class AdminProductListCreateView(generics.ListCreateAPIView):
 class AdminProductDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAdminUser]
     serializer_class = ProductAdminSerializer
-    queryset = Product.objects.all()
+    queryset = Product.objects.all().select_related('category').prefetch_related('images', 'videos')
+
+    def perform_update(self, serializer):
+        from .models import ProductImage, ProductVideo
+
+        product = serializer.save()
+        existing_image_count = product.images.count()
+        for index, image_file in enumerate(self.request.FILES.getlist('images')):
+            ProductImage.objects.create(
+                product=product,
+                image=image_file,
+                is_primary=existing_image_count == 0 and index == 0,
+                order=existing_image_count + index,
+            )
+        existing_video_count = product.videos.count()
+        for index, video_file in enumerate(self.request.FILES.getlist('videos')):
+            ProductVideo.objects.create(
+                product=product,
+                video=video_file,
+                order=existing_video_count + index,
+            )
 
 
 class ProductReviewsView(generics.ListCreateAPIView):
