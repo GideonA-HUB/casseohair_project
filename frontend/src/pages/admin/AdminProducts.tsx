@@ -445,13 +445,13 @@ export default function AdminProducts() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-brand-accent mb-2">Density</label>
+                <label className="block text-sm font-medium text-brand-accent mb-2">Grams</label>
                 <input
                   type="text"
                   value={newProduct.density}
                   onChange={(e) => setNewProduct({ ...newProduct, density: e.target.value })}
                   className="w-full px-4 py-3 rounded-xl border border-brand-gray-200 focus:border-brand-pink focus:ring-2 focus:ring-brand-pink/20 outline-none transition-all"
-                  placeholder="e.g., 180%"
+                  placeholder="e.g., 200g"
                 />
               </div>
               <div>

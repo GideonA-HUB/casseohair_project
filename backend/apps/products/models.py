@@ -64,7 +64,12 @@ class Product(models.Model):
     price = models.DecimalField(max_digits=12, decimal_places=2)
     sale_price = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
     length = models.CharField(max_length=5, choices=LENGTH_CHOICES, blank=True)
-    density = models.CharField(max_length=50, blank=True, help_text='e.g. 180%, 200%, 250%')
+    density = models.CharField(
+        'Grams',
+        max_length=50,
+        blank=True,
+        help_text='Hair weight in grams, e.g. 50g, 100g, 200g, 250g, 300g',
+    )
     lace_type = models.CharField(max_length=30, choices=LACE_TYPE_CHOICES, blank=True)
     color = models.CharField(max_length=100, blank=True)
     stock = models.PositiveIntegerField(default=0)

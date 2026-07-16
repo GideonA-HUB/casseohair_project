@@ -15,7 +15,7 @@ import MultiCurrencyPrice from '@/components/MultiCurrencyPrice';
 import { productsApi } from '@/api';
 import { useCartStore } from '@/store/cartStore';
 import { useCurrencyStore } from '@/store/currencyStore';
-import { formatPrice, getLaceTypeLabel, getLengthLabel } from '@/utils/format';
+import { formatGrams, formatPrice, getLaceTypeLabel, getLengthLabel } from '@/utils/format';
 
 export default function ProductPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -171,7 +171,7 @@ export default function ProductPage() {
               )}
               {product.density && (
                 <span className="px-3 py-1.5 rounded-full bg-brand-gray-50 text-brand-accent/70">
-                  Density: {product.density}
+                  Grams: {formatGrams(product.density)}
                 </span>
               )}
               {product.color && (

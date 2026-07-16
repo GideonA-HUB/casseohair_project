@@ -40,3 +40,15 @@ export function getLaceTypeLabel(type: string): string {
 export function getLengthLabel(length: string): string {
   return length ? `${length}"` : '';
 }
+
+/** Normalize grams for storefront display — always ends with "g" (e.g. 200g). */
+export function formatGrams(value: string): string {
+  const trimmed = value.trim();
+  if (!trimmed) return '';
+  // Drop legacy density % suffixes if still stored
+  const cleaned = trimmed.replace(/%$/g, '').trim();
+  if (/g$/i.test(cleaned)) {
+    return `${cleaned.slice(0, -1).trim()}g`;
+  }
+  return `${cleaned}g`;
+}
