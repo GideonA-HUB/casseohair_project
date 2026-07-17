@@ -61,7 +61,8 @@ class ProductAdmin(admin.ModelAdmin):
         ('Flags', {
             'fields': (
                 'is_featured', 'is_bestseller', 'is_new_arrival',
-                'is_flash_sale', 'flash_sale_end_at', 'is_active', 'is_archived'
+                'is_flash_sale', 'flash_sale_start_at', 'flash_sale_end_at',
+                'is_active', 'is_archived',
             ),
         }),
         ('SEO', {
@@ -81,11 +82,20 @@ class ProductAdmin(admin.ModelAdmin):
 
     @admin.action(description='Start 3-day flash sale for selected')
     def start_flash_sale(self, request, queryset):
-        queryset.update(is_flash_sale=True, flash_sale_end_at=timezone.now() + timedelta(days=3))
+        now = timezone.now()
+        queryset.update(
+            is_flash_sale=True,
+            flash_sale_start_at=now,
+            flash_sale_end_at=now + timedelta(days=3),
+        )
 
     @admin.action(description='Stop flash sale for selected')
     def stop_flash_sale(self, request, queryset):
-        queryset.update(is_flash_sale=False, flash_sale_end_at=None)
+        queryset.update(
+            is_flash_sale=False,
+            flash_sale_start_at=None,
+            flash_sale_end_at=None,
+        )
 
     @admin.action(description='Archive selected products')
     def archive_products(self, request, queryset):

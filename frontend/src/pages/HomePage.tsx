@@ -48,32 +48,64 @@ export default function HomePage() {
   const gridCategories = categories.slice(1, 3);
   const desktopCategories = categories.slice(0, 3);
 
-  const flashSaleEnd = useMemo(() => {
+  const flashTimer = useMemo(() => {
     if (!flashSales.length) return null;
 
-    const withEndDate = flashSales
-      .map((product) => (product.flash_sale_end_at ? new Date(product.flash_sale_end_at).getTime() : null))
-      .filter((timestamp): timestamp is number => !!timestamp && !Number.isNaN(timestamp));
+    const windows = flashSales.map((product) => {
+      const start = product.flash_sale_start_at
+        ? new Date(product.flash_sale_start_at).getTime()
+        : null;
+      const end = product.flash_sale_end_at
+        ? new Date(product.flash_sale_end_at).getTime()
+        : null;
+      return {
+        start: start && !Number.isNaN(start) ? start : null,
+        end: end && !Number.isNaN(end) ? end : null,
+      };
+    });
 
-    if (withEndDate.length) return Math.min(...withEndDate);
-    return now + 3 * 24 * 60 * 60 * 1000;
+    // Prefer active sales: started (or no start) and not yet ended → count down to earliest end
+    const activeEnds = windows
+      .filter((w) => w.end && w.end > now && (!w.start || w.start <= now))
+      .map((w) => w.end as number);
+    if (activeEnds.length) {
+      return { mode: 'ends' as const, target: Math.min(...activeEnds) };
+    }
+
+    // Upcoming sales → count down to earliest start
+    const upcomingStarts = windows
+      .filter((w) => w.start && w.start > now && (!w.end || w.end > now))
+      .map((w) => w.start as number);
+    if (upcomingStarts.length) {
+      return { mode: 'starts' as const, target: Math.min(...upcomingStarts) };
+    }
+
+    // Fallback: any future end date
+    const futureEnds = windows
+      .filter((w) => w.end && w.end > now)
+      .map((w) => w.end as number);
+    if (futureEnds.length) {
+      return { mode: 'ends' as const, target: Math.min(...futureEnds) };
+    }
+
+    return null;
   }, [flashSales, now]);
 
   useEffect(() => {
-    if (!flashSaleEnd) return;
+    if (!flashTimer) return;
     const timer = window.setInterval(() => setNow(Date.now()), 1000);
     return () => window.clearInterval(timer);
-  }, [flashSaleEnd]);
+  }, [flashTimer]);
 
   const countdown = useMemo(() => {
-    if (!flashSaleEnd) return null;
-    const ms = Math.max(0, flashSaleEnd - now);
+    if (!flashTimer) return null;
+    const ms = Math.max(0, flashTimer.target - now);
     const days = Math.floor(ms / (1000 * 60 * 60 * 24));
     const hours = Math.floor((ms / (1000 * 60 * 60)) % 24);
     const minutes = Math.floor((ms / (1000 * 60)) % 60);
     const seconds = Math.floor((ms / 1000) % 60);
-    return { days, hours, minutes, seconds };
-  }, [flashSaleEnd, now]);
+    return { mode: flashTimer.mode, days, hours, minutes, seconds };
+  }, [flashTimer, now]);
 
   return (
     <>
@@ -122,8 +154,10 @@ export default function HomePage() {
             <h2 className="text-xl font-display font-semibold">Flash Sales</h2>
             {countdown ? (
               <p className="text-sm text-white/70 mt-1">
-                Ends in {countdown.days}d : {String(countdown.hours).padStart(2, '0')}h :{' '}
-                {String(countdown.minutes).padStart(2, '0')}m : {String(countdown.seconds).padStart(2, '0')}s
+                {countdown.mode === 'starts' ? 'Starts in' : 'Ends in'}{' '}
+                {countdown.days}d : {String(countdown.hours).padStart(2, '0')}h :{' '}
+                {String(countdown.minutes).padStart(2, '0')}m :{' '}
+                {String(countdown.seconds).padStart(2, '0')}s
               </p>
             ) : (
               <p className="text-sm text-white/60 mt-1">No sales at the moment</p>

@@ -99,10 +99,17 @@ class FlashSaleProductsView(generics.ListAPIView):
     pagination_class = None
 
     def get_queryset(self):
+        from django.db.models import Q
+        from django.utils import timezone
+
+        now = timezone.now()
+        # Include upcoming + active flash sales; hide products whose sale window has ended
         return Product.objects.filter(
             is_active=True,
             is_archived=False,
             is_flash_sale=True,
+        ).filter(
+            Q(flash_sale_end_at__isnull=True) | Q(flash_sale_end_at__gt=now),
         ).select_related('category').prefetch_related('images', 'reviews')[:100]
 
 

@@ -30,6 +30,7 @@ export function getLaceTypeLabel(type: string): string {
     swiss_lace: 'Swiss Lace',
     frontal: 'Frontal',
     closure: 'Closure',
+    fringe: 'Fringe',
     full_lace: 'Full Lace',
     glueless: 'Glueless',
     none: 'None',

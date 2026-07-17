@@ -66,7 +66,8 @@ class ProductListSerializer(serializers.ModelSerializer):
             'short_description', 'price', 'sale_price', 'current_price',
             'is_on_sale', 'discount_percentage', 'length', 'density',
             'lace_type', 'color', 'stock', 'in_stock', 'is_featured',
-            'is_bestseller', 'is_new_arrival', 'is_flash_sale', 'flash_sale_end_at', 'primary_image',
+            'is_bestseller', 'is_new_arrival', 'is_flash_sale',
+            'flash_sale_start_at', 'flash_sale_end_at', 'primary_image',
             'average_rating', 'review_count',
         ]
 
@@ -111,7 +112,8 @@ class ProductAdminSerializer(serializers.ModelSerializer):
             'id', 'name', 'slug', 'category', 'category_name', 'description', 'short_description',
             'price', 'sale_price', 'current_price', 'is_on_sale', 'length', 'density', 'lace_type',
             'color', 'stock', 'sku', 'is_featured', 'is_bestseller', 'is_new_arrival', 'is_flash_sale',
-            'flash_sale_end_at', 'is_active', 'is_archived', 'meta_title', 'meta_description',
+            'flash_sale_start_at', 'flash_sale_end_at', 'is_active', 'is_archived',
+            'meta_title', 'meta_description',
             'views_count', 'images', 'videos', 'primary_image', 'created_at', 'updated_at',
         ]
         extra_kwargs = {
@@ -119,9 +121,21 @@ class ProductAdminSerializer(serializers.ModelSerializer):
             'sku': {'required': False, 'allow_null': True, 'allow_blank': True},
             'slug': {'required': False, 'allow_blank': True},
             'description': {'required': False, 'allow_blank': True},
+            'flash_sale_start_at': {'required': False, 'allow_null': True},
+            'flash_sale_end_at': {'required': False, 'allow_null': True},
         }
 
     def validate_sale_price(self, value):
+        if value in ('', None):
+            return None
+        return value
+
+    def validate_flash_sale_start_at(self, value):
+        if value in ('', None):
+            return None
+        return value
+
+    def validate_flash_sale_end_at(self, value):
         if value in ('', None):
             return None
         return value

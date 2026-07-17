@@ -49,6 +49,7 @@ LACE_TYPE_CHOICES = [
     ('swiss_lace', 'Swiss Lace'),
     ('frontal', 'Frontal'),
     ('closure', 'Closure'),
+    ('fringe', 'Fringe'),
     ('full_lace', 'Full Lace'),
     ('glueless', 'Glueless'),
     ('none', 'None'),
@@ -78,7 +79,16 @@ class Product(models.Model):
     is_bestseller = models.BooleanField(default=False)
     is_new_arrival = models.BooleanField(default=False)
     is_flash_sale = models.BooleanField(default=False)
-    flash_sale_end_at = models.DateTimeField(blank=True, null=True)
+    flash_sale_start_at = models.DateTimeField(
+        blank=True,
+        null=True,
+        help_text='When this product’s flash sale becomes active on the storefront.',
+    )
+    flash_sale_end_at = models.DateTimeField(
+        blank=True,
+        null=True,
+        help_text='When this product’s flash sale ends on the storefront.',
+    )
     is_active = models.BooleanField(default=True)
     is_archived = models.BooleanField(default=False)
     meta_title = models.CharField(max_length=70, blank=True)
@@ -103,9 +113,16 @@ class Product(models.Model):
                 counter += 1
             self.slug = slug
 
-        if self.is_flash_sale and not self.flash_sale_end_at:
-            self.flash_sale_end_at = timezone.now() + timedelta(days=3)
-        if not self.is_flash_sale:
+        if self.is_flash_sale:
+            now = timezone.now()
+            if not self.flash_sale_start_at:
+                self.flash_sale_start_at = now
+            if not self.flash_sale_end_at:
+                self.flash_sale_end_at = self.flash_sale_start_at + timedelta(days=3)
+            elif self.flash_sale_end_at <= self.flash_sale_start_at:
+                self.flash_sale_end_at = self.flash_sale_start_at + timedelta(days=3)
+        else:
+            self.flash_sale_start_at = None
             self.flash_sale_end_at = None
         super().save(*args, **kwargs)
 

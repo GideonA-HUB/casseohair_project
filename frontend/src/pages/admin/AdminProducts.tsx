@@ -41,6 +41,7 @@ interface Product {
   is_bestseller: boolean;
   is_new_arrival: boolean;
   is_flash_sale: boolean;
+  flash_sale_start_at: string | null;
   flash_sale_end_at: string | null;
   primary_image: string | null;
   images?: ProductImage[];
@@ -72,6 +73,8 @@ interface ProductFormState {
   is_bestseller: boolean;
   is_new_arrival: boolean;
   is_flash_sale: boolean;
+  flash_sale_start_at: string;
+  flash_sale_end_at: string;
   is_active: boolean;
   images: File[];
   videos: File[];
@@ -95,6 +98,8 @@ const EMPTY_FORM: ProductFormState = {
   is_bestseller: false,
   is_new_arrival: false,
   is_flash_sale: false,
+  flash_sale_start_at: '',
+  flash_sale_end_at: '',
   is_active: true,
   images: [],
   videos: [],
@@ -111,6 +116,7 @@ const LACE_OPTIONS: { value: string; label: string }[] = [
   { value: 'swiss_lace', label: 'Swiss Lace' },
   { value: 'frontal', label: 'Frontal' },
   { value: 'closure', label: 'Closure' },
+  { value: 'fringe', label: 'Fringe' },
   { value: 'full_lace', label: 'Full Lace' },
   { value: 'glueless', label: 'Glueless' },
   { value: 'none', label: 'None' },
@@ -126,6 +132,23 @@ function slugifyName(name: string) {
     .trim()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
+}
+
+/** Convert API ISO datetime → value for <input type="datetime-local"> */
+function toDatetimeLocalValue(iso: string | null | undefined): string {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+/** Convert datetime-local value → ISO for API */
+function fromDatetimeLocalValue(local: string): string {
+  if (!local.trim()) return '';
+  const d = new Date(local);
+  if (Number.isNaN(d.getTime())) return '';
+  return d.toISOString();
 }
 
 function productToForm(product: Product): ProductFormState {
@@ -147,6 +170,8 @@ function productToForm(product: Product): ProductFormState {
     is_bestseller: !!product.is_bestseller,
     is_new_arrival: !!product.is_new_arrival,
     is_flash_sale: !!product.is_flash_sale,
+    flash_sale_start_at: toDatetimeLocalValue(product.flash_sale_start_at),
+    flash_sale_end_at: toDatetimeLocalValue(product.flash_sale_end_at),
     is_active: product.is_active !== false,
     images: [],
     videos: [],
@@ -176,6 +201,15 @@ function buildProductFormData(form: ProductFormState): FormData {
   formData.append('is_bestseller', String(form.is_bestseller));
   formData.append('is_new_arrival', String(form.is_new_arrival));
   formData.append('is_flash_sale', String(form.is_flash_sale));
+  if (form.is_flash_sale) {
+    const startIso = fromDatetimeLocalValue(form.flash_sale_start_at);
+    const endIso = fromDatetimeLocalValue(form.flash_sale_end_at);
+    formData.append('flash_sale_start_at', startIso);
+    formData.append('flash_sale_end_at', endIso);
+  } else {
+    formData.append('flash_sale_start_at', '');
+    formData.append('flash_sale_end_at', '');
+  }
   formData.append('is_active', String(form.is_active));
   form.images.forEach((image) => formData.append('images', image));
   form.videos.forEach((video) => formData.append('videos', video));
@@ -788,13 +822,58 @@ export default function AdminProducts() {
                         <input
                           type="checkbox"
                           checked={form[key]}
-                          onChange={(e) => setForm({ ...form, [key]: e.target.checked })}
+                          onChange={(e) => {
+                            const checked = e.target.checked;
+                            if (key === 'is_flash_sale' && !checked) {
+                              setForm({
+                                ...form,
+                                is_flash_sale: false,
+                                flash_sale_start_at: '',
+                                flash_sale_end_at: '',
+                              });
+                            } else {
+                              setForm({ ...form, [key]: checked });
+                            }
+                          }}
                           className="w-4 h-4 rounded border-brand-gray-300 text-brand-pink focus:ring-brand-pink accent-brand-pink"
                         />
                         <span className="text-sm font-medium text-brand-accent">{label}</span>
                       </label>
                     ))}
                   </div>
+
+                  {form.is_flash_sale && (
+                    <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4 rounded-xl border border-brand-pink/20 bg-brand-pink/5 p-4">
+                      <div>
+                        <label className={labelClass}>Flash Sale Starts At</label>
+                        <input
+                          type="datetime-local"
+                          value={form.flash_sale_start_at}
+                          onChange={(e) =>
+                            setForm({ ...form, flash_sale_start_at: e.target.value })
+                          }
+                          className={inputClass}
+                        />
+                        <p className="mt-1 text-xs text-brand-accent/50">
+                          Countdown shows &quot;Starts in&quot; until this time.
+                        </p>
+                      </div>
+                      <div>
+                        <label className={labelClass}>Flash Sale Ends At</label>
+                        <input
+                          type="datetime-local"
+                          value={form.flash_sale_end_at}
+                          onChange={(e) =>
+                            setForm({ ...form, flash_sale_end_at: e.target.value })
+                          }
+                          className={inputClass}
+                        />
+                        <p className="mt-1 text-xs text-brand-accent/50">
+                          After the start time, countdown shows &quot;Ends in&quot; until this time.
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex gap-3 mt-6">
