@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import StarRating from '@/components/StarRating';
 import MultiCurrencyPrice from '@/components/MultiCurrencyPrice';
+import ProductShare from '@/components/ProductShare';
 import type { Product } from '@/types';
 import { formatPrice, truncateText } from '@/utils/format';
 import { useCurrencyStore } from '@/store/currencyStore';
@@ -13,6 +14,10 @@ interface ProductCardProps {
 
 export default function ProductCard({ product, index = 0 }: ProductCardProps) {
   const currencySettings = useCurrencyStore((s) => s.settings);
+  const productUrl =
+    typeof window !== 'undefined'
+      ? `${window.location.origin}/product/${product.slug}`
+      : `/product/${product.slug}`;
 
   return (
     <motion.div
@@ -21,8 +26,8 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
       transition={{ duration: 0.4, delay: index * 0.05 }}
       className="luxury-card group"
     >
-      <Link to={`/product/${product.slug}`} className="block">
-        <div className="relative aspect-[4/5] overflow-hidden bg-brand-gray-50">
+      <div className="relative aspect-[4/5] overflow-hidden bg-brand-gray-50">
+        <Link to={`/product/${product.slug}`} className="block h-full">
           {product.primary_image ? (
             <img
               src={product.primary_image}
@@ -35,23 +40,35 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
               <span className="text-4xl">✦</span>
             </div>
           )}
-          {product.is_on_sale && (
-            <span className="absolute top-3 left-3 bg-brand-pink text-white text-xs font-semibold px-2.5 py-1 rounded-full">
-              -{product.discount_percentage}%
-            </span>
-          )}
-          {product.is_new_arrival && (
-            <span className="absolute top-3 right-3 bg-brand-black text-white text-xs font-semibold px-2.5 py-1 rounded-full">
-              New
-            </span>
-          )}
-          {product.is_flash_sale && (
-            <span className="absolute bottom-3 left-3 bg-brand-black text-white text-[11px] font-semibold px-2.5 py-1 rounded-full">
-              Flash Sale
-            </span>
-          )}
+        </Link>
+        {product.is_on_sale && (
+          <span className="absolute top-3 left-3 z-[1] bg-brand-pink text-white text-xs font-semibold px-2.5 py-1 rounded-full">
+            -{product.discount_percentage}%
+          </span>
+        )}
+        {product.is_new_arrival && (
+          <span className="absolute top-3 right-3 z-[1] bg-brand-black text-white text-xs font-semibold px-2.5 py-1 rounded-full">
+            New
+          </span>
+        )}
+        <div
+          className={`absolute z-[2] ${
+            product.is_new_arrival ? 'top-12 right-3' : 'top-3 right-3'
+          }`}
+        >
+          <ProductShare
+            compact
+            name={product.name}
+            description={product.short_description}
+            url={productUrl}
+          />
         </div>
-      </Link>
+        {product.is_flash_sale && (
+          <span className="absolute bottom-3 left-3 z-[1] bg-brand-black text-white text-[11px] font-semibold px-2.5 py-1 rounded-full">
+            Flash Sale
+          </span>
+        )}
+      </div>
 
       <div className="p-3 space-y-2">
         <Link to={`/product/${product.slug}`}>

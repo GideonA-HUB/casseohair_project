@@ -12,6 +12,7 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import ProductReviews from '@/components/ui/product-reviews';
 import StarRating from '@/components/StarRating';
 import MultiCurrencyPrice from '@/components/MultiCurrencyPrice';
+import ProductShare from '@/components/ProductShare';
 import { productsApi } from '@/api';
 import { useCartStore } from '@/store/cartStore';
 import { useCurrencyStore } from '@/store/currencyStore';
@@ -79,8 +80,13 @@ export default function ProductPage() {
     <>
       <SEO
         title={product.meta_title || product.name}
-        description={product.meta_description || product.short_description}
+        description={
+          product.meta_description ||
+          product.short_description ||
+          product.description?.slice(0, 160)
+        }
         image={product.primary_image || undefined}
+        canonical={`${window.location.origin}/product/${product.slug}`}
         type="product"
         schema={productSchema}
       />
@@ -207,6 +213,12 @@ export default function ProductPage() {
                 </button>
               </div>
             )}
+
+            <ProductShare
+              name={product.name}
+              description={product.short_description || product.description}
+              url={`${window.location.origin}/product/${product.slug}`}
+            />
 
             <div className="pt-6 border-t border-brand-gray-100">
               <h3 className="font-semibold mb-3">Description</h3>
